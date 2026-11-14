@@ -22,8 +22,29 @@ dotnet run --project src/Rethread.Api
 ```
 
 Without Docker, any local PostgreSQL works if it has a `rethread` role (password `rethread`) that owns a
-`rethread` database. In Development the API applies migrations on start. It listens on
-http://localhost:5080, with the API reference at http://localhost:5080/docs and health at `/health`.
+`rethread` database. In Development the API applies migrations and seeds an empty database on start. It
+listens on http://localhost:5080, with the API reference at http://localhost:5080/docs and health at
+`/health`.
+
+## Seed data
+
+Development and the tests use the same data as the clients' mock modes: a port of the admin portal's mock
+world, so `RT-24841`, `COL-0457`, `ORD-5134` and the rest line up across all three apps. Times are relative
+to when the seed ran, so today's queue looks like today. Re-seed to move it to now:
+
+```sh
+dotnet run --project src/Rethread.Api -- seed --reset
+```
+
+| Who | Sign in with |
+| --- | --- |
+| Admin | `admin@rethread.lk` / `rethread-admin` |
+| Call centre | `callcentre@rethread.lk` / `rethread-callcentre` |
+| Collector Ruwan Silva | code `COL-0457`, mobile `+94771234567`, code `123456` in Development |
+| Customer Nadeesha Perera | mobile `+94764821190`, code `123456` in Development |
+
+`tests/Rethread.Api.Tests/Seed/portal-mock-world.json` pins the seed to the portal's mock world. If the
+portal's seed changes, regenerate it (see the test) and update `Data/Seed` to match.
 
 ## Tests
 
@@ -45,6 +66,7 @@ export TEST_DATABASE_URL="Host=localhost;Port=5432;Username=rethread;Password=re
 | --- | --- | --- |
 | `ConnectionStrings:Default` | local `rethread` database in Development | PostgreSQL (Neon in production) |
 | `Database:MigrateOnStartup` | `true` in Development | Apply migrations when the API starts |
+| `Seed:OnStartup` | `true` in Development | Seed an empty database when the API starts (never in Production) |
 
 Set secrets with `dotnet user-secrets` locally and environment variables elsewhere
 (`ConnectionStrings__Default`, for example).
@@ -54,7 +76,7 @@ Set secrets with `dotnet user-secrets` locally and environment variables elsewhe
 | Step | What | State |
 | --- | --- | --- |
 | 1 | Project, shared plumbing, test fixture, CI | Done |
-| 2 | Data model and dev seed | Planned |
+| 2 | Data model and dev seed | Done |
 | 3 | Auth for customers, collectors and staff | Planned |
 | 4 | Customer profile, addresses, family, bank details | Planned |
 | 5 | Customer pickups | Planned |

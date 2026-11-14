@@ -110,5 +110,5 @@ Set secrets with `dotnet user-secrets` locally and environment variables elsewhe
 | 9 | Wallet and redemptions | Done |
 | 10 | Shop, orders and catalogue | Done |
 | 11 | Admin operations | Done |
-| 12 | Rates and impact | Planned |
+| 12 | Rates and impact | Done |
 | 13 | Deploy readiness | Planned |

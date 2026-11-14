@@ -44,11 +44,30 @@ public sealed class PostgresServer : IAsyncLifetime
         return ConnectionFor(name);
     }
 
-    public Task DropDatabaseAsync(string connectionString)
+    /// <summary>
+    /// Best effort: a background PostgreSQL process (autovacuum, say) can briefly hold a connection that a
+    /// non-superuser role isn't allowed to end. A leftover test database is harmless; a failed test isn't.
+    /// </summary>
+    public async Task DropDatabaseAsync(string connectionString)
     {
         var name = new NpgsqlConnectionStringBuilder(connectionString).Database!;
         NpgsqlConnection.ClearAllPools();
-        return ExecuteAsync($"DROP DATABASE IF EXISTS \"{name}\" WITH (FORCE)");
+        for (var attempt = 1; attempt <= 3; attempt++)
+        {
+            try
+            {
+                await ExecuteAsync($"DROP DATABASE IF EXISTS \"{name}\" WITH (FORCE)");
+                return;
+            }
+            catch (PostgresException) when (attempt < 3)
+            {
+                await Task.Delay(200 * attempt);
+            }
+            catch (PostgresException)
+            {
+                return;
+            }
+        }
     }
 
     private async Task EnsureTemplateAsync()

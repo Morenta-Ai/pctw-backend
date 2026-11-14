@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Rethread.Api.Auth;
 using Rethread.Api.Common;
 using Rethread.Api.Data;
 using Rethread.Api.Data.Entities;
@@ -39,6 +40,8 @@ public static class RethreadServices
         services.AddScoped<RateBook>();
         services.AddScoped<NotificationService>();
         services.AddScoped<DevSeeder>();
+
+        services.AddRethreadAuth(config);
 
         services.AddHealthChecks().AddDbContextCheck<AppDbContext>("database");
         services.AddOpenApi("v1");

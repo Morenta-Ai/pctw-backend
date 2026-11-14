@@ -67,6 +67,22 @@ export TEST_DATABASE_URL="Host=localhost;Port=5432;Username=rethread;Password=re
 | `ConnectionStrings:Default` | local `rethread` database in Development | PostgreSQL (Neon in production) |
 | `Database:MigrateOnStartup` | `true` in Development | Apply migrations when the API starts |
 | `Seed:OnStartup` | `true` in Development | Seed an empty database when the API starts (never in Production) |
+| `Jwt:SigningKey` | a dev key in Development | HS256 key for access tokens, at least 32 characters. Required |
+| `Jwt:AppAccessTokenMinutes`, `Jwt:StaffAccessTokenMinutes` | 60, 15 | Access token lifetimes |
+| `Otp:FixedCode` | `123456` in Development | Every sign-in code is this value. Ignored in Production |
+
+## Auth
+
+| Audience | Sign-in | Token role |
+| --- | --- | --- |
+| User app | `POST /api/v1/auth/otp/request` then `/otp/verify` (mobile or email) | `customer` |
+| Collector app | `POST /api/v1/collector/auth/otp/request` then `/otp/verify` (collector code and mobile) | `collector` |
+| Portal | `POST /api/v1/admin/auth/login` (email and password) | `admin` or `callCentre` |
+
+Access tokens are JWTs; refresh tokens are random, stored hashed and rotated on every use. A refresh token
+used twice ends every session of that account. Suspension and staff roles are checked against the database
+on every request, not taken from the token. Until an SMS provider is chosen, codes and invite links are
+written to the log.
 
 Set secrets with `dotnet user-secrets` locally and environment variables elsewhere
 (`ConnectionStrings__Default`, for example).
@@ -77,7 +93,7 @@ Set secrets with `dotnet user-secrets` locally and environment variables elsewhe
 | --- | --- | --- |
 | 1 | Project, shared plumbing, test fixture, CI | Done |
 | 2 | Data model and dev seed | Done |
-| 3 | Auth for customers, collectors and staff | Planned |
+| 3 | Auth for customers, collectors and staff | Done |
 | 4 | Customer profile, addresses, family, bank details | Planned |
 | 5 | Customer pickups | Planned |
 | 6 | Collector jobs | Planned |

@@ -43,6 +43,7 @@ public static class RethreadServices
         services.AddScoped<PickupWorkflow>();
         services.AddScoped<WalletLedger>();
         services.AddScoped<AssignmentService>();
+        services.AddScoped<Redemptions>();
         services.AddScoped<OfferSimulator>();
         services.AddScoped<Maintenance>();
         services.AddHostedService<MaintenanceService>();

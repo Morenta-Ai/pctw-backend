@@ -19,6 +19,8 @@ public sealed class NotificationService(AppDbContext db, TimeProvider time)
         public const string OrderUpdate = "orderUpdate";
         public const string PaymentCredited = "paymentCredited";
         public const string DonationThanks = "donationThanks";
+        public const string PickupCancelled = "pickupCancelled";
+        public const string TransferUpdate = "transferUpdate";
     }
 
     public static class CollectorTypes

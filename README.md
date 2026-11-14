@@ -70,6 +70,9 @@ export TEST_DATABASE_URL="Host=localhost;Port=5432;Username=rethread;Password=re
 | `Jwt:SigningKey` | a dev key in Development | HS256 key for access tokens, at least 32 characters. Required |
 | `Jwt:AppAccessTokenMinutes`, `Jwt:StaffAccessTokenMinutes` | 60, 15 | Access token lifetimes |
 | `Otp:FixedCode` | `123456` in Development | Every sign-in code is this value. Ignored in Production |
+| `Maintenance:Enabled`, `Maintenance:IntervalSeconds` | `true`, 5 | The background job that expires offers and raises waiting-pickup alerts |
+| `Maintenance:StaleCollectorMinutes` | 30 (0, off, in Development) | Take collectors offline when their app stops reporting |
+| `Simulation:AutoAnswerOffers` | `false` | Development only: answer call-centre offers like the portal's mock collectors, to demo the portal without a phone |
 
 ## Auth
 
@@ -98,7 +101,7 @@ Set secrets with `dotnet user-secrets` locally and environment variables elsewhe
 | 5 | Customer pickups | Done |
 | 6 | Collector jobs | Done |
 | 7 | Load, hubs and earnings | Done |
-| 8 | Call-centre assignments | Planned |
+| 8 | Call-centre assignments | Done |
 | 9 | Wallet and redemptions | Planned |
 | 10 | Shop, orders and catalogue | Planned |
 | 11 | Admin operations | Planned |

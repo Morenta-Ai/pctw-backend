@@ -10,18 +10,19 @@ public sealed class TestApi : IAsyncDisposable
     private readonly PostgresServer _server;
     private readonly string _connectionString;
 
-    private TestApi(PostgresServer server, string connectionString)
+    private TestApi(PostgresServer server, string connectionString, IReadOnlyDictionary<string, string>? settings)
     {
         _server = server;
         _connectionString = connectionString;
-        Factory = new TestApiFactory(connectionString, TestClock.Start);
+        Factory = new TestApiFactory(connectionString, TestClock.Start, settings);
     }
 
     public TestApiFactory Factory { get; }
     public FakeTimeProvider Clock => Factory.Clock;
 
-    public static async Task<TestApi> StartAsync(PostgresServer server) =>
-        new(server, await server.CreateDatabaseAsync());
+    public static async Task<TestApi> StartAsync(PostgresServer server,
+        IReadOnlyDictionary<string, string>? settings = null) =>
+        new(server, await server.CreateDatabaseAsync(), settings);
 
     public HttpClient Client() => Factory.CreateClient();
 

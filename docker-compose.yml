@@ -1,0 +1,20 @@
+# Local PostgreSQL for development. Production uses Neon.
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: rethread
+      POSTGRES_PASSWORD: rethread
+      POSTGRES_DB: rethread
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rethread"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  pgdata:

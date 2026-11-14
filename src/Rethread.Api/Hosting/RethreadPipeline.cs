@@ -7,7 +7,12 @@ using Rethread.Api.Data.Entities;
 using Rethread.Api.Data.Seed;
 using Rethread.Api.Features.Admin.Auth;
 using Rethread.Api.Features.Collector.Auth;
+using Rethread.Api.Features.Customer.Addresses;
 using Rethread.Api.Features.Customer.Auth;
+using Rethread.Api.Features.Customer.Family;
+using Rethread.Api.Features.Customer.Notifications;
+using Rethread.Api.Features.Customer.Profile;
+using Rethread.Api.Features.Customer.Wallet;
 using Scalar.AspNetCore;
 
 namespace Rethread.Api.Hosting;
@@ -45,6 +50,11 @@ public static class RethreadPipeline
             .RequireAuthorization(Policies.Customer)
             .AddEndpointFilter(new ActiveAccountFilter(Audience.Customer));
         customer.MapCustomerAuth();
+        customer.MapCustomerProfile();
+        customer.MapAddresses();
+        customer.MapFamily();
+        customer.MapBankDetails();
+        customer.MapCustomerNotifications();
 
         var collector = api.MapGroup("/collector").WithTags("Collector app")
             .RequireAuthorization(Policies.Collector)

@@ -16,7 +16,7 @@ If you change a shape here, change the DTO and the mock source in the same PR.
 
 | Topic | Rule |
 | --- | --- |
-| Base path | Everything is under `/api/v1`. `API_BASE_URL` in `config/*.json` includes the prefix, so paths below are relative to it. |
+| Base path | Everything is under `/api/v1/collector`, because the user app shares the server and uses the same paths (`/auth/otp/request`, `/me`, `/notifications`) with different shapes. `API_BASE_URL` in `config/*.json` includes the prefix, so paths below are relative to it. |
 | JSON | camelCase keys. Enums are camelCase strings (`onTheWay`, `callCentre`). |
 | Dates | ISO-8601 in UTC with a `Z` suffix: `2026-11-07T04:30:00Z`. The app shows them in local time (UTC+05:30), 24-hour. Date-only values are `YYYY-MM-DD`. |
 | Money | Integer LKR cents, in fields ending in `Cents`. `88800` is Rs. 888.00. Never a float. |

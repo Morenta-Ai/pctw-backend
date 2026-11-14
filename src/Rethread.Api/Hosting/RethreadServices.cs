@@ -29,7 +29,9 @@ public static class RethreadServices
         var connectionString = config.GetConnectionString("Default")
             ?? throw new InvalidOperationException("ConnectionStrings:Default is not set.");
         services.AddDbContext<AppDbContext>(o => o
-            .UseNpgsql(connectionString, npgsql => npgsql.MigrationsHistoryTable("__ef_migrations_history"))
+            .UseNpgsql(connectionString, npgsql => npgsql
+                .MigrationsHistoryTable("__ef_migrations_history")
+                .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
             .UseSnakeCaseNamingConvention());
 
         services.AddDataProtection()

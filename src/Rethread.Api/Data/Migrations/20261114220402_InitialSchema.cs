@@ -40,7 +40,7 @@ namespace Rethread.Api.Data.Migrations
                     email = table.Column<string>(type: "character varying(254)", maxLength: 254, nullable: true),
                     language = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     status = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    status_reason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    status_reason = table.Column<string>(type: "text", nullable: true),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -54,8 +54,8 @@ namespace Rethread.Api.Data.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    friendly_name = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    xml = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true)
+                    friendly_name = table.Column<string>(type: "text", nullable: true),
+                    xml = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -66,8 +66,8 @@ namespace Rethread.Api.Data.Migrations
                 name: "donation_projects",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    name = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    id = table.Column<string>(type: "text", nullable: false),
+                    name = table.Column<string>(type: "text", nullable: false),
                     summary = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: false),
                     goal_cents = table.Column<long>(type: "bigint", nullable: false),
                     raised_cents = table.Column<long>(type: "bigint", nullable: false),
@@ -85,11 +85,11 @@ namespace Rethread.Api.Data.Migrations
                 name: "files",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    content_type = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    id = table.Column<string>(type: "text", nullable: false),
+                    content_type = table.Column<string>(type: "text", nullable: false),
                     size_bytes = table.Column<long>(type: "bigint", nullable: false),
-                    path = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    uploaded_by = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    path = table.Column<string>(type: "text", nullable: false),
+                    uploaded_by = table.Column<string>(type: "text", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -101,8 +101,8 @@ namespace Rethread.Api.Data.Migrations
                 name: "garment_types",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    name = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    id = table.Column<string>(type: "text", nullable: false),
+                    name = table.Column<string>(type: "text", nullable: false),
                     estimated_kg = table.Column<decimal>(type: "numeric(6,2)", precision: 6, scale: 2, nullable: false),
                     sort_order = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -116,8 +116,8 @@ namespace Rethread.Api.Data.Migrations
                 columns: table => new
                 {
                     id = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
-                    hub_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    collector_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    hub_id = table.Column<string>(type: "text", nullable: false),
+                    collector_id = table.Column<string>(type: "text", nullable: false),
                     job_count = table.Column<int>(type: "integer", nullable: false),
                     weight_kg = table.Column<decimal>(type: "numeric(12,2)", precision: 12, scale: 2, nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
@@ -131,9 +131,9 @@ namespace Rethread.Api.Data.Migrations
                 name: "hubs",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    id = table.Column<string>(type: "text", nullable: false),
                     code = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
-                    name = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    name = table.Column<string>(type: "text", nullable: false),
                     closes_at = table.Column<string>(type: "character varying(5)", maxLength: 5, nullable: false),
                     latitude = table.Column<double>(type: "double precision", nullable: false),
                     longitude = table.Column<double>(type: "double precision", nullable: false)
@@ -147,12 +147,12 @@ namespace Rethread.Api.Data.Migrations
                 name: "impact_multipliers",
                 columns: table => new
                 {
-                    key = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    unit = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    key = table.Column<string>(type: "text", nullable: false),
+                    unit = table.Column<string>(type: "text", nullable: false),
                     per_kg = table.Column<decimal>(type: "numeric(14,4)", precision: 14, scale: 4, nullable: false),
                     sort_order = table.Column<int>(type: "integer", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    updated_by = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false)
+                    updated_by = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -165,12 +165,12 @@ namespace Rethread.Api.Data.Migrations
                 {
                     id = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: false),
                     audience = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    recipient_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    recipient_id = table.Column<string>(type: "text", nullable: true),
                     type = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
-                    title = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    body = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    title = table.Column<string>(type: "text", nullable: false),
+                    body = table.Column<string>(type: "text", nullable: false),
                     target_type = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: true),
-                    target_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    target_id = table.Column<string>(type: "text", nullable: true),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     read_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
@@ -185,10 +185,10 @@ namespace Rethread.Api.Data.Migrations
                 {
                     id = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
                     audience = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    channel = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    destination = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    subject_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    code_hash = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    channel = table.Column<string>(type: "text", nullable: false),
+                    destination = table.Column<string>(type: "text", nullable: false),
+                    subject_id = table.Column<string>(type: "text", nullable: true),
+                    code_hash = table.Column<string>(type: "text", nullable: false),
                     attempts = table.Column<int>(type: "integer", nullable: false),
                     expires_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     resend_after = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -204,11 +204,11 @@ namespace Rethread.Api.Data.Migrations
                 name: "pickup_photos",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    pickup_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    collector_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    id = table.Column<string>(type: "text", nullable: false),
+                    pickup_id = table.Column<string>(type: "text", nullable: false),
+                    collector_id = table.Column<string>(type: "text", nullable: false),
                     kind = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    file_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    file_id = table.Column<string>(type: "text", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -227,7 +227,7 @@ namespace Rethread.Api.Data.Migrations
                     sizes = table.Column<List<string>>(type: "text[]", nullable: false),
                     stock = table.Column<int>(type: "integer", nullable: false),
                     published = table.Column<bool>(type: "boolean", nullable: false),
-                    story = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    story = table.Column<string>(type: "text", nullable: false),
                     image_urls = table.Column<List<string>>(type: "text[]", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -242,14 +242,14 @@ namespace Rethread.Api.Data.Migrations
                 name: "rate_sets",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    id = table.Column<string>(type: "text", nullable: false),
                     customer_rate_per_kg_cents = table.Column<long>(type: "bigint", nullable: false),
                     collector_rate_per_kg_cents = table.Column<long>(type: "bigint", nullable: false),
                     home_delivery_charge_cents = table.Column<long>(type: "bigint", nullable: false),
                     click_and_collect_charge_cents = table.Column<long>(type: "bigint", nullable: false),
                     effective_from = table.Column<DateOnly>(type: "date", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    created_by = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false)
+                    created_by = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -263,11 +263,11 @@ namespace Rethread.Api.Data.Migrations
                     id = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
                     token_hash = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     audience = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    subject_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    subject_id = table.Column<string>(type: "text", nullable: false),
                     expires_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     revoked_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    replaced_by_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true)
+                    replaced_by_id = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -279,12 +279,12 @@ namespace Rethread.Api.Data.Migrations
                 columns: table => new
                 {
                     id = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
-                    name = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    name = table.Column<string>(type: "text", nullable: false),
                     email = table.Column<string>(type: "character varying(254)", maxLength: 254, nullable: false),
                     role = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     status = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    password_hash = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    invite_token_hash = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    password_hash = table.Column<string>(type: "text", nullable: true),
+                    invite_token_hash = table.Column<string>(type: "text", nullable: true),
                     invite_expires_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     last_sign_in_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     notifications_read_before = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -299,9 +299,9 @@ namespace Rethread.Api.Data.Migrations
                 name: "vendors",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    name = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    address = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    id = table.Column<string>(type: "text", nullable: false),
+                    name = table.Column<string>(type: "text", nullable: false),
+                    address = table.Column<string>(type: "text", nullable: false),
                     latitude = table.Column<double>(type: "double precision", nullable: false),
                     longitude = table.Column<double>(type: "double precision", nullable: false)
                 },
@@ -314,9 +314,9 @@ namespace Rethread.Api.Data.Migrations
                 name: "voucher_brands",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    name = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    id = table.Column<string>(type: "text", nullable: false),
+                    name = table.Column<string>(type: "text", nullable: false),
+                    description = table.Column<string>(type: "text", nullable: false),
                     code_prefix = table.Column<string>(type: "character varying(4)", maxLength: 4, nullable: false),
                     values_cents = table.Column<List<long>>(type: "bigint[]", nullable: false),
                     active = table.Column<bool>(type: "boolean", nullable: false),
@@ -332,17 +332,17 @@ namespace Rethread.Api.Data.Migrations
                 columns: table => new
                 {
                     id = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
-                    customer_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    customer_id = table.Column<string>(type: "text", nullable: false),
                     type = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     status = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    title = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    title = table.Column<string>(type: "text", nullable: false),
                     amount_cents = table.Column<long>(type: "bigint", nullable: false),
                     occurred_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    pickup_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    pickup_id = table.Column<string>(type: "text", nullable: true),
                     weight_kg = table.Column<decimal>(type: "numeric(12,2)", precision: 12, scale: 2, nullable: true),
                     rate_per_kg_cents = table.Column<long>(type: "bigint", nullable: true),
-                    redemption_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    order_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true)
+                    redemption_id = table.Column<string>(type: "text", nullable: true),
+                    order_id = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -354,7 +354,7 @@ namespace Rethread.Api.Data.Migrations
                 columns: table => new
                 {
                     id = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
-                    customer_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    customer_id = table.Column<string>(type: "character varying(40)", nullable: false),
                     label = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     line = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     area = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: false),
@@ -378,10 +378,10 @@ namespace Rethread.Api.Data.Migrations
                 name: "bank_details",
                 columns: table => new
                 {
-                    customer_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    bank_name = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    branch = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    account_name = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    customer_id = table.Column<string>(type: "character varying(40)", nullable: false),
+                    bank_name = table.Column<string>(type: "text", nullable: false),
+                    branch = table.Column<string>(type: "text", nullable: false),
+                    account_name = table.Column<string>(type: "text", nullable: false),
                     account_number_protected = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
                     account_last4 = table.Column<string>(type: "character varying(4)", maxLength: 4, nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
@@ -402,7 +402,7 @@ namespace Rethread.Api.Data.Migrations
                 columns: table => new
                 {
                     id = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
-                    customer_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    customer_id = table.Column<string>(type: "character varying(40)", nullable: false),
                     name = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: false),
                     relation = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     gender = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
@@ -430,23 +430,23 @@ namespace Rethread.Api.Data.Migrations
                 columns: table => new
                 {
                     id = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
-                    customer_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    customer_id = table.Column<string>(type: "character varying(40)", nullable: false),
                     type = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     status = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     amount_cents = table.Column<long>(type: "bigint", nullable: false),
-                    bank_name = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    branch = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    account_name = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    bank_name = table.Column<string>(type: "text", nullable: true),
+                    branch = table.Column<string>(type: "text", nullable: true),
+                    account_name = table.Column<string>(type: "text", nullable: true),
                     account_number_protected = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
-                    voucher_brand_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    voucher_brand_name = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    voucher_code = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    project_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    voucher_brand_id = table.Column<string>(type: "text", nullable: true),
+                    voucher_brand_name = table.Column<string>(type: "text", nullable: true),
+                    voucher_code = table.Column<string>(type: "text", nullable: true),
+                    project_id = table.Column<string>(type: "text", nullable: true),
                     requested_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     processed_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    processed_by = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    reference = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    reject_reason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    processed_by = table.Column<string>(type: "text", nullable: true),
+                    reference = table.Column<string>(type: "text", nullable: true),
+                    reject_reason = table.Column<string>(type: "text", nullable: true),
                     xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
@@ -472,23 +472,24 @@ namespace Rethread.Api.Data.Migrations
                 {
                     id = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
                     code = table.Column<string>(type: "character varying(12)", maxLength: 12, nullable: false),
-                    first_name = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    last_name = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    first_name = table.Column<string>(type: "text", nullable: false),
+                    last_name = table.Column<string>(type: "text", nullable: false),
                     mobile = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     status = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    status_reason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    status_reason = table.Column<string>(type: "text", nullable: true),
                     online = table.Column<bool>(type: "boolean", nullable: false),
                     latitude = table.Column<double>(type: "double precision", nullable: true),
                     longitude = table.Column<double>(type: "double precision", nullable: true),
                     last_seen_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     radius_km = table.Column<int>(type: "integer", nullable: false),
                     vehicle_type = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    vehicle_plate = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    vehicle_plate = table.Column<string>(type: "text", nullable: false),
                     capacity_kg = table.Column<int>(type: "integer", nullable: false),
-                    area = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    area = table.Column<string>(type: "text", nullable: false),
+                    region = table.Column<string>(type: "text", nullable: false),
                     suburbs = table.Column<List<string>>(type: "text[]", nullable: false),
-                    hub_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    scale_name = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    hub_id = table.Column<string>(type: "text", nullable: false),
+                    scale_name = table.Column<string>(type: "text", nullable: true),
                     scale_paired = table.Column<bool>(type: "boolean", nullable: false),
                     scale_auto_connect = table.Column<bool>(type: "boolean", nullable: false),
                     language = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
@@ -511,8 +512,8 @@ namespace Rethread.Api.Data.Migrations
                 name: "staff_notification_reads",
                 columns: table => new
                 {
-                    notification_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    staff_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    notification_id = table.Column<string>(type: "character varying(80)", nullable: false),
+                    staff_id = table.Column<string>(type: "character varying(40)", nullable: false),
                     read_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -537,18 +538,18 @@ namespace Rethread.Api.Data.Migrations
                 columns: table => new
                 {
                     id = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    customer_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    customer_id = table.Column<string>(type: "character varying(40)", nullable: false),
                     fulfilment_type = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     destination = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    address_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    vendor_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    address_id = table.Column<string>(type: "text", nullable: true),
+                    vendor_id = table.Column<string>(type: "text", nullable: true),
                     payment_method = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     payment_status = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     subtotal_cents = table.Column<long>(type: "bigint", nullable: false),
                     transport_charge_cents = table.Column<long>(type: "bigint", nullable: false),
                     total_cents = table.Column<long>(type: "bigint", nullable: false),
                     status = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    waybill_number = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    waybill_number = table.Column<string>(type: "text", nullable: true),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     estimated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
@@ -575,8 +576,8 @@ namespace Rethread.Api.Data.Migrations
                 columns: table => new
                 {
                     id = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    customer_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    collector_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    customer_id = table.Column<string>(type: "character varying(40)", nullable: false),
+                    collector_id = table.Column<string>(type: "character varying(40)", nullable: true),
                     status = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     source = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     method = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
@@ -592,19 +593,19 @@ namespace Rethread.Api.Data.Migrations
                     slot = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     window_start = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     window_end = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    address_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    address_id = table.Column<string>(type: "text", nullable: true),
                     address_line = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     area = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: false),
                     latitude = table.Column<double>(type: "double precision", nullable: false),
                     longitude = table.Column<double>(type: "double precision", nullable: false),
-                    note = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    note = table.Column<string>(type: "text", nullable: true),
                     customer_rate_per_kg_cents = table.Column<long>(type: "bigint", nullable: false),
                     collector_rate_per_kg_cents = table.Column<long>(type: "bigint", nullable: false),
                     customer_payout_cents = table.Column<long>(type: "bigint", nullable: true),
                     collector_payout_cents = table.Column<long>(type: "bigint", nullable: true),
-                    hub_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    hub_delivery_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    cancel_reason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    hub_id = table.Column<string>(type: "text", nullable: true),
+                    hub_delivery_id = table.Column<string>(type: "text", nullable: true),
+                    cancel_reason = table.Column<string>(type: "text", nullable: true),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     collected_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     delivered_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -639,10 +640,10 @@ namespace Rethread.Api.Data.Migrations
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    order_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    order_id = table.Column<string>(type: "character varying(20)", nullable: false),
                     status = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     occurred_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    actor = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true)
+                    actor = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -661,10 +662,10 @@ namespace Rethread.Api.Data.Migrations
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    order_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    product_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    name = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    size = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    order_id = table.Column<string>(type: "character varying(20)", nullable: false),
+                    product_id = table.Column<string>(type: "text", nullable: false),
+                    name = table.Column<string>(type: "text", nullable: false),
+                    size = table.Column<string>(type: "text", nullable: false),
                     quantity = table.Column<int>(type: "integer", nullable: false),
                     unit_price_cents = table.Column<long>(type: "bigint", nullable: false)
                 },
@@ -684,16 +685,16 @@ namespace Rethread.Api.Data.Migrations
                 columns: table => new
                 {
                     id = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
-                    pickup_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    collector_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    pickup_id = table.Column<string>(type: "character varying(20)", nullable: false),
+                    collector_id = table.Column<string>(type: "character varying(40)", nullable: false),
                     status = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    note = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    note = table.Column<string>(type: "text", nullable: true),
                     offered_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     expires_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     responded_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    decline_reason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    offered_by_staff_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    offered_by = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    decline_reason = table.Column<string>(type: "text", nullable: true),
+                    offered_by_staff_id = table.Column<string>(type: "text", nullable: true),
+                    offered_by = table.Column<string>(type: "text", nullable: false),
                     xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
@@ -719,10 +720,10 @@ namespace Rethread.Api.Data.Migrations
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    pickup_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    pickup_id = table.Column<string>(type: "character varying(20)", nullable: false),
                     status = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     occurred_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    actor = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true)
+                    actor = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -740,13 +741,13 @@ namespace Rethread.Api.Data.Migrations
                 columns: table => new
                 {
                     id = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
-                    pickup_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    name = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    garment_type = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    member_id = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    size = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    pickup_id = table.Column<string>(type: "character varying(20)", nullable: false),
+                    name = table.Column<string>(type: "text", nullable: false),
+                    garment_type = table.Column<string>(type: "text", nullable: true),
+                    member_id = table.Column<string>(type: "text", nullable: true),
+                    size = table.Column<string>(type: "text", nullable: true),
                     quantity = table.Column<int>(type: "integer", nullable: true),
-                    bag_label = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    bag_label = table.Column<string>(type: "text", nullable: true),
                     condition = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     sort_order = table.Column<int>(type: "integer", nullable: false)
                 },

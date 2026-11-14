@@ -80,7 +80,10 @@ public sealed class Collector
     public VehicleType VehicleType { get; set; }
     public required string VehiclePlate { get; set; }
     public int CapacityKg { get; set; }
+    /// <summary>Home suburb, as the portal shows it (<c>Dehiwala</c>).</summary>
     public required string Area { get; set; }
+    /// <summary>Service region, as the collector app shows it (<c>Colombo South</c>).</summary>
+    public required string Region { get; set; }
     public List<string> Suburbs { get; set; } = [];
     public required string HubId { get; set; }
     public string? ScaleName { get; set; }

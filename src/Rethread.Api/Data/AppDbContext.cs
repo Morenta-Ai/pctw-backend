@@ -60,7 +60,6 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
         }
 
         builder.Properties<decimal>().HavePrecision(12, 2);
-        builder.Properties<string>().HaveMaxLength(500);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

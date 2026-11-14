@@ -45,13 +45,11 @@ namespace Rethread.Api.Data.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("FriendlyName")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("friendly_name");
 
                     b.Property<string>("Xml")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("xml");
 
                     b.HasKey("Id")
@@ -79,8 +77,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("CustomerId")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("character varying(40)")
                         .HasColumnName("customer_id");
 
                     b.Property<bool>("IsDefault")
@@ -127,13 +124,11 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("CollectorId")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("character varying(40)")
                         .HasColumnName("collector_id");
 
                     b.Property<string>("DeclineReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("decline_reason");
 
                     b.Property<DateTime>("ExpiresAt")
@@ -141,8 +136,7 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("expires_at");
 
                     b.Property<string>("Note")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("note");
 
                     b.Property<DateTime>("OfferedAt")
@@ -151,19 +145,16 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("OfferedBy")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("offered_by");
 
                     b.Property<string>("OfferedByStaffId")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("offered_by_staff_id");
 
                     b.Property<string>("PickupId")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("character varying(20)")
                         .HasColumnName("pickup_id");
 
                     b.Property<DateTime?>("RespondedAt")
@@ -202,8 +193,7 @@ namespace Rethread.Api.Data.Migrations
             modelBuilder.Entity("Rethread.Api.Data.Entities.BankDetails", b =>
                 {
                     b.Property<string>("CustomerId")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("character varying(40)")
                         .HasColumnName("customer_id");
 
                     b.Property<string>("AccountLast4")
@@ -214,8 +204,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("AccountName")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("account_name");
 
                     b.Property<string>("AccountNumberProtected")
@@ -226,14 +215,12 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("BankName")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("bank_name");
 
                     b.Property<string>("Branch")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("branch");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -255,8 +242,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("Area")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("area");
 
                     b.Property<int>("CapacityKg")
@@ -275,14 +261,12 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("first_name");
 
                     b.Property<string>("HubId")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("hub_id");
 
                     b.Property<string>("Language")
@@ -293,8 +277,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("LastName")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("last_name");
 
                     b.Property<DateTime?>("LastSeenAt")
@@ -332,13 +315,17 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnType("numeric(2,1)")
                         .HasColumnName("rating");
 
+                    b.Property<string>("Region")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("region");
+
                     b.Property<bool>("ScaleAutoConnect")
                         .HasColumnType("boolean")
                         .HasColumnName("scale_auto_connect");
 
                     b.Property<string>("ScaleName")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("scale_name");
 
                     b.Property<bool>("ScalePaired")
@@ -352,8 +339,7 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("status");
 
                     b.Property<string>("StatusReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("status_reason");
 
                     b.PrimitiveCollection<List<string>>("Suburbs")
@@ -363,8 +349,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("VehiclePlate")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("vehicle_plate");
 
                     b.Property<string>("VehicleType")
@@ -434,8 +419,7 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("status");
 
                     b.Property<string>("StatusReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("status_reason");
 
                     b.HasKey("Id")
@@ -460,8 +444,7 @@ namespace Rethread.Api.Data.Migrations
             modelBuilder.Entity("Rethread.Api.Data.Entities.DonationProject", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("id");
 
                     b.Property<bool>("Active")
@@ -486,8 +469,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("name");
 
                     b.Property<long>("RaisedCents")
@@ -530,8 +512,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("CustomerId")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("character varying(40)")
                         .HasColumnName("customer_id");
 
                     b.Property<string>("Gender")
@@ -584,8 +565,7 @@ namespace Rethread.Api.Data.Migrations
             modelBuilder.Entity("Rethread.Api.Data.Entities.GarmentType", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("id");
 
                     b.Property<decimal>("EstimatedKg")
@@ -595,8 +575,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("name");
 
                     b.Property<int>("SortOrder")
@@ -612,8 +591,7 @@ namespace Rethread.Api.Data.Migrations
             modelBuilder.Entity("Rethread.Api.Data.Entities.Hub", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("id");
 
                     b.Property<string>("ClosesAt")
@@ -638,8 +616,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("name");
 
                     b.HasKey("Id")
@@ -661,8 +638,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("CollectorId")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("collector_id");
 
                     b.Property<DateTime>("CreatedAt")
@@ -671,8 +647,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("HubId")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("hub_id");
 
                     b.Property<int>("JobCount")
@@ -696,8 +671,7 @@ namespace Rethread.Api.Data.Migrations
             modelBuilder.Entity("Rethread.Api.Data.Entities.ImpactMultiplier", b =>
                 {
                     b.Property<string>("Key")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("key");
 
                     b.Property<decimal>("PerKg")
@@ -711,8 +685,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("Unit")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("unit");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -721,8 +694,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("UpdatedBy")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("updated_by");
 
                     b.HasKey("Key")
@@ -746,8 +718,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("Body")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("body");
 
                     b.Property<DateTime>("CreatedAt")
@@ -759,13 +730,11 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("read_at");
 
                     b.Property<string>("RecipientId")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("recipient_id");
 
                     b.Property<string>("TargetId")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("target_id");
 
                     b.Property<string>("TargetType")
@@ -775,8 +744,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("title");
 
                     b.Property<string>("Type")
@@ -802,8 +770,7 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("id");
 
                     b.Property<string>("AddressId")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("address_id");
 
                     b.Property<DateTime>("CreatedAt")
@@ -812,8 +779,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("CustomerId")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("character varying(40)")
                         .HasColumnName("customer_id");
 
                     b.Property<string>("Destination")
@@ -863,8 +829,7 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("transport_charge_cents");
 
                     b.Property<string>("VendorId")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("vendor_id");
 
                     b.Property<uint>("Version")
@@ -874,8 +839,7 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("xmin");
 
                     b.Property<string>("WaybillNumber")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("waybill_number");
 
                     b.HasKey("Id")
@@ -908,8 +872,7 @@ namespace Rethread.Api.Data.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Actor")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("actor");
 
                     b.Property<DateTime>("OccurredAt")
@@ -918,8 +881,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("OrderId")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("character varying(20)")
                         .HasColumnName("order_id");
 
                     b.Property<string>("Status")
@@ -948,20 +910,17 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("name");
 
                     b.Property<string>("OrderId")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("character varying(20)")
                         .HasColumnName("order_id");
 
                     b.Property<string>("ProductId")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("product_id");
 
                     b.Property<int>("Quantity")
@@ -970,8 +929,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("Size")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("size");
 
                     b.Property<long>("UnitPriceCents")
@@ -1006,14 +964,12 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("Channel")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("channel");
 
                     b.Property<string>("CodeHash")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("code_hash");
 
                     b.Property<DateTime?>("ConsumedAt")
@@ -1026,8 +982,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("Destination")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("destination");
 
                     b.Property<DateTime>("ExpiresAt")
@@ -1039,8 +994,7 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("resend_after");
 
                     b.Property<string>("SubjectId")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("subject_id");
 
                     b.HasKey("Id")
@@ -1065,8 +1019,7 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("actual_weight_kg");
 
                     b.Property<string>("AddressId")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("address_id");
 
                     b.Property<string>("AddressLine")
@@ -1091,8 +1044,7 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("bulk_mode");
 
                     b.Property<string>("CancelReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("cancel_reason");
 
                     b.Property<DateTime?>("CollectedAt")
@@ -1100,8 +1052,7 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("collected_at");
 
                     b.Property<string>("CollectorId")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("character varying(40)")
                         .HasColumnName("collector_id");
 
                     b.Property<long?>("CollectorPayoutCents")
@@ -1118,8 +1069,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("CustomerId")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("character varying(40)")
                         .HasColumnName("customer_id");
 
                     b.Property<long?>("CustomerPayoutCents")
@@ -1149,13 +1099,11 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("estimated_kg");
 
                     b.Property<string>("HubDeliveryId")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("hub_delivery_id");
 
                     b.Property<string>("HubId")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("hub_id");
 
                     b.Property<int?>("ItemCount")
@@ -1177,8 +1125,7 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("method");
 
                     b.Property<string>("Note")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("note");
 
                     b.Property<DateOnly>("ScheduledDate")
@@ -1253,8 +1200,7 @@ namespace Rethread.Api.Data.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Actor")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("actor");
 
                     b.Property<DateTime>("OccurredAt")
@@ -1263,8 +1209,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("PickupId")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("character varying(20)")
                         .HasColumnName("pickup_id");
 
                     b.Property<string>("Status")
@@ -1293,8 +1238,7 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("id");
 
                     b.Property<string>("BagLabel")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("bag_label");
 
                     b.Property<string>("Condition")
@@ -1304,25 +1248,21 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("condition");
 
                     b.Property<string>("GarmentType")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("garment_type");
 
                     b.Property<string>("MemberId")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("member_id");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("name");
 
                     b.Property<string>("PickupId")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("character varying(20)")
                         .HasColumnName("pickup_id");
 
                     b.Property<int?>("Quantity")
@@ -1330,8 +1270,7 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("quantity");
 
                     b.Property<string>("Size")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("size");
 
                     b.Property<int>("SortOrder")
@@ -1350,14 +1289,12 @@ namespace Rethread.Api.Data.Migrations
             modelBuilder.Entity("Rethread.Api.Data.Entities.PickupPhoto", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("id");
 
                     b.Property<string>("CollectorId")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("collector_id");
 
                     b.Property<DateTime>("CreatedAt")
@@ -1366,8 +1303,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("FileId")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("file_id");
 
                     b.Property<string>("Kind")
@@ -1378,8 +1314,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("PickupId")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("pickup_id");
 
                     b.HasKey("Id")
@@ -1438,8 +1373,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("Story")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("story");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -1464,8 +1398,7 @@ namespace Rethread.Api.Data.Migrations
             modelBuilder.Entity("Rethread.Api.Data.Entities.RateSet", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("id");
 
                     b.Property<long>("ClickAndCollectChargeCents")
@@ -1482,8 +1415,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("CreatedBy")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("created_by");
 
                     b.Property<long>("CustomerRatePerKgCents")
@@ -1516,8 +1448,7 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("id");
 
                     b.Property<string>("AccountName")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("account_name");
 
                     b.Property<string>("AccountNumberProtected")
@@ -1530,19 +1461,16 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("amount_cents");
 
                     b.Property<string>("BankName")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("bank_name");
 
                     b.Property<string>("Branch")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("branch");
 
                     b.Property<string>("CustomerId")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("character varying(40)")
                         .HasColumnName("customer_id");
 
                     b.Property<DateTime?>("ProcessedAt")
@@ -1550,23 +1478,19 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("processed_at");
 
                     b.Property<string>("ProcessedBy")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("processed_by");
 
                     b.Property<string>("ProjectId")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("project_id");
 
                     b.Property<string>("Reference")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("reference");
 
                     b.Property<string>("RejectReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("reject_reason");
 
                     b.Property<DateTime>("RequestedAt")
@@ -1592,18 +1516,15 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("xmin");
 
                     b.Property<string>("VoucherBrandId")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("voucher_brand_id");
 
                     b.Property<string>("VoucherBrandName")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("voucher_brand_name");
 
                     b.Property<string>("VoucherCode")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("voucher_code");
 
                     b.HasKey("Id")
@@ -1643,8 +1564,7 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("expires_at");
 
                     b.Property<string>("ReplacedById")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("replaced_by_id");
 
                     b.Property<DateTime?>("RevokedAt")
@@ -1653,8 +1573,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("SubjectId")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("subject_id");
 
                     b.Property<string>("TokenHash")
@@ -1698,8 +1617,7 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("invite_expires_at");
 
                     b.Property<string>("InviteTokenHash")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("invite_token_hash");
 
                     b.Property<DateTime?>("LastSignInAt")
@@ -1708,8 +1626,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("name");
 
                     b.Property<DateTime?>("NotificationsReadBefore")
@@ -1717,8 +1634,7 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("notifications_read_before");
 
                     b.Property<string>("PasswordHash")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("password_hash");
 
                     b.Property<string>("Role")
@@ -1751,13 +1667,11 @@ namespace Rethread.Api.Data.Migrations
             modelBuilder.Entity("Rethread.Api.Data.Entities.StaffNotificationRead", b =>
                 {
                     b.Property<string>("StaffId")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("character varying(40)")
                         .HasColumnName("staff_id");
 
                     b.Property<string>("NotificationId")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("character varying(80)")
                         .HasColumnName("notification_id");
 
                     b.Property<DateTime>("ReadAt")
@@ -1776,14 +1690,12 @@ namespace Rethread.Api.Data.Migrations
             modelBuilder.Entity("Rethread.Api.Data.Entities.StoredFile", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("id");
 
                     b.Property<string>("ContentType")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("content_type");
 
                     b.Property<DateTime>("CreatedAt")
@@ -1792,8 +1704,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("Path")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("path");
 
                     b.Property<long>("SizeBytes")
@@ -1802,8 +1713,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("UploadedBy")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("uploaded_by");
 
                     b.HasKey("Id")
@@ -1815,14 +1725,12 @@ namespace Rethread.Api.Data.Migrations
             modelBuilder.Entity("Rethread.Api.Data.Entities.Vendor", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("id");
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("address");
 
                     b.Property<double>("Latitude")
@@ -1835,8 +1743,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("name");
 
                     b.HasKey("Id")
@@ -1848,8 +1755,7 @@ namespace Rethread.Api.Data.Migrations
             modelBuilder.Entity("Rethread.Api.Data.Entities.VoucherBrand", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("id");
 
                     b.Property<bool>("Active")
@@ -1864,14 +1770,12 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("description");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("name");
 
                     b.Property<int>("SortOrder")
@@ -1902,8 +1806,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("CustomerId")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("customer_id");
 
                     b.Property<DateTime>("OccurredAt")
@@ -1911,13 +1814,11 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("occurred_at");
 
                     b.Property<string>("OrderId")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("order_id");
 
                     b.Property<string>("PickupId")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("pickup_id");
 
                     b.Property<long?>("RatePerKgCents")
@@ -1925,8 +1826,7 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnName("rate_per_kg_cents");
 
                     b.Property<string>("RedemptionId")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("redemption_id");
 
                     b.Property<string>("Status")
@@ -1937,8 +1837,7 @@ namespace Rethread.Api.Data.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("title");
 
                     b.Property<string>("Type")

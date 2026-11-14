@@ -1,8 +1,13 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
+using Rethread.Api.Auth;
 using Rethread.Api.Common;
 using Rethread.Api.Data;
+using Rethread.Api.Data.Entities;
 using Rethread.Api.Data.Seed;
+using Rethread.Api.Features.Admin.Auth;
+using Rethread.Api.Features.Collector.Auth;
+using Rethread.Api.Features.Customer.Auth;
 using Scalar.AspNetCore;
 
 namespace Rethread.Api.Hosting;
@@ -13,6 +18,9 @@ public static class RethreadPipeline
     {
         app.UseExceptionHandler();
         app.UseContractStatusCodes();
+        app.UseAuthentication();
+        app.UseAuthorization();
+        app.UseRateLimiter();
         return app;
     }
 
@@ -29,11 +37,24 @@ public static class RethreadPipeline
 
         app.MapGet("/", () => Results.Redirect("/docs")).ExcludeFromDescription();
 
-        // Route groups by audience. Features add their endpoints to these.
+        // One route group per audience, each with its own policy. Suspended accounts are turned away on
+        // every request, whatever their token says.
         var api = app.MapGroup("/api/v1");
-        _ = api.MapGroup("").WithTags("Customer app");
-        _ = api.MapGroup("/collector").WithTags("Collector app");
-        _ = api.MapGroup("/admin").WithTags("Admin portal");
+
+        var customer = api.MapGroup("").WithTags("Customer app")
+            .RequireAuthorization(Policies.Customer)
+            .AddEndpointFilter(new ActiveAccountFilter(Audience.Customer));
+        customer.MapCustomerAuth();
+
+        var collector = api.MapGroup("/collector").WithTags("Collector app")
+            .RequireAuthorization(Policies.Collector)
+            .AddEndpointFilter(new ActiveAccountFilter(Audience.Collector));
+        collector.MapCollectorAuth();
+
+        var admin = api.MapGroup("/admin").WithTags("Admin portal")
+            .RequireAuthorization(Policies.Staff)
+            .AddEndpointFilter(new ActiveAccountFilter(Audience.Staff));
+        admin.MapStaffAuth();
 
         return app;
     }

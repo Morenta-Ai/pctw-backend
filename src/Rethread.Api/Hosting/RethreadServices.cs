@@ -8,6 +8,7 @@ using Rethread.Api.Data;
 using Rethread.Api.Data.Entities;
 using Rethread.Api.Data.Seed;
 using Rethread.Api.Domain;
+using Rethread.Api.Features.Shared;
 
 namespace Rethread.Api.Hosting;
 
@@ -40,6 +41,7 @@ public static class RethreadServices
         services.AddScoped<RateBook>();
         services.AddScoped<NotificationService>();
         services.AddScoped<DevSeeder>();
+        services.AddScoped<RecipientNotifications>();
 
         services.AddRethreadAuth(config);
 

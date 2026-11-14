@@ -342,7 +342,8 @@ public sealed class PickupWorkflow(AppDbContext db, RateBook rates, Notification
         var now = time.UtcNow();
         var open = await db.Assignments.Where(a => a.PickupId == pickupId && a.Status == AssignmentStatus.Offered)
             .ToListAsync(ct);
-        foreach (var offer in open)
+        // An offer being accepted in this same unit of work is already tracked as accepted: leave it alone.
+        foreach (var offer in open.Where(o => o.Status == AssignmentStatus.Offered))
         {
             offer.Status = AssignmentStatus.Withdrawn;
             offer.RespondedAt = now;

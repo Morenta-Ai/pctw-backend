@@ -1,8 +1,12 @@
 using FluentValidation;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Rethread.Api.Common;
 using Rethread.Api.Data;
+using Rethread.Api.Data.Entities;
+using Rethread.Api.Data.Seed;
+using Rethread.Api.Domain;
 
 namespace Rethread.Api.Hosting;
 
@@ -29,6 +33,12 @@ public static class RethreadServices
         services.AddDataProtection()
             .SetApplicationName("rethread-api")
             .PersistKeysToDbContext<AppDbContext>();
+
+        services.AddSingleton<BankAccountProtector>();
+        services.AddSingleton<IPasswordHasher<Staff>, PasswordHasher<Staff>>();
+        services.AddScoped<RateBook>();
+        services.AddScoped<NotificationService>();
+        services.AddScoped<DevSeeder>();
 
         services.AddHealthChecks().AddDbContextCheck<AppDbContext>("database");
         services.AddOpenApi("v1");

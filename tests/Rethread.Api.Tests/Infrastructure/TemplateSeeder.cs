@@ -1,7 +1,11 @@
+using Microsoft.Extensions.DependencyInjection;
+using Rethread.Api.Data.Seed;
+
 namespace Rethread.Api.Tests.Infrastructure;
 
-/// <summary>What every test database starts with. Filled in once the seed exists.</summary>
+/// <summary>Every test database starts with the dev seed, at <see cref="TestClock.Start"/>.</summary>
 internal static class TemplateSeeder
 {
-    public static Task SeedAsync(IServiceProvider services) => Task.CompletedTask;
+    public static Task SeedAsync(IServiceProvider services) =>
+        services.GetRequiredService<DevSeeder>().SeedAsync();
 }

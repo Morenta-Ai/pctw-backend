@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Rethread.Api.Common;
 using Rethread.Api.Data;
+using Rethread.Api.Data.Seed;
 using Scalar.AspNetCore;
 
 namespace Rethread.Api.Hosting;
@@ -37,11 +38,46 @@ public static class RethreadPipeline
         return app;
     }
 
-    /// <summary>Applies pending migrations when <c>Database:MigrateOnStartup</c> is on (local dev).</summary>
-    public static async Task MigrateIfConfiguredAsync(this WebApplication app)
+    /// <summary>
+    /// Applies pending migrations when <c>Database:MigrateOnStartup</c> is on, and seeds an empty database
+    /// when <c>Seed:OnStartup</c> is on (local dev only).
+    /// </summary>
+    public static async Task PrepareDatabaseAsync(this WebApplication app)
     {
-        if (!app.Configuration.GetValue<bool>("Database:MigrateOnStartup")) return;
+        var migrate = app.Configuration.GetValue<bool>("Database:MigrateOnStartup");
+        var seed = app.Configuration.GetValue<bool>("Seed:OnStartup") && !app.Environment.IsProduction();
+        if (!migrate && !seed) return;
+
         await using var scope = app.Services.CreateAsyncScope();
-        await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
+        if (migrate) await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
+        if (seed) await scope.ServiceProvider.GetRequiredService<DevSeeder>().SeedAsync();
+    }
+
+    /// <summary>
+    /// <c>dotnet run -- seed [--reset]</c>: migrates and seeds the database, then exits. <c>--reset</c> drops
+    /// the database first. Refuses to run in Production.
+    /// </summary>
+    public static async Task<int> RunSeedCommandAsync(this WebApplication app, string[] args)
+    {
+        if (app.Environment.IsProduction())
+        {
+            Console.Error.WriteLine("Refusing to seed a Production database.");
+            return 1;
+        }
+
+        await using var scope = app.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        if (args.Contains("--reset"))
+        {
+            await db.Database.EnsureDeletedAsync();
+            Console.WriteLine("Dropped the database.");
+        }
+
+        await db.Database.MigrateAsync();
+        var seeded = await scope.ServiceProvider.GetRequiredService<DevSeeder>().SeedAsync();
+        Console.WriteLine(seeded
+            ? "Seeded the database."
+            : "The database already has data. Run `seed --reset` to start again.");
+        return 0;
     }
 }

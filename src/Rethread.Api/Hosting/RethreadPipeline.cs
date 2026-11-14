@@ -11,6 +11,7 @@ using Rethread.Api.Features.Customer.Addresses;
 using Rethread.Api.Features.Customer.Auth;
 using Rethread.Api.Features.Customer.Family;
 using Rethread.Api.Features.Customer.Notifications;
+using Rethread.Api.Features.Customer.Pickups;
 using Rethread.Api.Features.Customer.Profile;
 using Rethread.Api.Features.Customer.Wallet;
 using Scalar.AspNetCore;
@@ -55,6 +56,7 @@ public static class RethreadPipeline
         customer.MapFamily();
         customer.MapBankDetails();
         customer.MapCustomerNotifications();
+        customer.MapCustomerPickups();
 
         var collector = api.MapGroup("/collector").WithTags("Collector app")
             .RequireAuthorization(Policies.Collector)

@@ -97,7 +97,7 @@ Set secrets with `dotnet user-secrets` locally and environment variables elsewhe
 | 4 | Customer profile, addresses, family, bank details | Done |
 | 5 | Customer pickups | Done |
 | 6 | Collector jobs | Done |
-| 7 | Load, hubs and earnings | Planned |
+| 7 | Load, hubs and earnings | Done |
 | 8 | Call-centre assignments | Planned |
 | 9 | Wallet and redemptions | Planned |
 | 10 | Shop, orders and catalogue | Planned |

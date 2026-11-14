@@ -5,9 +5,12 @@ builder.AddRethread();
 
 var app = builder.Build();
 
-if (args is ["seed", ..])
+switch (args)
 {
-    return await app.RunSeedCommandAsync(args);
+    case ["seed", ..]:
+        return await app.RunSeedCommandAsync(args);
+    case ["migrate", ..]:
+        return await app.RunMigrateCommandAsync();
 }
 
 app.UseRethread();

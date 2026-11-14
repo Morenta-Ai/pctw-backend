@@ -102,7 +102,7 @@ Set secrets with `dotnet user-secrets` locally and environment variables elsewhe
 | 6 | Collector jobs | Done |
 | 7 | Load, hubs and earnings | Done |
 | 8 | Call-centre assignments | Done |
-| 9 | Wallet and redemptions | Planned |
+| 9 | Wallet and redemptions | Done |
 | 10 | Shop, orders and catalogue | Planned |
 | 11 | Admin operations | Planned |
 | 12 | Rates and impact | Planned |

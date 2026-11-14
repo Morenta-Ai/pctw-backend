@@ -37,6 +37,13 @@ public sealed class WalletLedger(AppDbContext db, TimeProvider time)
         RatePerKgCents = pickup.CustomerRatePerKgCents,
     });
 
+    /// <summary>
+    /// Serialises money movements for one customer until the current transaction ends, so two redemptions
+    /// sent at once can't both spend the same balance. Call inside a database transaction.
+    /// </summary>
+    public async Task LockAsync(string customerId, CancellationToken ct) =>
+        await db.Database.ExecuteSqlAsync($"SELECT pg_advisory_xact_lock(hashtext({"wallet:" + customerId}))", ct);
+
     public WalletTransaction Add(WalletTransaction transaction)
     {
         db.WalletTransactions.Add(transaction);

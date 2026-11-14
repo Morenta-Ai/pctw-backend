@@ -575,8 +575,10 @@ Returns `{ "items": [Order], "nextCursor": null }`, newest first.
 }
 ```
 
-`type` is `weightUpdated`, `collectorEnRoute`, `hubArrival`, `orderUpdate`, `paymentCredited` or
-`donationThanks`. `targetType` is `pickup`, `order`, `wallet` or `null`, and decides where a tap goes.
+`type` is `weightUpdated`, `collectorEnRoute`, `hubArrival`, `orderUpdate`, `paymentCredited`,
+`donationThanks`, `pickupCancelled` (the call centre cancelled a pickup) or `transferUpdate` (a bank
+transfer was sent or rejected). `targetType` is `pickup`, `order`, `wallet` or `null`, and decides where a
+tap goes.
 
 ### `POST /notifications/{id}/read`
 

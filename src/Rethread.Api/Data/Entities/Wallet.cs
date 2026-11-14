@@ -1,12 +1,10 @@
-using Rethread.Api.Common;
-
 namespace Rethread.Api.Data.Entities;
 
 /// <summary>
 /// The customer's wallet ledger. Amounts are signed: credits positive, debits negative. The balance is the
 /// sum of completed and pending rows (a pending transfer is already set aside); failed rows don't count.
 /// </summary>
-public sealed class WalletTransaction : ICursorRow
+public sealed class WalletTransaction
 {
     public required string Id { get; set; }
     public required string CustomerId { get; set; }
@@ -20,8 +18,6 @@ public sealed class WalletTransaction : ICursorRow
     public long? RatePerKgCents { get; set; }
     public string? RedemptionId { get; set; }
     public string? OrderId { get; set; }
-
-    DateTime ICursorRow.CreatedAt => OccurredAt;
 }
 
 public sealed class Redemption

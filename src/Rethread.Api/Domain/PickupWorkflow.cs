@@ -156,7 +156,7 @@ public sealed class PickupWorkflow(AppDbContext db, RateBook rates, Notification
 
         if (actor is not null)
         {
-            notifications.ToCustomer(pickup.CustomerId, "pickupCancelled", "Pickup cancelled",
+            notifications.ToCustomer(pickup.CustomerId, NotificationService.CustomerTypes.PickupCancelled, "Pickup cancelled",
                 $"{pickup.Id} was cancelled: {reason}", "pickup", pickup.Id);
         }
 

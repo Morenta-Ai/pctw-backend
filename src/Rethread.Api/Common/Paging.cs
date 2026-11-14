@@ -1,5 +1,6 @@
 using System.Buffers.Text;
 using System.Globalization;
+using System.Linq.Expressions;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 
@@ -60,20 +61,43 @@ public static class Cursor
 public static class PagingExtensions
 {
     /// <summary>Newest first, keyset-paged by <c>(createdAt, id)</c>.</summary>
+    public static Task<CursorPage<TOut>> ToCursorPageAsync<T, TOut>(this IQueryable<T> query, string? cursor,
+        int limit, Func<T, TOut> map, CancellationToken ct) where T : class, ICursorRow =>
+        query.ToCursorPageAsync(cursor, limit, x => x.CreatedAt, x => x.Id, map, ct);
+
+    /// <summary>Newest first, keyset-paged by a timestamp column and the ID.</summary>
     public static async Task<CursorPage<TOut>> ToCursorPageAsync<T, TOut>(this IQueryable<T> query, string? cursor,
-        int limit, Func<T, TOut> map, CancellationToken ct) where T : class, ICursorRow
+        int limit, Expression<Func<T, DateTime>> timestamp, Expression<Func<T, string>> id, Func<T, TOut> map,
+        CancellationToken ct) where T : class
     {
-        var after = Cursor.Decode(cursor);
-        if (after is { } c)
+        if (Cursor.Decode(cursor) is { } after)
         {
-            var (at, id) = c;
-            query = query.Where(x => x.CreatedAt < at || (x.CreatedAt == at && string.Compare(x.Id, id) < 0));
+            // timestamp < at || (timestamp == at && id < lastId), built over the caller's columns.
+            var row = Expression.Parameter(typeof(T), "row");
+            var at = Replace(timestamp, row);
+            var key = Replace(id, row);
+            var atValue = Expression.Constant(after.CreatedAt);
+            var compare = Expression.Call(typeof(string).GetMethod(nameof(string.Compare), [typeof(string), typeof(string)])!,
+                key, Expression.Constant(after.Id));
+            var before = Expression.OrElse(
+                Expression.LessThan(at, atValue),
+                Expression.AndAlso(Expression.Equal(at, atValue), Expression.LessThan(compare, Expression.Constant(0))));
+            query = query.Where(Expression.Lambda<Func<T, bool>>(before, row));
         }
 
-        var rows = await query.OrderByDescending(x => x.CreatedAt).ThenByDescending(x => x.Id)
-            .Take(limit + 1).ToListAsync(ct);
-        var next = rows.Count > limit ? Cursor.Encode(rows[limit - 1].CreatedAt, rows[limit - 1].Id) : null;
+        var rows = await query.OrderByDescending(timestamp).ThenByDescending(id).Take(limit + 1).ToListAsync(ct);
+        var getAt = timestamp.Compile();
+        var getId = id.Compile();
+        var next = rows.Count > limit ? Cursor.Encode(getAt(rows[limit - 1]), getId(rows[limit - 1])) : null;
         return new CursorPage<TOut>(rows.Take(limit).Select(map).ToList(), next);
+    }
+
+    private static Expression Replace<T, TValue>(Expression<Func<T, TValue>> selector, ParameterExpression row) =>
+        new ParameterSwap(selector.Parameters[0], row).Visit(selector.Body);
+
+    private sealed class ParameterSwap(ParameterExpression from, ParameterExpression to) : ExpressionVisitor
+    {
+        protected override Expression VisitParameter(ParameterExpression node) => node == from ? to : node;
     }
 
     public static async Task<PagedList<TOut>> ToPageAsync<T, TOut>(this IQueryable<T> query, PageRequest page,

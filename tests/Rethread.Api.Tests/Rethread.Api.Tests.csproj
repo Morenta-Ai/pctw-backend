@@ -22,6 +22,7 @@
   <ItemGroup>
     <Using Include="Xunit" />
     <None Include="..\..\docs\contracts\*.md" LinkBase="contracts" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Seed\*.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

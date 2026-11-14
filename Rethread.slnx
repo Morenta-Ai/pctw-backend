@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Rethread.Api/Rethread.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Rethread.Api.Tests/Rethread.Api.Tests.csproj" />
+  </Folder>
+</Solution>

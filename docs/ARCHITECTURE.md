@@ -46,6 +46,29 @@ A pickup is one row in `pickups`. Its status is the portal's set: `pending`, `as
 
 The rest are the same everywhere.
 
+## Domain services
+
+| Service | Owns |
+| --- | --- |
+| `PickupWorkflow` | Booking, accepting, starting, arriving, collecting, hub drops and cancelling |
+| `AssignmentService` | Call-centre offers: 45-second expiry, accept, decline, withdraw |
+| `OrderWorkflow` | Placing orders (stock and wallet) and the fulfilment status table |
+| `Redemptions` | Cash, vouchers and donations; staff paying or rejecting transfers |
+| `WalletLedger` | The signed ledger, balances, and the per-customer lock for spending |
+| `RateBook` | Which rates apply on a Colombo day |
+| `ImpactCalculator` | Kilograms × multipliers for the impact screen |
+| `NotificationService`, `NotificationTexts` | Alerts for all three audiences, and their wording |
+| `Maintenance` | Offer expiry, 30-minute waiting alerts, silent collectors going offline |
+
+Money moves under database guarantees: accepting a job and buying stock are conditional updates, and
+wallet spending takes a PostgreSQL advisory lock per customer, so concurrent requests can't double-spend.
+
+## Background work
+
+`MaintenanceService` runs `Maintenance` every few seconds. Every read that depends on it (an offer's
+status, the dispatch map, the counts) also runs it first, so the API is correct even where background work
+doesn't run, such as on a platform that sleeps between requests.
+
 ## Errors
 
 Every non-2xx response is `{ code, message, details }`:

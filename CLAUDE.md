@@ -24,6 +24,11 @@ spec: read the relevant one before adding or changing an endpoint.
 - Each audience's endpoints sit in their own route group with their own authorisation policy.
 - Validate request bodies with a FluentValidation validator and `.Validate<T>()`.
 - Never return a customer's full bank account number outside the staff redemption queue.
+- Anything that spends wallet money takes `WalletLedger.LockAsync` inside a transaction.
+- Time-based rules (offer expiry, waiting alerts) live in `Maintenance`; run it before reads that depend
+  on them rather than trusting the background job.
+- The seed must keep matching the portal's mock world (`tests/.../Seed/*.json`). Don't change seed data
+  without regenerating those fixtures from pctw-admin.
 
 ## Commands
 
@@ -32,6 +37,8 @@ dotnet format          # before committing; CI runs --verify-no-changes
 dotnet build
 dotnet test            # TEST_DATABASE_URL, or Docker for Testcontainers
 dotnet ef migrations add <Name> --project src/Rethread.Api --output-dir Data/Migrations
+dotnet run --project src/Rethread.Api -- seed --reset   # fresh dev data, dated today
+dotnet run --project src/Rethread.Api -- migrate        # what production runs on deploy
 ```
 
 ## Git

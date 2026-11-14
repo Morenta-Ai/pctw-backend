@@ -95,6 +95,33 @@ written to the log.
 Set secrets with `dotnet user-secrets` locally and environment variables elsewhere
 (`ConnectionStrings__Default`, for example).
 
+## Deploying
+
+The API is a single container: `docker build -t rethread-api .` gives an image that listens on 8080 and
+runs as a non-root user. Production needs:
+
+| Variable | Example |
+| --- | --- |
+| `ConnectionStrings__Default` | `Host=ep-…-pooler.ap-southeast-1.aws.neon.tech;Database=rethread;Username=…;Password=…;SSL Mode=Require` |
+| `Jwt__SigningKey` | 32+ random characters, from the platform's secret store |
+| `Storage__PublicBaseUrl` | `https://api.rethread.lk` (catalogue photo links) |
+| `Storage__Root` | A mounted volume for uploads (`/data/storage` in the image) |
+| `Portal__BaseUrl` | `https://portal.rethread.lk` (staff invite links) |
+| `Hosting__TrustForwardedHeaders` | `true` behind a load balancer or platform proxy |
+
+Run migrations as a deploy step, not on start: `dotnet Rethread.Api.dll migrate` (in the container,
+`docker run … rethread-api migrate`). Use Neon's direct (non-pooled) connection string for that, and the
+pooled one for the API. The seed and the development switches (`Otp:FixedCode`,
+`Simulation:AutoAnswerOffers`) never run in Production.
+
+Before going live:
+
+- Choose an SMS provider and an email sender: codes and invite links only go to the log today.
+- Move uploads to object storage (S3, R2 or Azure Blob) behind `IFileStore` if there's more than one
+  instance.
+- Protect the Data Protection keys (they encrypt bank account numbers) with a certificate or a key vault.
+- Choose a card payment gateway: card orders are recorded unpaid.
+
 ## Status
 
 | Step | What | State |
@@ -111,4 +138,4 @@ Set secrets with `dotnet user-secrets` locally and environment variables elsewhe
 | 10 | Shop, orders and catalogue | Done |
 | 11 | Admin operations | Done |
 | 12 | Rates and impact | Done |
-| 13 | Deploy readiness | Planned |
+| 13 | Deploy readiness | Done |

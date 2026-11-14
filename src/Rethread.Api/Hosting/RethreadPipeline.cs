@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Rethread.Api.Auth;
 using Rethread.Api.Common;
@@ -44,6 +45,19 @@ public static class RethreadPipeline
 {
     public static WebApplication UseRethread(this WebApplication app)
     {
+        // Behind a load balancer or platform proxy, trust its X-Forwarded-* headers so client IPs (for rate
+        // limits) and https links (for uploaded photos) are right.
+        if (app.Configuration.GetValue<bool>("Hosting:TrustForwardedHeaders"))
+        {
+            var options = new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+            };
+            options.KnownIPNetworks.Clear();
+            options.KnownProxies.Clear();
+            app.UseForwardedHeaders(options);
+        }
+
         app.UseExceptionHandler();
         app.UseContractStatusCodes();
         app.UseAuthentication();
@@ -131,6 +145,19 @@ public static class RethreadPipeline
         await using var scope = app.Services.CreateAsyncScope();
         if (migrate) await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
         if (seed) await scope.ServiceProvider.GetRequiredService<DevSeeder>().SeedAsync();
+    }
+
+    /// <summary><c>dotnet Rethread.Api.dll migrate</c>: applies pending migrations, then exits. For deploy pipelines.</summary>
+    public static async Task<int> RunMigrateCommandAsync(this WebApplication app)
+    {
+        await using var scope = app.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
+        await db.Database.MigrateAsync();
+        Console.WriteLine(pending.Count == 0
+            ? "The database is up to date."
+            : $"Applied {pending.Count} migration(s): {string.Join(", ", pending)}");
+        return 0;
     }
 
     /// <summary>

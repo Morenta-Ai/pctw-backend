@@ -18,6 +18,7 @@ public sealed class PickupWorkflow(AppDbContext db, RateBook rates, Notification
     public const string JobTaken = "JOB_TAKEN";
     public const string JobNotActive = "JOB_NOT_ACTIVE";
     public const string LoadFull = "LOAD_FULL";
+    public const string NothingToDeliver = "NOTHING_TO_DELIVER";
 
     /// <summary>Statuses a pickup is still "open" in: on the way to being collected.</summary>
     public static readonly PickupStatus[] Open =
@@ -252,6 +253,56 @@ public sealed class PickupWorkflow(AppDbContext db, RateBook rates, Notification
         }
 
         await db.SaveChangesAsync(ct);
+    }
+
+    public sealed record Delivery(HubDelivery Receipt, Hub Hub, int CustomersNotified);
+
+    /// <summary>
+    /// Drops collected jobs at a hub and issues the receipt. Every job must still be in the collector's load;
+    /// otherwise nothing is delivered (<c>NOTHING_TO_DELIVER</c>), so a receipt never covers half a drop.
+    /// </summary>
+    public async Task<Delivery> DeliverToHubAsync(Collector collector, Hub hub, IReadOnlyCollection<string> jobIds,
+        CancellationToken ct)
+    {
+        var ids = jobIds.Distinct().ToList();
+        var jobs = await db.Pickups
+            .Where(p => ids.Contains(p.Id) && p.CollectorId == collector.Id && p.Status == PickupStatus.Collected)
+            .ToListAsync(ct);
+        if (ids.Count == 0 || jobs.Count != ids.Count)
+        {
+            throw ApiException.Conflict(NothingToDeliver, "Some of these jobs aren't in your load any more.",
+                new { jobIds = ids.Except(jobs.Select(j => j.Id)).ToList() });
+        }
+
+        var now = time.UtcNow();
+        var receipt = HubReceipts.Number(hub.Code, now, collector.Code);
+        var id = receipt;
+        for (var n = 2; await db.HubDeliveries.AnyAsync(d => d.Id == id, ct); n++) id = $"{receipt}-{n}";
+
+        var delivery = new HubDelivery
+        {
+            Id = id,
+            HubId = hub.Id,
+            CollectorId = collector.Id,
+            JobCount = jobs.Count,
+            WeightKg = jobs.Sum(j => j.ActualWeightKg ?? 0),
+            CreatedAt = now,
+        };
+        db.HubDeliveries.Add(delivery);
+
+        foreach (var job in jobs)
+        {
+            job.HubId = hub.Id;
+            job.HubDeliveryId = delivery.Id;
+            job.DeliveredAt = now;
+            Move(job, PickupStatus.DeliveredToHub, collector.FullName);
+            var (title, body) = NotificationTexts.HubArrival(job, hub.Name);
+            notifications.ToCustomer(job.CustomerId, NotificationService.CustomerTypes.HubArrival, title, body,
+                "pickup", job.Id);
+        }
+
+        await db.SaveChangesAsync(ct);
+        return new Delivery(delivery, hub, jobs.Select(j => j.CustomerId).Distinct().Count());
     }
 
     /// <summary>What a collector is carrying: collected, not yet delivered to a hub.</summary>

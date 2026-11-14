@@ -60,11 +60,17 @@ public sealed class PostgresServer : IAsyncLifetime
             if (_templateReady) return;
             await ExecuteAsync($"CREATE DATABASE \"{_template}\"");
             var connection = ConnectionFor(_template, pooling: false);
+            // Migrate before the API starts, so nothing at start-up queries tables that don't exist yet.
+            await using (var db = new AppDbContext(new DbContextOptionsBuilder<AppDbContext>()
+                             .UseNpgsql(connection, o => o.MigrationsHistoryTable("__ef_migrations_history"))
+                             .UseSnakeCaseNamingConvention().Options))
+            {
+                await db.Database.MigrateAsync();
+            }
+
             await using (var api = new TestApiFactory(connection, TestClock.Start))
             {
                 await using var scope = api.Services.CreateAsyncScope();
-                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                await db.Database.MigrateAsync();
                 await TemplateSeeder.SeedAsync(scope.ServiceProvider);
             }
 

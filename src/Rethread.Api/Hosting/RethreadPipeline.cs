@@ -7,7 +7,9 @@ using Rethread.Api.Data.Entities;
 using Rethread.Api.Data.Seed;
 using Rethread.Api.Features.Admin.Auth;
 using Rethread.Api.Features.Collector.Auth;
+using Rethread.Api.Features.Collector.Earnings;
 using Rethread.Api.Features.Collector.Jobs;
+using Rethread.Api.Features.Collector.Load;
 using Rethread.Api.Features.Collector.Notifications;
 using Rethread.Api.Features.Collector.Profile;
 using Rethread.Api.Features.Customer.Addresses;
@@ -68,6 +70,8 @@ public static class RethreadPipeline
         collector.MapCollectorProfile();
         collector.MapJobs();
         collector.MapCollectorNotifications();
+        collector.MapLoad();
+        collector.MapEarnings();
 
         var admin = api.MapGroup("/admin").WithTags("Admin portal")
             .RequireAuthorization(Policies.Staff)

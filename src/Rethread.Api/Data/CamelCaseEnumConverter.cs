@@ -17,4 +17,7 @@ public sealed class CamelCaseEnumConverter<T>() : ValueConverter<T, string>(
         Names.GetOrAdd(value, v => JsonNamingPolicy.CamelCase.ConvertName(v.ToString()));
 
     public static T FromText(string text) => Values[text];
+
+    /// <summary>Parses a query or form value such as <c>afternoon</c>; null when it isn't one of the values.</summary>
+    public static T? TryParse(string? text) => text is not null && Values.TryGetValue(text, out var value) ? value : null;
 }

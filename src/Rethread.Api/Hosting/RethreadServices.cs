@@ -41,6 +41,8 @@ public static class RethreadServices
         services.AddScoped<RateBook>();
         services.AddScoped<NotificationService>();
         services.AddScoped<PickupWorkflow>();
+        services.AddScoped<WalletLedger>();
+        services.AddSingleton<IFileStore, LocalFileStore>();
         services.AddScoped<DevSeeder>();
         services.AddScoped<RecipientNotifications>();
 

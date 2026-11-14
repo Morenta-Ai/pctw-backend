@@ -10,11 +10,14 @@ namespace Rethread.Api.Domain;
 /// centre. Keeping it in one place means a cancel or a collection does the same thing from every app.
 /// </summary>
 public sealed class PickupWorkflow(AppDbContext db, RateBook rates, NotificationService notifications,
-    TimeProvider time)
+    WalletLedger wallet, TimeProvider time)
 {
     public const string NoCollectorsAvailable = "NO_COLLECTORS_AVAILABLE";
     public const string PickupNotCancellable = "PICKUP_NOT_CANCELLABLE";
     public const string PickupNotFound = "PICKUP_NOT_FOUND";
+    public const string JobTaken = "JOB_TAKEN";
+    public const string JobNotActive = "JOB_NOT_ACTIVE";
+    public const string LoadFull = "LOAD_FULL";
 
     /// <summary>Statuses a pickup is still "open" in: on the way to being collected.</summary>
     public static readonly PickupStatus[] Open =
@@ -157,6 +160,129 @@ public sealed class PickupWorkflow(AppDbContext db, RateBook rates, Notification
         }
 
         await db.SaveChangesAsync(ct);
+    }
+
+    /// <summary>
+    /// A collector takes an open job. Only one can win: the update only applies while the pickup is still
+    /// pending, so a second collector gets <c>JOB_TAKEN</c>. Any open call-centre offer for it is withdrawn.
+    /// </summary>
+    public async Task AcceptAsync(string pickupId, Collector collector, CancellationToken ct)
+    {
+        var now = time.UtcNow();
+        var taken = await db.Pickups
+            .Where(p => p.Id == pickupId && p.Status == PickupStatus.Pending)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(p => p.Status, PickupStatus.Assigned)
+                .SetProperty(p => p.CollectorId, collector.Id), ct);
+        if (taken == 0)
+        {
+            var current = await db.Pickups.AsNoTracking().Where(p => p.Id == pickupId)
+                .Select(p => new { p.Status, p.CollectorId }).SingleOrDefaultAsync(ct);
+            if (current is { Status: PickupStatus.Assigned } && current.CollectorId == collector.Id) return;
+            if (current?.Status == PickupStatus.Cancelled)
+                throw ApiException.Conflict(JobNotActive, "This job was cancelled.", new { jobId = pickupId });
+            throw ApiException.Conflict(JobTaken, "Another collector accepted this job.", new { jobId = pickupId });
+        }
+
+        db.PickupEvents.Add(new PickupEvent
+        {
+            PickupId = pickupId,
+            Status = PickupStatus.Assigned,
+            OccurredAt = now,
+            Actor = collector.FullName,
+        });
+        await WithdrawOpenOffersAsync(pickupId, ct);
+        await db.SaveChangesAsync(ct);
+    }
+
+    /// <summary>The collector sets off. The customer is told they're coming.</summary>
+    public async Task StartAsync(Pickup pickup, Collector collector, CancellationToken ct)
+    {
+        RequireStatus(pickup, collector, PickupStatus.Assigned);
+        Move(pickup, PickupStatus.EnRoute, collector.FullName);
+        var (title, body) = NotificationTexts.CollectorEnRoute(pickup, collector.FullName);
+        notifications.ToCustomer(pickup.CustomerId, NotificationService.CustomerTypes.CollectorEnRoute, title, body,
+            "pickup", pickup.Id);
+        await db.SaveChangesAsync(ct);
+    }
+
+    public async Task ArriveAsync(Pickup pickup, Collector collector, CancellationToken ct)
+    {
+        RequireStatus(pickup, collector, PickupStatus.EnRoute);
+        Move(pickup, PickupStatus.Arrived, collector.FullName);
+        await db.SaveChangesAsync(ct);
+    }
+
+    public sealed record Collection(decimal WeightKg, WeightSource WeightSource, int BagCount);
+
+    /// <summary>
+    /// Weighs and pays: the payout comes from the weight and the rates copied in at booking, never from the
+    /// app. The customer's wallet is credited in the same save. It can't be undone.
+    /// </summary>
+    public async Task CollectAsync(Pickup pickup, Collector collector, Collection collection, CancellationToken ct)
+    {
+        RequireStatus(pickup, collector, PickupStatus.Arrived, PickupStatus.EnRoute);
+        var weight = Weight.Round(collection.WeightKg);
+        var (loadKg, _) = await LoadAsync(collector.Id, ct);
+        if (loadKg + weight > collector.CapacityKg)
+        {
+            throw ApiException.Conflict(LoadFull, "This would go over the vehicle's capacity. Drop off at a hub first.",
+                new { loadKg, capacityKg = collector.CapacityKg });
+        }
+
+        var now = time.UtcNow();
+        pickup.ActualWeightKg = weight;
+        pickup.WeightSource = collection.WeightSource;
+        pickup.BagCount = collection.BagCount;
+        pickup.CustomerPayoutCents = Money.Payout(weight, pickup.CustomerRatePerKgCents);
+        pickup.CollectorPayoutCents = Money.Payout(weight, pickup.CollectorRatePerKgCents);
+        pickup.CollectedAt = now;
+        Move(pickup, PickupStatus.Collected, collector.FullName);
+        wallet.CreditPickup(pickup);
+
+        foreach (var (type, text) in new[]
+                 {
+                     (NotificationService.CustomerTypes.WeightUpdated, NotificationTexts.WeightUpdated(pickup)),
+                     (NotificationService.CustomerTypes.PaymentCredited, NotificationTexts.PaymentCredited(pickup)),
+                 })
+        {
+            notifications.ToCustomer(pickup.CustomerId, type, text.Title, text.Body,
+                type == NotificationService.CustomerTypes.PaymentCredited ? "wallet" : "pickup",
+                type == NotificationService.CustomerTypes.PaymentCredited ? null : pickup.Id);
+        }
+
+        await db.SaveChangesAsync(ct);
+    }
+
+    /// <summary>What a collector is carrying: collected, not yet delivered to a hub.</summary>
+    public async Task<(decimal WeightKg, int JobCount)> LoadAsync(string collectorId, CancellationToken ct)
+    {
+        var load = await db.Pickups.Where(p => p.CollectorId == collectorId && p.Status == PickupStatus.Collected)
+            .Select(p => p.ActualWeightKg ?? 0).ToListAsync(ct);
+        return (load.Sum(), load.Count);
+    }
+
+    private void Move(Pickup pickup, PickupStatus status, string? actor)
+    {
+        pickup.Status = status;
+        db.PickupEvents.Add(new PickupEvent
+        {
+            PickupId = pickup.Id,
+            Status = status,
+            OccurredAt = time.UtcNow(),
+            Actor = actor,
+        });
+    }
+
+    private static void RequireStatus(Pickup pickup, Collector collector, params PickupStatus[] allowed)
+    {
+        if (pickup.CollectorId != collector.Id)
+            throw ApiException.Forbidden(Common.ErrorCodes.Forbidden, "This job belongs to another collector.");
+        if (!allowed.Contains(pickup.Status))
+        {
+            throw ApiException.Conflict(JobNotActive, "This job can't do that right now.",
+                new { jobId = pickup.Id, status = CamelCaseEnum(pickup.Status) });
+        }
     }
 
     /// <summary>Closes any open call-centre offer for a pickup (it was taken, or cancelled).</summary>

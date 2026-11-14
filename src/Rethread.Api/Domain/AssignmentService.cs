@@ -84,44 +84,57 @@ public sealed class AssignmentService(AppDbContext db, PickupWorkflow pickups, N
         return offer;
     }
 
+    // Every change to an offer's status is a conditional update ("only while it's still offered"), so the
+    // collector answering, staff withdrawing and the expiry sweep can race without contradicting each other:
+    // exactly one of them closes the offer.
+
     public async Task<Assignment> WithdrawAsync(Assignment offer, CancellationToken ct)
     {
         await ExpireStaleAsync(ct);
-        await db.Entry(offer).ReloadAsync(ct);
-        if (offer.Status != AssignmentStatus.Offered)
+        if (!await CloseAsync(offer.Id, AssignmentStatus.Withdrawn, null, time.UtcNow(), ct))
             throw ApiException.Conflict(AssignmentClosed, "This offer was already answered or has expired.");
-        offer.Status = AssignmentStatus.Withdrawn;
-        offer.RespondedAt = time.UtcNow();
-        await db.SaveChangesAsync(ct);
+        await db.Entry(offer).ReloadAsync(ct);
         return offer;
     }
 
-    /// <summary>The collector accepts: the pickup becomes theirs, exactly as if they took it from the board.</summary>
+    /// <summary>
+    /// The collector accepts: the offer and the pickup are claimed in one transaction, so the pickup is never
+    /// theirs unless the offer says accepted, and vice versa.
+    /// </summary>
     public async Task AcceptAsync(Assignment offer, Collector collector, CancellationToken ct)
     {
-        await RequireOpenAsync(offer, ct);
-        offer.Status = AssignmentStatus.Accepted;
-        offer.RespondedAt = time.UtcNow();
+        await ExpireStaleAsync(ct);
+        var now = time.UtcNow();
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+        if (!await CloseAsync(offer.Id, AssignmentStatus.Accepted, null, now, ct))
+            throw ApiException.Conflict(AssignmentExpired, "This offer has closed.", new { assignmentId = offer.Id });
+
         try
         {
             await pickups.AcceptAsync(offer.PickupId, collector, ct);
         }
         catch (ApiException e) when (e.Code is PickupWorkflow.JobTaken or PickupWorkflow.JobNotActive)
         {
+            await transaction.RollbackAsync(ct);
             db.ChangeTracker.Clear();
-            await db.Assignments.Where(a => a.Id == offer.Id)
-                .ExecuteUpdateAsync(s => s.SetProperty(a => a.Status, AssignmentStatus.Withdrawn)
-                    .SetProperty(a => a.RespondedAt, time.UtcNow()), ct);
+            await CloseAsync(offer.Id, AssignmentStatus.Withdrawn, null, now, ct);
             throw ApiException.Conflict(AssignmentExpired, "This pickup has gone to someone else.");
         }
+
+        await transaction.CommitAsync(ct);
+        await db.Entry(offer).ReloadAsync(ct);
     }
 
-    public async Task DeclineAsync(Assignment offer, DeclineReason reason, CancellationToken ct)
+    public Task DeclineAsync(Assignment offer, DeclineReason reason, CancellationToken ct) =>
+        DeclineAsync(offer, ReasonLabel(reason), ct);
+
+    /// <summary>Declines with a reason as staff will read it.</summary>
+    public async Task DeclineAsync(Assignment offer, string reason, CancellationToken ct, DateTime? at = null)
     {
-        await RequireOpenAsync(offer, ct);
-        offer.Status = AssignmentStatus.Declined;
-        offer.DeclineReason = ReasonLabel(reason);
-        offer.RespondedAt = time.UtcNow();
+        await ExpireStaleAsync(ct);
+        if (!await CloseAsync(offer.Id, AssignmentStatus.Declined, reason, at ?? time.UtcNow(), ct))
+            throw ApiException.Conflict(AssignmentExpired, "This offer has closed.", new { assignmentId = offer.Id });
+        await db.Entry(offer).ReloadAsync(ct);
         await AlertStaffAsync(offer, ct);
         await db.SaveChangesAsync(ct);
     }
@@ -130,25 +143,32 @@ public sealed class AssignmentService(AppDbContext db, PickupWorkflow pickups, N
     public async Task<int> ExpireStaleAsync(CancellationToken ct)
     {
         var now = time.UtcNow();
-        var stale = await db.Assignments.Include(a => a.Collector)
-            .Where(a => a.Status == AssignmentStatus.Offered && a.ExpiresAt <= now).ToListAsync(ct);
-        foreach (var offer in stale)
+        var stale = await db.Assignments.AsNoTracking()
+            .Where(a => a.Status == AssignmentStatus.Offered && a.ExpiresAt <= now)
+            .Select(a => new { a.Id, a.ExpiresAt }).ToListAsync(ct);
+        var expired = 0;
+        foreach (var candidate in stale)
         {
-            offer.Status = AssignmentStatus.Expired;
-            offer.RespondedAt = offer.ExpiresAt;
+            // Another request may have expired or answered it in the meantime; only the winner alerts.
+            if (!await CloseAsync(candidate.Id, AssignmentStatus.Expired, null, candidate.ExpiresAt, ct)) continue;
+            var offer = await db.Assignments.Include(a => a.Collector).AsNoTracking().SingleAsync(a => a.Id == candidate.Id, ct);
             await AlertStaffAsync(offer, ct);
+            expired++;
         }
 
-        if (stale.Count > 0) await db.SaveChangesAsync(ct);
-        return stale.Count;
+        if (expired > 0) await db.SaveChangesAsync(ct);
+        return expired;
     }
 
-    private async Task RequireOpenAsync(Assignment offer, CancellationToken ct)
-    {
-        await ExpireStaleAsync(ct);
-        if (offer.Status != AssignmentStatus.Offered)
-            throw ApiException.Conflict(AssignmentExpired, "This offer has closed.", new { assignmentId = offer.Id });
-    }
+    /// <summary>Moves an offer out of <c>offered</c>. False if something else got there first.</summary>
+    private async Task<bool> CloseAsync(string id, AssignmentStatus status, string? reason, DateTime at,
+        CancellationToken ct) =>
+        await db.Assignments
+            .Where(a => a.Id == id && a.Status == AssignmentStatus.Offered)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(a => a.Status, status)
+                .SetProperty(a => a.RespondedAt, at)
+                .SetProperty(a => a.DeclineReason, a => reason ?? a.DeclineReason), ct) == 1;
 
     private async Task AlertStaffAsync(Assignment offer, CancellationToken ct)
     {

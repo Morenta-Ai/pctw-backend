@@ -170,6 +170,9 @@ public sealed class PickupWorkflow(AppDbContext db, RateBook rates, Notification
     public async Task AcceptAsync(string pickupId, Collector collector, CancellationToken ct)
     {
         var now = time.UtcNow();
+        // The claim, its timeline event and withdrawing other offers commit together, or not at all.
+        var own = db.Database.CurrentTransaction is null ? await db.Database.BeginTransactionAsync(ct) : null;
+        await using var _ = own;
         var taken = await db.Pickups
             .Where(p => p.Id == pickupId && p.Status == PickupStatus.Pending)
             .ExecuteUpdateAsync(s => s
@@ -194,6 +197,7 @@ public sealed class PickupWorkflow(AppDbContext db, RateBook rates, Notification
         });
         await WithdrawOpenOffersAsync(pickupId, ct);
         await db.SaveChangesAsync(ct);
+        if (own is not null) await own.CommitAsync(ct);
     }
 
     /// <summary>The collector sets off. The customer is told they're coming.</summary>
@@ -340,14 +344,9 @@ public sealed class PickupWorkflow(AppDbContext db, RateBook rates, Notification
     public async Task WithdrawOpenOffersAsync(string pickupId, CancellationToken ct)
     {
         var now = time.UtcNow();
-        var open = await db.Assignments.Where(a => a.PickupId == pickupId && a.Status == AssignmentStatus.Offered)
-            .ToListAsync(ct);
-        // An offer being accepted in this same unit of work is already tracked as accepted: leave it alone.
-        foreach (var offer in open.Where(o => o.Status == AssignmentStatus.Offered))
-        {
-            offer.Status = AssignmentStatus.Withdrawn;
-            offer.RespondedAt = now;
-        }
+        await db.Assignments.Where(a => a.PickupId == pickupId && a.Status == AssignmentStatus.Offered)
+            .ExecuteUpdateAsync(s => s.SetProperty(a => a.Status, AssignmentStatus.Withdrawn)
+                .SetProperty(a => a.RespondedAt, now), ct);
     }
 
     /// <summary>Is any active, online collector within their radius of this point?</summary>

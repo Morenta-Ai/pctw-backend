@@ -1433,9 +1433,8 @@ namespace Rethread.Api.Data.Migrations
                     b.HasKey("Id")
                         .HasName("pk_rate_sets");
 
-                    b.HasIndex("EffectiveFrom")
-                        .IsUnique()
-                        .HasDatabaseName("ix_rate_sets_effective_from");
+                    b.HasIndex("EffectiveFrom", "CreatedAt")
+                        .HasDatabaseName("ix_rate_sets_effective_from_created_at");
 
                     b.ToTable("rate_sets", (string)null);
                 });

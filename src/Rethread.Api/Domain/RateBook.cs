@@ -15,7 +15,7 @@ public sealed class RateBook(AppDbContext db, TimeProvider time)
     {
         var today = time.Today();
         return await db.RateSets.Where(r => r.EffectiveFrom <= today)
-                   .OrderByDescending(r => r.EffectiveFrom).FirstOrDefaultAsync(ct)
+                   .OrderByDescending(r => r.EffectiveFrom).ThenByDescending(r => r.CreatedAt).FirstOrDefaultAsync(ct)
                ?? throw new InvalidOperationException("No rate set is in force. Seed the rates first.");
     }
 
@@ -23,11 +23,14 @@ public sealed class RateBook(AppDbContext db, TimeProvider time)
     {
         var today = time.Today();
         return await db.RateSets.Where(r => r.EffectiveFrom > today)
-            .OrderBy(r => r.EffectiveFrom).FirstOrDefaultAsync(ct);
+            .OrderBy(r => r.EffectiveFrom).ThenByDescending(r => r.CreatedAt).FirstOrDefaultAsync(ct);
     }
 
     /// <summary>Earlier rate sets, newest first, not including the current one.</summary>
-    public async Task<List<RateSet>> HistoryAsync(RateSet current, CancellationToken ct) =>
-        await db.RateSets.Where(r => r.EffectiveFrom < current.EffectiveFrom)
-            .OrderByDescending(r => r.EffectiveFrom).ToListAsync(ct);
+    public async Task<List<RateSet>> HistoryAsync(RateSet current, CancellationToken ct)
+    {
+        var today = time.Today();
+        return await db.RateSets.Where(r => r.EffectiveFrom <= today && r.Id != current.Id)
+            .OrderByDescending(r => r.EffectiveFrom).ThenByDescending(r => r.CreatedAt).ToListAsync(ct);
+    }
 }

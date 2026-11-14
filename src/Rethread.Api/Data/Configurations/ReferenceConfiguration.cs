@@ -26,7 +26,8 @@ public sealed class VoucherBrandConfiguration : IEntityTypeConfiguration<Voucher
 
 public sealed class RateSetConfiguration : IEntityTypeConfiguration<RateSet>
 {
-    public void Configure(EntityTypeBuilder<RateSet> b) => b.HasIndex(x => x.EffectiveFrom).IsUnique();
+    // Not unique: rates can change twice in a day, and the later change wins.
+    public void Configure(EntityTypeBuilder<RateSet> b) => b.HasIndex(x => new { x.EffectiveFrom, x.CreatedAt });
 }
 
 public sealed class ImpactMultiplierConfiguration : IEntityTypeConfiguration<ImpactMultiplier>

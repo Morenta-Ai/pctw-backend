@@ -7,7 +7,9 @@ using Rethread.Api.Data.Entities;
 using Rethread.Api.Data.Seed;
 using Rethread.Api.Features.Admin.Assignments;
 using Rethread.Api.Features.Admin.Auth;
+using Rethread.Api.Features.Admin.Catalogue;
 using Rethread.Api.Features.Admin.DonationProjects;
+using Rethread.Api.Features.Admin.Orders;
 using Rethread.Api.Features.Admin.Redemptions;
 using Rethread.Api.Features.Collector.Assignments;
 using Rethread.Api.Features.Collector.Auth;
@@ -20,8 +22,10 @@ using Rethread.Api.Features.Customer.Addresses;
 using Rethread.Api.Features.Customer.Auth;
 using Rethread.Api.Features.Customer.Family;
 using Rethread.Api.Features.Customer.Notifications;
+using Rethread.Api.Features.Customer.Orders;
 using Rethread.Api.Features.Customer.Pickups;
 using Rethread.Api.Features.Customer.Profile;
+using Rethread.Api.Features.Customer.Shop;
 using Rethread.Api.Features.Customer.Wallet;
 using Scalar.AspNetCore;
 
@@ -67,6 +71,8 @@ public static class RethreadPipeline
         customer.MapCustomerNotifications();
         customer.MapCustomerPickups();
         customer.MapWallet();
+        customer.MapShop();
+        customer.MapCustomerOrders();
 
         var collector = api.MapGroup("/collector").WithTags("Collector app")
             .RequireAuthorization(Policies.Collector)
@@ -86,6 +92,10 @@ public static class RethreadPipeline
         admin.MapAdminAssignments();
         admin.MapAdminRedemptions();
         admin.MapAdminDonationProjects();
+        admin.MapAdminOrders();
+        admin.MapCatalogue();
+
+        app.MapFiles();
 
         return app;
     }

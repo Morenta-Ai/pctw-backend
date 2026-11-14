@@ -181,4 +181,27 @@ public sealed class AssignmentTests(PostgresServer server)
         api.Clock.Advance(TimeSpan.FromSeconds(40));
         Assert.Equal("expired", (await staff.GetJsonAsync($"/api/v1/admin/assignments/{silent.Str("id")}")).Str("status"));
     }
+
+    [Fact]
+    public async Task Concurrent_answers_never_leave_an_offer_and_its_pickup_disagreeing()
+    {
+        await using var api = await TestApi.StartAsync(server, new Dictionary<string, string> { ["Simulation:AutoAnswerOffers"] = "true" });
+        var staff = await api.CallCentreAsync();
+        var free = await OfferAsync(staff, "RT-24830", "col_515");
+        var busy = await OfferAsync(staff, "RT-24844", "col_457");
+        api.Clock.Advance(TimeSpan.FromSeconds(9));
+
+        // The portal polls, the background job runs: many maintenance passes at once.
+        await Task.WhenAll(Enumerable.Range(0, 16).Select(i =>
+            staff.GetAsync($"/api/v1/admin/assignments/{(i % 2 == 0 ? free : busy).Str("id")}")));
+
+        var accepted = await staff.GetJsonAsync($"/api/v1/admin/assignments/{free.Str("id")}");
+        var declined = await staff.GetJsonAsync($"/api/v1/admin/assignments/{busy.Str("id")}");
+        Assert.Equal(("accepted", "declined"), (accepted.Str("status"), declined.Str("status")));
+        var pickups = await api.DbAsync(db => db.Pickups.Where(p => p.Id == "RT-24830" || p.Id == "RT-24844").ToDictionaryAsync(p => p.Id));
+        Assert.Equal((PickupStatus.Assigned, "col_515"), (pickups["RT-24830"].Status, pickups["RT-24830"].CollectorId));
+        Assert.Equal(PickupStatus.Pending, pickups["RT-24844"].Status);
+        Assert.Single(await api.DbAsync(db => db.PickupEvents.Where(e => e.PickupId == "RT-24830" && e.Status == PickupStatus.Assigned).ToListAsync()));
+        Assert.Single(await api.DbAsync(db => db.Notifications.Where(n => n.Id == $"ntf_offerDeclined_{busy.Str("id")}").ToListAsync()));
+    }
 }

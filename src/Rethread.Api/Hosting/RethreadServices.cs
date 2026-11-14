@@ -40,6 +40,7 @@ public static class RethreadServices
         services.AddSingleton<IPasswordHasher<Staff>, PasswordHasher<Staff>>();
         services.AddScoped<RateBook>();
         services.AddScoped<NotificationService>();
+        services.AddScoped<PickupWorkflow>();
         services.AddScoped<DevSeeder>();
         services.AddScoped<RecipientNotifications>();
 

@@ -65,7 +65,7 @@ public sealed class Maintenance(
 /// answers, and anyone else accepts after 8. Off unless <c>Simulation:AutoAnswerOffers</c> is true, and
 /// never in Production.
 /// </summary>
-public sealed class OfferSimulator(AppDbContext db, PickupWorkflow pickups, IConfiguration config,
+public sealed class OfferSimulator(AppDbContext db, AssignmentService assignments, IConfiguration config,
     IHostEnvironment environment, TimeProvider time)
 {
     public bool Enabled => !environment.IsProduction() && config.GetValue<bool>("Simulation:AutoAnswerOffers");
@@ -75,25 +75,24 @@ public sealed class OfferSimulator(AppDbContext db, PickupWorkflow pickups, ICon
         if (!Enabled) return;
         var now = time.UtcNow();
         var open = await db.Assignments.Include(a => a.Collector)
-            .Where(a => a.Status == AssignmentStatus.Offered).ToListAsync(ct);
+            .Where(a => a.Status == AssignmentStatus.Offered && a.ExpiresAt > now).ToListAsync(ct);
         foreach (var offer in open)
         {
             var collector = offer.Collector!;
             if (collector.Code == "COL-0421") continue;
-            var busy = await db.Pickups.AnyAsync(p => p.CollectorId == collector.Id &&
+            // Busy means on another job; the pickup on offer doesn't count.
+            var busy = await db.Pickups.AnyAsync(p => p.CollectorId == collector.Id && p.Id != offer.PickupId &&
                 (p.Status == PickupStatus.Assigned || p.Status == PickupStatus.EnRoute || p.Status == PickupStatus.Arrived), ct);
-            if (busy && now >= offer.OfferedAt.AddSeconds(6))
+            try
             {
-                offer.Status = AssignmentStatus.Declined;
-                offer.DeclineReason = "Already on a job";
-                offer.RespondedAt = offer.OfferedAt.AddSeconds(6);
-                await db.SaveChangesAsync(ct);
+                if (busy && now >= offer.OfferedAt.AddSeconds(6))
+                    await assignments.DeclineAsync(offer, "Already on a job", ct, offer.OfferedAt.AddSeconds(6));
+                else if (!busy && now >= offer.OfferedAt.AddSeconds(8))
+                    await assignments.AcceptAsync(offer, collector, ct);
             }
-            else if (!busy && now >= offer.OfferedAt.AddSeconds(8))
+            catch (ApiException)
             {
-                offer.Status = AssignmentStatus.Accepted;
-                offer.RespondedAt = offer.OfferedAt.AddSeconds(8);
-                await pickups.AcceptAsync(offer.PickupId, collector, ct);
+                // Someone else answered, withdrew or expired it first.
             }
         }
     }

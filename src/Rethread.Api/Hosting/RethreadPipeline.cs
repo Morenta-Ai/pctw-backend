@@ -8,9 +8,16 @@ using Rethread.Api.Data.Seed;
 using Rethread.Api.Features.Admin.Assignments;
 using Rethread.Api.Features.Admin.Auth;
 using Rethread.Api.Features.Admin.Catalogue;
+using Rethread.Api.Features.Admin.Collectors;
+using Rethread.Api.Features.Admin.Customers;
+using Rethread.Api.Features.Admin.Dashboard;
+using Rethread.Api.Features.Admin.Dispatch;
 using Rethread.Api.Features.Admin.DonationProjects;
+using Rethread.Api.Features.Admin.Notifications;
 using Rethread.Api.Features.Admin.Orders;
+using Rethread.Api.Features.Admin.Pickups;
 using Rethread.Api.Features.Admin.Redemptions;
+using Rethread.Api.Features.Admin.Staff;
 using Rethread.Api.Features.Collector.Assignments;
 using Rethread.Api.Features.Collector.Auth;
 using Rethread.Api.Features.Collector.Earnings;
@@ -94,6 +101,13 @@ public static class RethreadPipeline
         admin.MapAdminDonationProjects();
         admin.MapAdminOrders();
         admin.MapCatalogue();
+        admin.MapDashboard();
+        admin.MapAdminPickups();
+        admin.MapDispatch();
+        admin.MapAdminCustomers();
+        admin.MapAdminCollectors();
+        admin.MapStaff();
+        admin.MapStaffNotifications();
 
         app.MapFiles();
 

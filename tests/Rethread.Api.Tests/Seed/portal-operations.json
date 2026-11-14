@@ -1,0 +1,2140 @@
+{
+  "dashboard": {
+    "date": "2026-11-07",
+    "pickupsToday": {
+      "total": 15,
+      "pending": 5,
+      "assigned": 1,
+      "enRoute": 1,
+      "arrived": 1,
+      "collected": 5,
+      "deliveredToHub": 1,
+      "cancelled": 1
+    },
+    "unassignedOverdue": 3,
+    "collectedTodayKg": 48,
+    "customerPayoutsTodayCents": 576000,
+    "collectorPayoutsTodayCents": 192000,
+    "collectors": {
+      "online": 7,
+      "active": 11
+    },
+    "orders": {
+      "open": 5,
+      "placedToday": 3
+    },
+    "daily": [
+      {
+        "date": "2026-10-25",
+        "pickups": 8,
+        "collectedKg": 49.41
+      },
+      {
+        "date": "2026-10-26",
+        "pickups": 7,
+        "collectedKg": 60.86
+      },
+      {
+        "date": "2026-10-27",
+        "pickups": 10,
+        "collectedKg": 105.74
+      },
+      {
+        "date": "2026-10-28",
+        "pickups": 13,
+        "collectedKg": 116.37
+      },
+      {
+        "date": "2026-10-29",
+        "pickups": 7,
+        "collectedKg": 34.42
+      },
+      {
+        "date": "2026-10-30",
+        "pickups": 13,
+        "collectedKg": 113.55
+      },
+      {
+        "date": "2026-10-31",
+        "pickups": 7,
+        "collectedKg": 49.74
+      },
+      {
+        "date": "2026-11-01",
+        "pickups": 7,
+        "collectedKg": 45.27
+      },
+      {
+        "date": "2026-11-02",
+        "pickups": 12,
+        "collectedKg": 86.77
+      },
+      {
+        "date": "2026-11-03",
+        "pickups": 13,
+        "collectedKg": 85.12
+      },
+      {
+        "date": "2026-11-04",
+        "pickups": 6,
+        "collectedKg": 39.75
+      },
+      {
+        "date": "2026-11-05",
+        "pickups": 11,
+        "collectedKg": 65.35
+      },
+      {
+        "date": "2026-11-06",
+        "pickups": 9,
+        "collectedKg": 69.97
+      },
+      {
+        "date": "2026-11-07",
+        "pickups": 15,
+        "collectedKg": 48
+      }
+    ],
+    "recentActivity": [
+      {
+        "id": "act_RT-24844_pending",
+        "type": "pickupRequested",
+        "subjectId": "RT-24844",
+        "summary": "Battaramulla · about 6 kg · booked in the app",
+        "occurredAt": "2026-11-07T05:52:00Z"
+      },
+      {
+        "id": "act_ORD-5134_placed",
+        "type": "orderPlaced",
+        "subjectId": "ORD-5134",
+        "summary": "Dinesh · 2 items · home delivery",
+        "occurredAt": "2026-11-07T05:46:00Z"
+      },
+      {
+        "id": "act_RT-24835_pending",
+        "type": "pickupRequested",
+        "subjectId": "RT-24835",
+        "summary": "Nugegoda · about 3.2 kg · booked in the app",
+        "occurredAt": "2026-11-07T05:40:00Z"
+      },
+      {
+        "id": "act_RT-24830_pending",
+        "type": "pickupRequested",
+        "subjectId": "RT-24830",
+        "summary": "Bambalapitiya · about 12 kg · booked in the app",
+        "occurredAt": "2026-11-07T05:25:00Z"
+      },
+      {
+        "id": "act_RT-24841_pending",
+        "type": "pickupRequested",
+        "subjectId": "RT-24841",
+        "summary": "Rajagiriya · about 9.5 kg · booked by the call centre",
+        "occurredAt": "2026-11-07T05:18:00Z"
+      },
+      {
+        "id": "act_ORD-5133_placed",
+        "type": "orderPlaced",
+        "subjectId": "ORD-5133",
+        "summary": "Shehan · 1 item · click & collect",
+        "occurredAt": "2026-11-07T05:12:00Z"
+      },
+      {
+        "id": "act_RT-24822_pending",
+        "type": "pickupRequested",
+        "subjectId": "RT-24822",
+        "summary": "Wellawatte · about 5.5 kg · booked in the app",
+        "occurredAt": "2026-11-07T05:05:00Z"
+      },
+      {
+        "id": "act_RT-24806_deliveredToHub",
+        "type": "pickupDelivered",
+        "subjectId": "RT-24806",
+        "summary": "Wattala · 9.80 kg at the hub",
+        "occurredAt": "2026-11-07T05:00:00Z"
+      },
+      {
+        "id": "act_RT-24826_assigned",
+        "type": "pickupAssigned",
+        "subjectId": "RT-24826",
+        "summary": "Kotte · Dilshan accepted",
+        "occurredAt": "2026-11-07T04:50:00Z"
+      },
+      {
+        "id": "act_RT-24826_pending",
+        "type": "pickupRequested",
+        "subjectId": "RT-24826",
+        "summary": "Kotte · about 4.4 kg · booked in the app",
+        "occurredAt": "2026-11-07T04:30:00Z"
+      }
+    ]
+  },
+  "counts": {
+    "unreadNotifications": 36,
+    "newOrders": 2,
+    "waitingPickups": 5,
+    "pendingTransfers": 3
+  },
+  "pickups": {
+    "items": [
+      {
+        "id": "RT-24844",
+        "status": "pending",
+        "source": "app",
+        "method": "bulk",
+        "customerName": "Thilini Abeysekara",
+        "area": "Battaramulla",
+        "scheduledDate": "2026-11-07",
+        "slot": "evening",
+        "windowStart": "2026-11-07T10:30:00Z",
+        "windowEnd": "2026-11-07T11:30:00Z",
+        "estimatedKg": 6,
+        "actualWeightKg": null,
+        "collector": null,
+        "createdAt": "2026-11-07T05:52:00Z"
+      },
+      {
+        "id": "RT-24835",
+        "status": "pending",
+        "source": "app",
+        "method": "itemised",
+        "customerName": "Fathima Rinoza",
+        "area": "Nugegoda",
+        "scheduledDate": "2026-11-07",
+        "slot": "afternoon",
+        "windowStart": "2026-11-07T08:30:00Z",
+        "windowEnd": "2026-11-07T09:30:00Z",
+        "estimatedKg": 3.2,
+        "actualWeightKg": null,
+        "collector": null,
+        "createdAt": "2026-11-07T05:40:00Z"
+      },
+      {
+        "id": "RT-24830",
+        "status": "pending",
+        "source": "app",
+        "method": "bulk",
+        "customerName": "Anjali Wijesinghe",
+        "area": "Bambalapitiya",
+        "scheduledDate": "2026-11-07",
+        "slot": "afternoon",
+        "windowStart": "2026-11-07T07:30:00Z",
+        "windowEnd": "2026-11-07T08:30:00Z",
+        "estimatedKg": 12,
+        "actualWeightKg": null,
+        "collector": null,
+        "createdAt": "2026-11-07T05:25:00Z"
+      },
+      {
+        "id": "RT-24841",
+        "status": "pending",
+        "source": "callCentre",
+        "method": "bulk",
+        "customerName": "Kumudu Herath",
+        "area": "Rajagiriya",
+        "scheduledDate": "2026-11-07",
+        "slot": "afternoon",
+        "windowStart": "2026-11-07T09:30:00Z",
+        "windowEnd": "2026-11-07T10:30:00Z",
+        "estimatedKg": 9.5,
+        "actualWeightKg": null,
+        "collector": null,
+        "createdAt": "2026-11-07T05:18:00Z"
+      },
+      {
+        "id": "RT-24822",
+        "status": "pending",
+        "source": "app",
+        "method": "itemised",
+        "customerName": "Mohamed Fazil",
+        "area": "Wellawatte",
+        "scheduledDate": "2026-11-07",
+        "slot": "morning",
+        "windowStart": "2026-11-07T05:30:00Z",
+        "windowEnd": "2026-11-07T06:30:00Z",
+        "estimatedKg": 5.5,
+        "actualWeightKg": null,
+        "collector": null,
+        "createdAt": "2026-11-07T05:05:00Z"
+      },
+      {
+        "id": "RT-24826",
+        "status": "assigned",
+        "source": "app",
+        "method": "itemised",
+        "customerName": "Sanduni Karunaratne",
+        "area": "Kotte",
+        "scheduledDate": "2026-11-07",
+        "slot": "afternoon",
+        "windowStart": "2026-11-07T06:30:00Z",
+        "windowEnd": "2026-11-07T07:30:00Z",
+        "estimatedKg": 4.4,
+        "actualWeightKg": null,
+        "collector": {
+          "id": "col_466",
+          "code": "COL-0466",
+          "name": "Dilshan Fernando"
+        },
+        "createdAt": "2026-11-07T04:30:00Z"
+      },
+      {
+        "id": "RT-24817",
+        "status": "enRoute",
+        "source": "callCentre",
+        "method": "bulk",
+        "customerName": "Nadeesha Perera",
+        "area": "Dehiwala",
+        "scheduledDate": "2026-11-07",
+        "slot": "morning",
+        "windowStart": "2026-11-07T04:30:00Z",
+        "windowEnd": "2026-11-07T05:30:00Z",
+        "estimatedKg": 8,
+        "actualWeightKg": null,
+        "collector": {
+          "id": "col_457",
+          "code": "COL-0457",
+          "name": "Ruwan Silva"
+        },
+        "createdAt": "2026-11-07T03:30:00Z"
+      },
+      {
+        "id": "RT-24819",
+        "status": "arrived",
+        "source": "app",
+        "method": "bulk",
+        "customerName": "Ravi Shankar",
+        "area": "Mount Lavinia",
+        "scheduledDate": "2026-11-07",
+        "slot": "morning",
+        "windowStart": "2026-11-07T04:30:00Z",
+        "windowEnd": "2026-11-07T05:30:00Z",
+        "estimatedKg": 18,
+        "actualWeightKg": null,
+        "collector": {
+          "id": "col_480",
+          "code": "COL-0480",
+          "name": "Nimal Rathnayake"
+        },
+        "createdAt": "2026-11-07T02:40:00Z"
+      },
+      {
+        "id": "RT-24815",
+        "status": "cancelled",
+        "source": "app",
+        "method": "bulk",
+        "customerName": "Ishani Ekanayake",
+        "area": "Bambalapitiya",
+        "scheduledDate": "2026-11-07",
+        "slot": "morning",
+        "windowStart": "2026-11-07T05:30:00Z",
+        "windowEnd": "2026-11-07T06:30:00Z",
+        "estimatedKg": 5,
+        "actualWeightKg": null,
+        "collector": null,
+        "createdAt": "2026-11-07T02:00:00Z"
+      },
+      {
+        "id": "RT-24803",
+        "status": "collected",
+        "source": "app",
+        "method": "bulk",
+        "customerName": "Pradeep Senanayake",
+        "area": "Wattala",
+        "scheduledDate": "2026-11-07",
+        "slot": "morning",
+        "windowStart": "2026-11-07T02:30:00Z",
+        "windowEnd": "2026-11-07T03:30:00Z",
+        "estimatedKg": 7,
+        "actualWeightKg": 7.2,
+        "collector": {
+          "id": "col_457",
+          "code": "COL-0457",
+          "name": "Ruwan Silva"
+        },
+        "createdAt": "2026-11-07T01:40:00Z"
+      },
+      {
+        "id": "RT-24813",
+        "status": "collected",
+        "source": "app",
+        "method": "itemised",
+        "customerName": "Arjun Pillai",
+        "area": "Wellawatte",
+        "scheduledDate": "2026-11-07",
+        "slot": "morning",
+        "windowStart": "2026-11-07T03:30:00Z",
+        "windowEnd": "2026-11-07T04:30:00Z",
+        "estimatedKg": 3,
+        "actualWeightKg": 3.4,
+        "collector": {
+          "id": "col_515",
+          "code": "COL-0515",
+          "name": "Lahiru Gunasekara"
+        },
+        "createdAt": "2026-11-07T01:20:00Z"
+      },
+      {
+        "id": "RT-24811",
+        "status": "collected",
+        "source": "callCentre",
+        "method": "bulk",
+        "customerName": "Malsha Gamage",
+        "area": "Dehiwala",
+        "scheduledDate": "2026-11-07",
+        "slot": "morning",
+        "windowStart": "2026-11-07T03:30:00Z",
+        "windowEnd": "2026-11-07T04:30:00Z",
+        "estimatedKg": 15,
+        "actualWeightKg": 14.3,
+        "collector": {
+          "id": "col_388",
+          "code": "COL-0388",
+          "name": "Mohamed Rizwan"
+        },
+        "createdAt": "2026-11-07T00:40:00Z"
+      },
+      {
+        "id": "RT-24796",
+        "status": "collected",
+        "source": "app",
+        "method": "bulk",
+        "customerName": "Hasini Jayawardena",
+        "area": "Maharagama",
+        "scheduledDate": "2026-11-07",
+        "slot": "morning",
+        "windowStart": "2026-11-07T02:30:00Z",
+        "windowEnd": "2026-11-07T03:30:00Z",
+        "estimatedKg": 7,
+        "actualWeightKg": 7.1,
+        "collector": {
+          "id": "col_457",
+          "code": "COL-0457",
+          "name": "Ruwan Silva"
+        },
+        "createdAt": "2026-11-07T00:40:00Z"
+      },
+      {
+        "id": "RT-24790",
+        "status": "collected",
+        "source": "app",
+        "method": "bulk",
+        "customerName": "Dinesh Mendis",
+        "area": "Borella",
+        "scheduledDate": "2026-11-07",
+        "slot": "morning",
+        "windowStart": "2026-11-07T02:30:00Z",
+        "windowEnd": "2026-11-07T03:30:00Z",
+        "estimatedKg": 6,
+        "actualWeightKg": 6.2,
+        "collector": {
+          "id": "col_457",
+          "code": "COL-0457",
+          "name": "Ruwan Silva"
+        },
+        "createdAt": "2026-11-06T23:40:00Z"
+      },
+      {
+        "id": "RT-24806",
+        "status": "deliveredToHub",
+        "source": "app",
+        "method": "bulk",
+        "customerName": "Pradeep Senanayake",
+        "area": "Wattala",
+        "scheduledDate": "2026-11-07",
+        "slot": "morning",
+        "windowStart": "2026-11-07T02:30:00Z",
+        "windowEnd": "2026-11-07T03:30:00Z",
+        "estimatedKg": 10,
+        "actualWeightKg": 9.8,
+        "collector": {
+          "id": "col_312",
+          "code": "COL-0312",
+          "name": "Chaminda Perera"
+        },
+        "createdAt": "2026-11-06T23:20:00Z"
+      },
+      {
+        "id": "RT-24786",
+        "status": "deliveredToHub",
+        "source": "app",
+        "method": "itemised",
+        "customerName": "Nadeesha Perera",
+        "area": "Dehiwala",
+        "scheduledDate": "2026-11-06",
+        "slot": "evening",
+        "windowStart": "2026-11-06T10:30:00Z",
+        "windowEnd": "2026-11-06T11:30:00Z",
+        "estimatedKg": 2,
+        "actualWeightKg": 2.02,
+        "collector": {
+          "id": "col_388",
+          "code": "COL-0388",
+          "name": "Mohamed Rizwan"
+        },
+        "createdAt": "2026-11-06T08:02:00Z"
+      },
+      {
+        "id": "RT-24781",
+        "status": "deliveredToHub",
+        "source": "callCentre",
+        "method": "bulk",
+        "customerName": "Nadeesha Perera",
+        "area": "Dehiwala",
+        "scheduledDate": "2026-11-06",
+        "slot": "afternoon",
+        "windowStart": "2026-11-06T08:30:00Z",
+        "windowEnd": "2026-11-06T09:30:00Z",
+        "estimatedKg": 10,
+        "actualWeightKg": 9.75,
+        "collector": {
+          "id": "col_473",
+          "code": "COL-0473",
+          "name": "Tharindu Wickramasinghe"
+        },
+        "createdAt": "2026-11-06T06:07:00Z"
+      },
+      {
+        "id": "RT-24789",
+        "status": "collected",
+        "source": "app",
+        "method": "itemised",
+        "customerName": "Fathima Rinoza",
+        "area": "Nugegoda",
+        "scheduledDate": "2026-11-06",
+        "slot": "afternoon",
+        "windowStart": "2026-11-06T08:30:00Z",
+        "windowEnd": "2026-11-06T09:30:00Z",
+        "estimatedKg": 9,
+        "actualWeightKg": 8.78,
+        "collector": {
+          "id": "col_502",
+          "code": "COL-0502",
+          "name": "Priyantha Bandara"
+        },
+        "createdAt": "2026-11-06T05:46:00Z"
+      },
+      {
+        "id": "RT-24787",
+        "status": "deliveredToHub",
+        "source": "app",
+        "method": "itemised",
+        "customerName": "Gayan Liyanage",
+        "area": "Rajagiriya",
+        "scheduledDate": "2026-11-06",
+        "slot": "afternoon",
+        "windowStart": "2026-11-06T07:30:00Z",
+        "windowEnd": "2026-11-06T08:30:00Z",
+        "estimatedKg": 9,
+        "actualWeightKg": 7.65,
+        "collector": {
+          "id": "col_466",
+          "code": "COL-0466",
+          "name": "Dilshan Fernando"
+        },
+        "createdAt": "2026-11-06T05:09:00Z"
+      },
+      {
+        "id": "RT-24785",
+        "status": "deliveredToHub",
+        "source": "app",
+        "method": "bulk",
+        "customerName": "Thilini Abeysekara",
+        "area": "Battaramulla",
+        "scheduledDate": "2026-11-06",
+        "slot": "afternoon",
+        "windowStart": "2026-11-06T07:30:00Z",
+        "windowEnd": "2026-11-06T08:30:00Z",
+        "estimatedKg": 16,
+        "actualWeightKg": 14.96,
+        "collector": {
+          "id": "col_421",
+          "code": "COL-0421",
+          "name": "Saman Kumara"
+        },
+        "createdAt": "2026-11-06T05:09:00Z"
+      },
+      {
+        "id": "RT-24784",
+        "status": "cancelled",
+        "source": "app",
+        "method": "bulk",
+        "customerName": "Dinesh Mendis",
+        "area": "Borella",
+        "scheduledDate": "2026-11-06",
+        "slot": "afternoon",
+        "windowStart": "2026-11-06T06:30:00Z",
+        "windowEnd": "2026-11-06T07:30:00Z",
+        "estimatedKg": 6,
+        "actualWeightKg": null,
+        "collector": null,
+        "createdAt": "2026-11-06T03:57:00Z"
+      },
+      {
+        "id": "RT-24782",
+        "status": "collected",
+        "source": "callCentre",
+        "method": "bulk",
+        "customerName": "Dinesh Mendis",
+        "area": "Borella",
+        "scheduledDate": "2026-11-06",
+        "slot": "morning",
+        "windowStart": "2026-11-06T05:30:00Z",
+        "windowEnd": "2026-11-06T06:30:00Z",
+        "estimatedKg": 4,
+        "actualWeightKg": 3.49,
+        "collector": {
+          "id": "col_312",
+          "code": "COL-0312",
+          "name": "Chaminda Perera"
+        },
+        "createdAt": "2026-11-06T03:12:00Z"
+      },
+      {
+        "id": "RT-24783",
+        "status": "deliveredToHub",
+        "source": "app",
+        "method": "bulk",
+        "customerName": "Fathima Rinoza",
+        "area": "Nugegoda",
+        "scheduledDate": "2026-11-06",
+        "slot": "morning",
+        "windowStart": "2026-11-06T05:30:00Z",
+        "windowEnd": "2026-11-06T06:30:00Z",
+        "estimatedKg": 11,
+        "actualWeightKg": 9.74,
+        "collector": {
+          "id": "col_515",
+          "code": "COL-0515",
+          "name": "Lahiru Gunasekara"
+        },
+        "createdAt": "2026-11-06T02:36:00Z"
+      },
+      {
+        "id": "RT-24788",
+        "status": "deliveredToHub",
+        "source": "app",
+        "method": "bulk",
+        "customerName": "Anjali Wijesinghe",
+        "area": "Bambalapitiya",
+        "scheduledDate": "2026-11-06",
+        "slot": "morning",
+        "windowStart": "2026-11-06T02:30:00Z",
+        "windowEnd": "2026-11-06T03:30:00Z",
+        "estimatedKg": 15,
+        "actualWeightKg": 13.58,
+        "collector": {
+          "id": "col_480",
+          "code": "COL-0480",
+          "name": "Nimal Rathnayake"
+        },
+        "createdAt": "2026-11-06T00:45:00Z"
+      },
+      {
+        "id": "RT-24779",
+        "status": "deliveredToHub",
+        "source": "app",
+        "method": "bulk",
+        "customerName": "Mohamed Fazil",
+        "area": "Wellawatte",
+        "scheduledDate": "2026-11-05",
+        "slot": "evening",
+        "windowStart": "2026-11-05T11:30:00Z",
+        "windowEnd": "2026-11-05T12:30:00Z",
+        "estimatedKg": 9,
+        "actualWeightKg": 8.73,
+        "collector": {
+          "id": "col_515",
+          "code": "COL-0515",
+          "name": "Lahiru Gunasekara"
+        },
+        "createdAt": "2026-11-05T08:47:00Z"
+      }
+    ],
+    "page": 1,
+    "pageSize": 25,
+    "totalCount": 138
+  },
+  "pickupDetail": {
+    "id": "RT-24817",
+    "status": "enRoute",
+    "source": "callCentre",
+    "method": "bulk",
+    "customer": {
+      "id": "cus_1",
+      "name": "Nadeesha Perera",
+      "mobile": "+94764821190"
+    },
+    "area": "Dehiwala",
+    "address": "151/3 Park Avenue, Dehiwala",
+    "latitude": 6.8512120086468284,
+    "longitude": 79.86096531784581,
+    "scheduledDate": "2026-11-07",
+    "slot": "morning",
+    "windowStart": "2026-11-07T04:30:00Z",
+    "windowEnd": "2026-11-07T05:30:00Z",
+    "estimatedKg": 8,
+    "itemCount": null,
+    "bagCount": 3,
+    "actualWeightKg": null,
+    "note": "Bags are next to the side gate. Please ring twice — gate code 1144.",
+    "items": [
+      {
+        "name": "T-shirts & shirts",
+        "quantity": null,
+        "size": null,
+        "condition": "good"
+      },
+      {
+        "name": "Trousers & denim",
+        "quantity": null,
+        "size": null,
+        "condition": "fair"
+      },
+      {
+        "name": "Bedsheets & towels",
+        "quantity": null,
+        "size": null,
+        "condition": "worn"
+      }
+    ],
+    "collector": {
+      "id": "col_457",
+      "code": "COL-0457",
+      "name": "Ruwan Silva",
+      "mobile": "+94771234567",
+      "vehiclePlate": "WP ABC-1234"
+    },
+    "customerRatePerKgCents": 12000,
+    "collectorRatePerKgCents": 4000,
+    "customerPayoutCents": null,
+    "collectorPayoutCents": null,
+    "hub": null,
+    "cancelReason": null,
+    "createdAt": "2026-11-07T03:30:00Z",
+    "timeline": [
+      {
+        "status": "pending",
+        "occurredAt": "2026-11-07T03:30:00Z",
+        "actor": "Call centre"
+      },
+      {
+        "status": "assigned",
+        "occurredAt": "2026-11-07T04:00:00Z",
+        "actor": "Ruwan Silva"
+      },
+      {
+        "status": "enRoute",
+        "occurredAt": "2026-11-07T05:48:00Z",
+        "actor": "Ruwan Silva"
+      }
+    ]
+  },
+  "dispatch": {
+    "generatedAt": "2026-11-07T06:00:00Z",
+    "collectors": [
+      {
+        "id": "col_457",
+        "code": "COL-0457",
+        "name": "Ruwan Silva",
+        "mobile": "+94771234567",
+        "online": true,
+        "latitude": 6.85498,
+        "longitude": 79.86563,
+        "lastSeenAt": "2026-11-07T06:00:00Z",
+        "area": "Dehiwala",
+        "vehicle": {
+          "type": "threeWheeler",
+          "plate": "WP ABC-1234",
+          "capacityKg": 120
+        },
+        "loadKg": 20.5,
+        "activePickupId": "RT-24817"
+      },
+      {
+        "id": "col_312",
+        "code": "COL-0312",
+        "name": "Chaminda Perera",
+        "mobile": "+94771242486",
+        "online": true,
+        "latitude": 6.86939,
+        "longitude": 79.87125,
+        "lastSeenAt": "2026-11-07T05:59:53Z",
+        "area": "Wellawatte",
+        "vehicle": {
+          "type": "threeWheeler",
+          "plate": "WP QA-4521",
+          "capacityKg": 120
+        },
+        "loadKg": 3.49,
+        "activePickupId": null
+      },
+      {
+        "id": "col_388",
+        "code": "COL-0388",
+        "name": "Mohamed Rizwan",
+        "mobile": "+94771250405",
+        "online": true,
+        "latitude": 6.89849,
+        "longitude": 79.86197,
+        "lastSeenAt": "2026-11-07T05:59:46Z",
+        "area": "Bambalapitiya",
+        "vehicle": {
+          "type": "van",
+          "plate": "WP PH-2290",
+          "capacityKg": 400
+        },
+        "loadKg": 14.3,
+        "activePickupId": null
+      },
+      {
+        "id": "col_421",
+        "code": "COL-0421",
+        "name": "Saman Kumara",
+        "mobile": "+94771258324",
+        "online": true,
+        "latitude": 6.85632,
+        "longitude": 79.90886,
+        "lastSeenAt": "2026-11-07T05:59:39Z",
+        "area": "Nugegoda",
+        "vehicle": {
+          "type": "motorbike",
+          "plate": "WP BGT-7731",
+          "capacityKg": 40
+        },
+        "loadKg": 0,
+        "activePickupId": null
+      },
+      {
+        "id": "col_466",
+        "code": "COL-0466",
+        "name": "Dilshan Fernando",
+        "mobile": "+94771266243",
+        "online": true,
+        "latitude": 6.90691,
+        "longitude": 79.9037,
+        "lastSeenAt": "2026-11-07T05:59:32Z",
+        "area": "Rajagiriya",
+        "vehicle": {
+          "type": "threeWheeler",
+          "plate": "WP AAK-5562",
+          "capacityKg": 120
+        },
+        "loadKg": 0,
+        "activePickupId": "RT-24826"
+      },
+      {
+        "id": "col_473",
+        "code": "COL-0473",
+        "name": "Tharindu Wickramasinghe",
+        "mobile": "+94771274162",
+        "online": false,
+        "latitude": 6.90374,
+        "longitude": 79.92386,
+        "lastSeenAt": "2026-11-06T22:02:00Z",
+        "area": "Battaramulla",
+        "vehicle": {
+          "type": "threeWheeler",
+          "plate": "WP ABJ-1180",
+          "capacityKg": 120
+        },
+        "loadKg": 0,
+        "activePickupId": null
+      },
+      {
+        "id": "col_480",
+        "code": "COL-0480",
+        "name": "Nimal Rathnayake",
+        "mobile": "+94771282081",
+        "online": true,
+        "latitude": 6.83789,
+        "longitude": 79.8697,
+        "lastSeenAt": "2026-11-07T05:59:48Z",
+        "area": "Mount Lavinia",
+        "vehicle": {
+          "type": "lorry",
+          "plate": "WP LH-9034",
+          "capacityKg": 1000
+        },
+        "loadKg": 0,
+        "activePickupId": "RT-24819"
+      },
+      {
+        "id": "col_502",
+        "code": "COL-0502",
+        "name": "Priyantha Bandara",
+        "mobile": "+94771290000",
+        "online": false,
+        "latitude": 6.88617,
+        "longitude": 79.91125,
+        "lastSeenAt": "2026-11-06T10:06:00Z",
+        "area": "Kotte",
+        "vehicle": {
+          "type": "threeWheeler",
+          "plate": "WP AAQ-3317",
+          "capacityKg": 120
+        },
+        "loadKg": 8.78,
+        "activePickupId": null
+      },
+      {
+        "id": "col_515",
+        "code": "COL-0515",
+        "name": "Lahiru Gunasekara",
+        "mobile": "+94771297919",
+        "online": true,
+        "latitude": 6.91394,
+        "longitude": 79.87664,
+        "lastSeenAt": "2026-11-07T05:59:34Z",
+        "area": "Borella",
+        "vehicle": {
+          "type": "motorbike",
+          "plate": "WP BJK-6620",
+          "capacityKg": 40
+        },
+        "loadKg": 3.4,
+        "activePickupId": null
+      },
+      {
+        "id": "col_528",
+        "code": "COL-0528",
+        "name": "Asanka de Silva",
+        "mobile": "+94771305838",
+        "online": false,
+        "latitude": 6.8454,
+        "longitude": 79.92847,
+        "lastSeenAt": "2026-11-06T17:21:00Z",
+        "area": "Maharagama",
+        "vehicle": {
+          "type": "threeWheeler",
+          "plate": "WP ABP-2245",
+          "capacityKg": 120
+        },
+        "loadKg": 0,
+        "activePickupId": null
+      },
+      {
+        "id": "col_533",
+        "code": "COL-0533",
+        "name": "Kavindu Jayasuriya",
+        "mobile": "+94771313757",
+        "online": false,
+        "latitude": 6.90046,
+        "longitude": 79.84431,
+        "lastSeenAt": "2026-11-06T12:38:00Z",
+        "area": "Kollupitiya",
+        "vehicle": {
+          "type": "threeWheeler",
+          "plate": "WP ACD-8891",
+          "capacityKg": 120
+        },
+        "loadKg": 0,
+        "activePickupId": null
+      }
+    ],
+    "pickups": [
+      {
+        "id": "RT-24817",
+        "status": "enRoute",
+        "source": "callCentre",
+        "customerName": "Nadeesha Perera",
+        "area": "Dehiwala",
+        "latitude": 6.8512120086468284,
+        "longitude": 79.86096531784581,
+        "estimatedKg": 8,
+        "windowStart": "2026-11-07T04:30:00Z",
+        "windowEnd": "2026-11-07T05:30:00Z",
+        "createdAt": "2026-11-07T03:30:00Z",
+        "collectorId": "col_457",
+        "offer": null
+      },
+      {
+        "id": "RT-24822",
+        "status": "pending",
+        "source": "app",
+        "customerName": "Mohamed Fazil",
+        "area": "Wellawatte",
+        "latitude": 6.873512622769503,
+        "longitude": 79.85855049990994,
+        "estimatedKg": 5.5,
+        "windowStart": "2026-11-07T05:30:00Z",
+        "windowEnd": "2026-11-07T06:30:00Z",
+        "createdAt": "2026-11-07T05:05:00Z",
+        "collectorId": null,
+        "offer": null
+      },
+      {
+        "id": "RT-24830",
+        "status": "pending",
+        "source": "app",
+        "customerName": "Anjali Wijesinghe",
+        "area": "Bambalapitiya",
+        "latitude": 6.892367043873762,
+        "longitude": 79.85989726497415,
+        "estimatedKg": 12,
+        "windowStart": "2026-11-07T07:30:00Z",
+        "windowEnd": "2026-11-07T08:30:00Z",
+        "createdAt": "2026-11-07T05:25:00Z",
+        "collectorId": null,
+        "offer": null
+      },
+      {
+        "id": "RT-24835",
+        "status": "pending",
+        "source": "app",
+        "customerName": "Fathima Rinoza",
+        "area": "Nugegoda",
+        "latitude": 6.8660710915679575,
+        "longitude": 79.8953613070087,
+        "estimatedKg": 3.2,
+        "windowStart": "2026-11-07T08:30:00Z",
+        "windowEnd": "2026-11-07T09:30:00Z",
+        "createdAt": "2026-11-07T05:40:00Z",
+        "collectorId": null,
+        "offer": null
+      },
+      {
+        "id": "RT-24841",
+        "status": "pending",
+        "source": "callCentre",
+        "customerName": "Kumudu Herath",
+        "area": "Rajagiriya",
+        "latitude": 6.914763106059376,
+        "longitude": 79.8906380117403,
+        "estimatedKg": 9.5,
+        "windowStart": "2026-11-07T09:30:00Z",
+        "windowEnd": "2026-11-07T10:30:00Z",
+        "createdAt": "2026-11-07T05:18:00Z",
+        "collectorId": null,
+        "offer": null
+      },
+      {
+        "id": "RT-24844",
+        "status": "pending",
+        "source": "app",
+        "customerName": "Thilini Abeysekara",
+        "area": "Battaramulla",
+        "latitude": 6.901956546044443,
+        "longitude": 79.91498859328172,
+        "estimatedKg": 6,
+        "windowStart": "2026-11-07T10:30:00Z",
+        "windowEnd": "2026-11-07T11:30:00Z",
+        "createdAt": "2026-11-07T05:52:00Z",
+        "collectorId": null,
+        "offer": null
+      },
+      {
+        "id": "RT-24826",
+        "status": "assigned",
+        "source": "app",
+        "customerName": "Sanduni Karunaratne",
+        "area": "Kotte",
+        "latitude": 6.8889818354772405,
+        "longitude": 79.91501193072884,
+        "estimatedKg": 4.4,
+        "windowStart": "2026-11-07T06:30:00Z",
+        "windowEnd": "2026-11-07T07:30:00Z",
+        "createdAt": "2026-11-07T04:30:00Z",
+        "collectorId": "col_466",
+        "offer": null
+      },
+      {
+        "id": "RT-24819",
+        "status": "arrived",
+        "source": "app",
+        "customerName": "Ravi Shankar",
+        "area": "Mount Lavinia",
+        "latitude": 6.837891983377981,
+        "longitude": 79.8696973515232,
+        "estimatedKg": 18,
+        "windowStart": "2026-11-07T04:30:00Z",
+        "windowEnd": "2026-11-07T05:30:00Z",
+        "createdAt": "2026-11-07T02:40:00Z",
+        "collectorId": "col_480",
+        "offer": null
+      }
+    ],
+    "hubs": [
+      {
+        "id": "hub_plg",
+        "code": "PLG",
+        "name": "Central Hub — Peliyagoda",
+        "latitude": 6.9622,
+        "longitude": 79.8829
+      },
+      {
+        "id": "hub_mrt",
+        "code": "MRT",
+        "name": "South Hub — Moratuwa",
+        "latitude": 6.7733,
+        "longitude": 79.8826
+      }
+    ]
+  },
+  "customers": {
+    "items": [
+      {
+        "id": "cus_1",
+        "name": "Nadeesha Perera",
+        "mobile": "+94764821190",
+        "email": null,
+        "area": "Dehiwala",
+        "status": "active",
+        "joinedAt": "2026-10-08T06:00:00Z",
+        "pickupCount": 8,
+        "collectedKg": 57.73,
+        "walletBalanceCents": 642760
+      },
+      {
+        "id": "cus_8",
+        "name": "Ravi Shankar",
+        "mobile": "+94764846187",
+        "email": null,
+        "area": "Mount Lavinia",
+        "status": "active",
+        "joinedAt": "2026-10-03T06:00:00Z",
+        "pickupCount": 4,
+        "collectedKg": 25.23,
+        "walletBalanceCents": 302760
+      },
+      {
+        "id": "cus_4",
+        "name": "Roshan Dias",
+        "mobile": "+94764831903",
+        "email": null,
+        "area": "Kollupitiya",
+        "status": "active",
+        "joinedAt": "2026-09-30T06:00:00Z",
+        "pickupCount": 7,
+        "collectedKg": 49.41,
+        "walletBalanceCents": 592920
+      },
+      {
+        "id": "cus_2",
+        "name": "Mohamed Fazil",
+        "mobile": "+94764824761",
+        "email": null,
+        "area": "Wellawatte",
+        "status": "active",
+        "joinedAt": "2026-09-19T06:00:00Z",
+        "pickupCount": 3,
+        "collectedKg": 30.8,
+        "walletBalanceCents": 369600
+      },
+      {
+        "id": "cus_16",
+        "name": "Shehan Weerasinghe",
+        "mobile": "+94764874755",
+        "email": null,
+        "area": "Kollupitiya",
+        "status": "active",
+        "joinedAt": "2026-09-02T06:00:00Z",
+        "pickupCount": 7,
+        "collectedKg": 50.35,
+        "walletBalanceCents": 604200
+      },
+      {
+        "id": "cus_14",
+        "name": "Arjun Pillai",
+        "mobile": "+94764867613",
+        "email": "arjun.pillai@example.lk",
+        "area": "Wellawatte",
+        "status": "active",
+        "joinedAt": "2026-08-31T06:00:00Z",
+        "pickupCount": 7,
+        "collectedKg": 46.47,
+        "walletBalanceCents": 557640
+      },
+      {
+        "id": "cus_19",
+        "name": "Ayesha Cassim",
+        "mobile": "+94764885468",
+        "email": "ayesha.cassim@example.lk",
+        "area": "Battaramulla",
+        "status": "active",
+        "joinedAt": "2026-08-28T06:00:00Z",
+        "pickupCount": 5,
+        "collectedKg": 35.75,
+        "walletBalanceCents": 429000
+      },
+      {
+        "id": "cus_12",
+        "name": "Pradeep Senanayake",
+        "mobile": "+94764860471",
+        "email": "pradeep.senanayake@example.lk",
+        "area": "Wattala",
+        "status": "active",
+        "joinedAt": "2026-07-20T06:00:00Z",
+        "pickupCount": 7,
+        "collectedKg": 46.44,
+        "walletBalanceCents": 557280
+      },
+      {
+        "id": "cus_9",
+        "name": "Sanduni Karunaratne",
+        "mobile": "+94764849758",
+        "email": "sanduni.karunaratne@example.lk",
+        "area": "Kotte",
+        "status": "active",
+        "joinedAt": "2026-06-09T06:00:00Z",
+        "pickupCount": 5,
+        "collectedKg": 31.41,
+        "walletBalanceCents": 376920
+      },
+      {
+        "id": "cus_3",
+        "name": "Anjali Wijesinghe",
+        "mobile": "+94764828332",
+        "email": "anjali.wijesinghe@example.lk",
+        "area": "Bambalapitiya",
+        "status": "active",
+        "joinedAt": "2026-05-18T06:00:00Z",
+        "pickupCount": 8,
+        "collectedKg": 71.31,
+        "walletBalanceCents": 655720
+      },
+      {
+        "id": "cus_6",
+        "name": "Kumudu Herath",
+        "mobile": "+94764839045",
+        "email": "kumudu.herath@example.lk",
+        "area": "Rajagiriya",
+        "status": "active",
+        "joinedAt": "2026-05-16T06:00:00Z",
+        "pickupCount": 6,
+        "collectedKg": 63.44,
+        "walletBalanceCents": 586280
+      },
+      {
+        "id": "cus_10",
+        "name": "Dinesh Mendis",
+        "mobile": "+94764853329",
+        "email": "dinesh.mendis@example.lk",
+        "area": "Borella",
+        "status": "active",
+        "joinedAt": "2026-05-11T06:00:00Z",
+        "pickupCount": 3,
+        "collectedKg": 15.33,
+        "walletBalanceCents": 183960
+      },
+      {
+        "id": "cus_11",
+        "name": "Hasini Jayawardena",
+        "mobile": "+94764856900",
+        "email": "hasini.jayawardena@example.lk",
+        "area": "Maharagama",
+        "status": "active",
+        "joinedAt": "2026-04-11T06:00:00Z",
+        "pickupCount": 7,
+        "collectedKg": 61.3,
+        "walletBalanceCents": 685600
+      },
+      {
+        "id": "cus_15",
+        "name": "Ishani Ekanayake",
+        "mobile": "+94764871184",
+        "email": null,
+        "area": "Bambalapitiya",
+        "status": "active",
+        "joinedAt": "2026-04-05T06:00:00Z",
+        "pickupCount": 8,
+        "collectedKg": 62.26,
+        "walletBalanceCents": 577120
+      },
+      {
+        "id": "cus_18",
+        "name": "Gayan Liyanage",
+        "mobile": "+94764881897",
+        "email": null,
+        "area": "Rajagiriya",
+        "status": "suspended",
+        "joinedAt": "2026-03-31T06:00:00Z",
+        "pickupCount": 8,
+        "collectedKg": 71.29,
+        "walletBalanceCents": 855480
+      },
+      {
+        "id": "cus_13",
+        "name": "Malsha Gamage",
+        "mobile": "+94764864042",
+        "email": "malsha.gamage@example.lk",
+        "area": "Dehiwala",
+        "status": "active",
+        "joinedAt": "2026-03-11T06:00:00Z",
+        "pickupCount": 4,
+        "collectedKg": 52.84,
+        "walletBalanceCents": 634080
+      },
+      {
+        "id": "cus_5",
+        "name": "Fathima Rinoza",
+        "mobile": "+94764835474",
+        "email": "fathima.rinoza@example.lk",
+        "area": "Nugegoda",
+        "status": "active",
+        "joinedAt": "2026-02-11T06:00:00Z",
+        "pickupCount": 6,
+        "collectedKg": 53.74,
+        "walletBalanceCents": 619880
+      },
+      {
+        "id": "cus_17",
+        "name": "Nirosha Samarasinghe",
+        "mobile": "+94764878326",
+        "email": null,
+        "area": "Nugegoda",
+        "status": "active",
+        "joinedAt": "2026-01-25T06:00:00Z",
+        "pickupCount": 5,
+        "collectedKg": 51.43,
+        "walletBalanceCents": 617160
+      },
+      {
+        "id": "cus_7",
+        "name": "Thilini Abeysekara",
+        "mobile": "+94764842616",
+        "email": "thilini.abeysekara@example.lk",
+        "area": "Battaramulla",
+        "status": "active",
+        "joinedAt": "2026-01-02T06:00:00Z",
+        "pickupCount": 3,
+        "collectedKg": 34.85,
+        "walletBalanceCents": 418200
+      },
+      {
+        "id": "cus_20",
+        "name": "Chathura Wanigasekara",
+        "mobile": "+94764889039",
+        "email": "chathura.wanigasekara@example.lk",
+        "area": "Mount Lavinia",
+        "status": "active",
+        "joinedAt": "2025-12-11T06:00:00Z",
+        "pickupCount": 6,
+        "collectedKg": 58.94,
+        "walletBalanceCents": 707280
+      }
+    ],
+    "page": 1,
+    "pageSize": 25,
+    "totalCount": 20
+  },
+  "customerDetail": {
+    "id": "cus_1",
+    "name": "Nadeesha Perera",
+    "mobile": "+94764821190",
+    "email": null,
+    "area": "Dehiwala",
+    "status": "active",
+    "joinedAt": "2026-10-08T06:00:00Z",
+    "pickupCount": 8,
+    "collectedKg": 57.73,
+    "walletBalanceCents": 642760,
+    "address": "151/3 Park Avenue, Dehiwala",
+    "familyMemberCount": 1,
+    "earnedCents": 692760,
+    "recentPickups": [
+      {
+        "id": "RT-24817",
+        "status": "enRoute",
+        "scheduledDate": "2026-11-07",
+        "estimatedKg": 8,
+        "actualWeightKg": null,
+        "customerPayoutCents": null
+      },
+      {
+        "id": "RT-24786",
+        "status": "deliveredToHub",
+        "scheduledDate": "2026-11-06",
+        "estimatedKg": 2,
+        "actualWeightKg": 2.02,
+        "customerPayoutCents": 24240
+      },
+      {
+        "id": "RT-24781",
+        "status": "deliveredToHub",
+        "scheduledDate": "2026-11-06",
+        "estimatedKg": 10,
+        "actualWeightKg": 9.75,
+        "customerPayoutCents": 117000
+      },
+      {
+        "id": "RT-24766",
+        "status": "cancelled",
+        "scheduledDate": "2026-11-04",
+        "estimatedKg": 6,
+        "actualWeightKg": null,
+        "customerPayoutCents": null
+      },
+      {
+        "id": "RT-24741",
+        "status": "deliveredToHub",
+        "scheduledDate": "2026-11-02",
+        "estimatedKg": 5,
+        "actualWeightKg": 5.71,
+        "customerPayoutCents": 68520
+      },
+      {
+        "id": "RT-24747",
+        "status": "deliveredToHub",
+        "scheduledDate": "2026-11-02",
+        "estimatedKg": 6,
+        "actualWeightKg": 5.24,
+        "customerPayoutCents": 62880
+      },
+      {
+        "id": "RT-24738",
+        "status": "deliveredToHub",
+        "scheduledDate": "2026-11-01",
+        "estimatedKg": 12,
+        "actualWeightKg": 10.93,
+        "customerPayoutCents": 131160
+      },
+      {
+        "id": "RT-24722",
+        "status": "deliveredToHub",
+        "scheduledDate": "2026-10-30",
+        "estimatedKg": 8,
+        "actualWeightKg": 7.5,
+        "customerPayoutCents": 90000
+      },
+      {
+        "id": "RT-24708",
+        "status": "deliveredToHub",
+        "scheduledDate": "2026-10-29",
+        "estimatedKg": 2,
+        "actualWeightKg": 3.1,
+        "customerPayoutCents": 37200
+      },
+      {
+        "id": "RT-24676",
+        "status": "deliveredToHub",
+        "scheduledDate": "2026-10-26",
+        "estimatedKg": 14,
+        "actualWeightKg": 13.48,
+        "customerPayoutCents": 161760
+      }
+    ]
+  },
+  "collectors": {
+    "items": [
+      {
+        "id": "col_312",
+        "code": "COL-0312",
+        "name": "Chaminda Perera",
+        "mobile": "+94771242486",
+        "status": "active",
+        "online": true,
+        "area": "Wellawatte",
+        "hub": {
+          "id": "hub_plg",
+          "name": "Central Hub — Peliyagoda"
+        },
+        "vehicle": {
+          "type": "threeWheeler",
+          "plate": "WP QA-4521",
+          "capacityKg": 120
+        },
+        "rating": 4.3,
+        "memberSince": "2025-02-01",
+        "collectedKgThisWeek": 42.31
+      },
+      {
+        "id": "col_388",
+        "code": "COL-0388",
+        "name": "Mohamed Rizwan",
+        "mobile": "+94771250405",
+        "status": "active",
+        "online": true,
+        "area": "Bambalapitiya",
+        "hub": {
+          "id": "hub_plg",
+          "name": "Central Hub — Peliyagoda"
+        },
+        "vehicle": {
+          "type": "van",
+          "plate": "WP PH-2290",
+          "capacityKg": 400
+        },
+        "rating": 4.4,
+        "memberSince": "2024-03-01",
+        "collectedKgThisWeek": 37.79
+      },
+      {
+        "id": "col_421",
+        "code": "COL-0421",
+        "name": "Saman Kumara",
+        "mobile": "+94771258324",
+        "status": "active",
+        "online": true,
+        "area": "Nugegoda",
+        "hub": {
+          "id": "hub_plg",
+          "name": "Central Hub — Peliyagoda"
+        },
+        "vehicle": {
+          "type": "motorbike",
+          "plate": "WP BGT-7731",
+          "capacityKg": 40
+        },
+        "rating": 4.5,
+        "memberSince": "2025-04-01",
+        "collectedKgThisWeek": 36.02
+      },
+      {
+        "id": "col_457",
+        "code": "COL-0457",
+        "name": "Ruwan Silva",
+        "mobile": "+94771234567",
+        "status": "active",
+        "online": true,
+        "area": "Dehiwala",
+        "hub": {
+          "id": "hub_mrt",
+          "name": "South Hub — Moratuwa"
+        },
+        "vehicle": {
+          "type": "threeWheeler",
+          "plate": "WP ABC-1234",
+          "capacityKg": 120
+        },
+        "rating": 4.5,
+        "memberSince": "2024-01-01",
+        "collectedKgThisWeek": 47.91
+      },
+      {
+        "id": "col_466",
+        "code": "COL-0466",
+        "name": "Dilshan Fernando",
+        "mobile": "+94771266243",
+        "status": "active",
+        "online": true,
+        "area": "Rajagiriya",
+        "hub": {
+          "id": "hub_plg",
+          "name": "Central Hub — Peliyagoda"
+        },
+        "vehicle": {
+          "type": "threeWheeler",
+          "plate": "WP AAK-5562",
+          "capacityKg": 120
+        },
+        "rating": 4.7,
+        "memberSince": "2024-05-01",
+        "collectedKgThisWeek": 22.69
+      },
+      {
+        "id": "col_480",
+        "code": "COL-0480",
+        "name": "Nimal Rathnayake",
+        "mobile": "+94771282081",
+        "status": "active",
+        "online": true,
+        "area": "Mount Lavinia",
+        "hub": {
+          "id": "hub_mrt",
+          "name": "South Hub — Moratuwa"
+        },
+        "vehicle": {
+          "type": "lorry",
+          "plate": "WP LH-9034",
+          "capacityKg": 1000
+        },
+        "rating": 4.7,
+        "memberSince": "2024-07-01",
+        "collectedKgThisWeek": 24.22
+      },
+      {
+        "id": "col_515",
+        "code": "COL-0515",
+        "name": "Lahiru Gunasekara",
+        "mobile": "+94771297919",
+        "status": "active",
+        "online": true,
+        "area": "Borella",
+        "hub": {
+          "id": "hub_plg",
+          "name": "Central Hub — Peliyagoda"
+        },
+        "vehicle": {
+          "type": "motorbike",
+          "plate": "WP BJK-6620",
+          "capacityKg": 40
+        },
+        "rating": 4.6,
+        "memberSince": "2024-09-01",
+        "collectedKgThisWeek": 55.12
+      },
+      {
+        "id": "col_473",
+        "code": "COL-0473",
+        "name": "Tharindu Wickramasinghe",
+        "mobile": "+94771274162",
+        "status": "active",
+        "online": false,
+        "area": "Battaramulla",
+        "hub": {
+          "id": "hub_plg",
+          "name": "Central Hub — Peliyagoda"
+        },
+        "vehicle": {
+          "type": "threeWheeler",
+          "plate": "WP ABJ-1180",
+          "capacityKg": 120
+        },
+        "rating": 4.9,
+        "memberSince": "2025-06-01",
+        "collectedKgThisWeek": 32.93
+      },
+      {
+        "id": "col_502",
+        "code": "COL-0502",
+        "name": "Priyantha Bandara",
+        "mobile": "+94771290000",
+        "status": "active",
+        "online": false,
+        "area": "Kotte",
+        "hub": {
+          "id": "hub_plg",
+          "name": "Central Hub — Peliyagoda"
+        },
+        "vehicle": {
+          "type": "threeWheeler",
+          "plate": "WP AAQ-3317",
+          "capacityKg": 120
+        },
+        "rating": 4.6,
+        "memberSince": "2025-08-01",
+        "collectedKgThisWeek": 35.73
+      },
+      {
+        "id": "col_528",
+        "code": "COL-0528",
+        "name": "Asanka de Silva",
+        "mobile": "+94771305838",
+        "status": "active",
+        "online": false,
+        "area": "Maharagama",
+        "hub": {
+          "id": "hub_mrt",
+          "name": "South Hub — Moratuwa"
+        },
+        "vehicle": {
+          "type": "threeWheeler",
+          "plate": "WP ABP-2245",
+          "capacityKg": 120
+        },
+        "rating": 4.4,
+        "memberSince": "2025-01-01",
+        "collectedKgThisWeek": 31.24
+      },
+      {
+        "id": "col_533",
+        "code": "COL-0533",
+        "name": "Kavindu Jayasuriya",
+        "mobile": "+94771313757",
+        "status": "active",
+        "online": false,
+        "area": "Kollupitiya",
+        "hub": {
+          "id": "hub_plg",
+          "name": "Central Hub — Peliyagoda"
+        },
+        "vehicle": {
+          "type": "threeWheeler",
+          "plate": "WP ACD-8891",
+          "capacityKg": 120
+        },
+        "rating": 4.8,
+        "memberSince": "2024-02-01",
+        "collectedKgThisWeek": 29
+      },
+      {
+        "id": "col_541",
+        "code": "COL-0541",
+        "name": "Suresh Raj",
+        "mobile": "+94771321676",
+        "status": "suspended",
+        "online": false,
+        "area": "Wattala",
+        "hub": {
+          "id": "hub_plg",
+          "name": "Central Hub — Peliyagoda"
+        },
+        "vehicle": {
+          "type": "van",
+          "plate": "WP PJ-4410",
+          "capacityKg": 400
+        },
+        "rating": 5,
+        "memberSince": "2025-03-01",
+        "collectedKgThisWeek": 0
+      }
+    ],
+    "page": 1,
+    "pageSize": 25,
+    "totalCount": 12
+  },
+  "collectorDetail": {
+    "id": "col_457",
+    "code": "COL-0457",
+    "name": "Ruwan Silva",
+    "mobile": "+94771234567",
+    "status": "active",
+    "online": true,
+    "area": "Dehiwala",
+    "hub": {
+      "id": "hub_mrt",
+      "name": "South Hub — Moratuwa"
+    },
+    "vehicle": {
+      "type": "threeWheeler",
+      "plate": "WP ABC-1234",
+      "capacityKg": 120
+    },
+    "rating": 4.5,
+    "memberSince": "2024-01-01",
+    "collectedKgThisWeek": 47.91,
+    "loadKg": 20.5,
+    "earnings": {
+      "todayCents": 82000,
+      "weekCents": 191640,
+      "monthCents": 235360
+    },
+    "recentJobs": [
+      {
+        "id": "RT-24817",
+        "status": "enRoute",
+        "scheduledDate": "2026-11-07",
+        "area": "Dehiwala",
+        "actualWeightKg": null,
+        "collectorPayoutCents": null
+      },
+      {
+        "id": "RT-24790",
+        "status": "collected",
+        "scheduledDate": "2026-11-07",
+        "area": "Borella",
+        "actualWeightKg": 6.2,
+        "collectorPayoutCents": 24800
+      },
+      {
+        "id": "RT-24796",
+        "status": "collected",
+        "scheduledDate": "2026-11-07",
+        "area": "Maharagama",
+        "actualWeightKg": 7.1,
+        "collectorPayoutCents": 28400
+      },
+      {
+        "id": "RT-24803",
+        "status": "collected",
+        "scheduledDate": "2026-11-07",
+        "area": "Wattala",
+        "actualWeightKg": 7.2,
+        "collectorPayoutCents": 28800
+      },
+      {
+        "id": "RT-24761",
+        "status": "deliveredToHub",
+        "scheduledDate": "2026-11-03",
+        "area": "Bambalapitiya",
+        "actualWeightKg": 4.64,
+        "collectorPayoutCents": 18560
+      },
+      {
+        "id": "RT-24751",
+        "status": "deliveredToHub",
+        "scheduledDate": "2026-11-03",
+        "area": "Bambalapitiya",
+        "actualWeightKg": 4.48,
+        "collectorPayoutCents": 17920
+      },
+      {
+        "id": "RT-24762",
+        "status": "deliveredToHub",
+        "scheduledDate": "2026-11-03",
+        "area": "Bambalapitiya",
+        "actualWeightKg": 9.27,
+        "collectorPayoutCents": 37080
+      },
+      {
+        "id": "RT-24745",
+        "status": "deliveredToHub",
+        "scheduledDate": "2026-11-02",
+        "area": "Dehiwala",
+        "actualWeightKg": 9.02,
+        "collectorPayoutCents": 36080
+      },
+      {
+        "id": "RT-24738",
+        "status": "deliveredToHub",
+        "scheduledDate": "2026-11-01",
+        "area": "Dehiwala",
+        "actualWeightKg": 10.93,
+        "collectorPayoutCents": 43720
+      },
+      {
+        "id": "RT-24724",
+        "status": "deliveredToHub",
+        "scheduledDate": "2026-10-30",
+        "area": "Kollupitiya",
+        "actualWeightKg": 2.29,
+        "collectorPayoutCents": 9160
+      }
+    ]
+  },
+  "staff": [
+    {
+      "id": "stf_1",
+      "name": "Nadeesha Perera",
+      "email": "admin@rethread.lk",
+      "role": "admin",
+      "status": "active",
+      "lastSignInAt": "2026-11-06T03:00:00Z"
+    },
+    {
+      "id": "stf_2",
+      "name": "Kasun Jayawardena",
+      "email": "callcentre@rethread.lk",
+      "role": "callCentre",
+      "status": "active",
+      "lastSignInAt": "2026-11-06T02:40:00Z"
+    },
+    {
+      "id": "stf_3",
+      "name": "Ishara Fernando",
+      "email": "ishara@rethread.lk",
+      "role": "callCentre",
+      "status": "suspended",
+      "lastSignInAt": "2026-09-12T08:10:00Z"
+    }
+  ],
+  "notifications": {
+    "items": [
+      {
+        "id": "ntf_pickupWaiting_RT-24830",
+        "type": "pickupWaiting",
+        "title": "RT-24830 has waited 30 minutes",
+        "body": "Bambalapitiya · about 12 kg · no collector yet",
+        "subjectId": "RT-24830",
+        "createdAt": "2026-11-07T05:55:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupRequested_RT-24844",
+        "type": "pickupRequested",
+        "title": "New pickup RT-24844",
+        "body": "Battaramulla · about 6 kg",
+        "subjectId": "RT-24844",
+        "createdAt": "2026-11-07T05:52:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupWaiting_RT-24841",
+        "type": "pickupWaiting",
+        "title": "RT-24841 has waited 30 minutes",
+        "body": "Rajagiriya · about 9.5 kg · no collector yet",
+        "subjectId": "RT-24841",
+        "createdAt": "2026-11-07T05:48:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_orderPlaced_ORD-5134",
+        "type": "orderPlaced",
+        "title": "New order ORD-5134",
+        "body": "Dinesh · home delivery",
+        "subjectId": "ORD-5134",
+        "createdAt": "2026-11-07T05:46:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupRequested_RT-24835",
+        "type": "pickupRequested",
+        "title": "New pickup RT-24835",
+        "body": "Nugegoda · about 3.2 kg",
+        "subjectId": "RT-24835",
+        "createdAt": "2026-11-07T05:40:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupWaiting_RT-24822",
+        "type": "pickupWaiting",
+        "title": "RT-24822 has waited 30 minutes",
+        "body": "Wellawatte · about 5.5 kg · no collector yet",
+        "subjectId": "RT-24822",
+        "createdAt": "2026-11-07T05:35:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupRequested_RT-24830",
+        "type": "pickupRequested",
+        "title": "New pickup RT-24830",
+        "body": "Bambalapitiya · about 12 kg",
+        "subjectId": "RT-24830",
+        "createdAt": "2026-11-07T05:25:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_orderPlaced_ORD-5133",
+        "type": "orderPlaced",
+        "title": "New order ORD-5133",
+        "body": "Shehan · click & collect",
+        "subjectId": "ORD-5133",
+        "createdAt": "2026-11-07T05:12:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupRequested_RT-24822",
+        "type": "pickupRequested",
+        "title": "New pickup RT-24822",
+        "body": "Wellawatte · about 5.5 kg",
+        "subjectId": "RT-24822",
+        "createdAt": "2026-11-07T05:05:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupRequested_RT-24826",
+        "type": "pickupRequested",
+        "title": "New pickup RT-24826",
+        "body": "Kotte · about 4.4 kg",
+        "subjectId": "RT-24826",
+        "createdAt": "2026-11-07T04:30:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_transferRequested_red_3",
+        "type": "transferRequested",
+        "title": "Bank transfer requested",
+        "body": "Ishani Ekanayake · Rs. 1,200.00",
+        "subjectId": "red_3",
+        "createdAt": "2026-11-07T04:00:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_orderPlaced_ORD-5132",
+        "type": "orderPlaced",
+        "title": "New order ORD-5132",
+        "body": "Thilini · home delivery",
+        "subjectId": "ORD-5132",
+        "createdAt": "2026-11-07T03:50:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupRequested_RT-24819",
+        "type": "pickupRequested",
+        "title": "New pickup RT-24819",
+        "body": "Mount Lavinia · about 18 kg",
+        "subjectId": "RT-24819",
+        "createdAt": "2026-11-07T02:40:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupRequested_RT-24815",
+        "type": "pickupRequested",
+        "title": "New pickup RT-24815",
+        "body": "Bambalapitiya · about 5 kg",
+        "subjectId": "RT-24815",
+        "createdAt": "2026-11-07T02:00:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupRequested_RT-24803",
+        "type": "pickupRequested",
+        "title": "New pickup RT-24803",
+        "body": "Wattala · about 7 kg",
+        "subjectId": "RT-24803",
+        "createdAt": "2026-11-07T01:40:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupRequested_RT-24813",
+        "type": "pickupRequested",
+        "title": "New pickup RT-24813",
+        "body": "Wellawatte · about 3 kg",
+        "subjectId": "RT-24813",
+        "createdAt": "2026-11-07T01:20:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupRequested_RT-24796",
+        "type": "pickupRequested",
+        "title": "New pickup RT-24796",
+        "body": "Maharagama · about 7 kg",
+        "subjectId": "RT-24796",
+        "createdAt": "2026-11-07T00:40:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupRequested_RT-24790",
+        "type": "pickupRequested",
+        "title": "New pickup RT-24790",
+        "body": "Borella · about 6 kg",
+        "subjectId": "RT-24790",
+        "createdAt": "2026-11-06T23:40:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupRequested_RT-24806",
+        "type": "pickupRequested",
+        "title": "New pickup RT-24806",
+        "body": "Wattala · about 10 kg",
+        "subjectId": "RT-24806",
+        "createdAt": "2026-11-06T23:20:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_transferRequested_red_2",
+        "type": "transferRequested",
+        "title": "Bank transfer requested",
+        "body": "Kumudu Herath · Rs. 750.00",
+        "subjectId": "red_2",
+        "createdAt": "2026-11-06T21:00:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupRequested_RT-24786",
+        "type": "pickupRequested",
+        "title": "New pickup RT-24786",
+        "body": "Dehiwala · about 2 kg",
+        "subjectId": "RT-24786",
+        "createdAt": "2026-11-06T08:02:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupRequested_RT-24789",
+        "type": "pickupRequested",
+        "title": "New pickup RT-24789",
+        "body": "Nugegoda · about 9 kg",
+        "subjectId": "RT-24789",
+        "createdAt": "2026-11-06T05:46:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupRequested_RT-24785",
+        "type": "pickupRequested",
+        "title": "New pickup RT-24785",
+        "body": "Battaramulla · about 16 kg",
+        "subjectId": "RT-24785",
+        "createdAt": "2026-11-06T05:09:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupRequested_RT-24787",
+        "type": "pickupRequested",
+        "title": "New pickup RT-24787",
+        "body": "Rajagiriya · about 9 kg",
+        "subjectId": "RT-24787",
+        "createdAt": "2026-11-06T05:09:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_transferRequested_red_1",
+        "type": "transferRequested",
+        "title": "Bank transfer requested",
+        "body": "Anjali Wijesinghe · Rs. 2,000.00",
+        "subjectId": "red_1",
+        "createdAt": "2026-11-06T04:00:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupRequested_RT-24784",
+        "type": "pickupRequested",
+        "title": "New pickup RT-24784",
+        "body": "Borella · about 6 kg",
+        "subjectId": "RT-24784",
+        "createdAt": "2026-11-06T03:57:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_orderPlaced_ORD-5131",
+        "type": "orderPlaced",
+        "title": "New order ORD-5131",
+        "body": "Kumudu · home delivery",
+        "subjectId": "ORD-5131",
+        "createdAt": "2026-11-06T02:59:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_orderPlaced_ORD-5130",
+        "type": "orderPlaced",
+        "title": "New order ORD-5130",
+        "body": "Fathima · click & collect",
+        "subjectId": "ORD-5130",
+        "createdAt": "2026-11-06T02:55:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupRequested_RT-24783",
+        "type": "pickupRequested",
+        "title": "New pickup RT-24783",
+        "body": "Nugegoda · about 11 kg",
+        "subjectId": "RT-24783",
+        "createdAt": "2026-11-06T02:36:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupRequested_RT-24788",
+        "type": "pickupRequested",
+        "title": "New pickup RT-24788",
+        "body": "Bambalapitiya · about 15 kg",
+        "subjectId": "RT-24788",
+        "createdAt": "2026-11-06T00:45:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_orderPlaced_ORD-5129",
+        "type": "orderPlaced",
+        "title": "New order ORD-5129",
+        "body": "Nirosha · home delivery",
+        "subjectId": "ORD-5129",
+        "createdAt": "2026-11-05T10:05:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupRequested_RT-24779",
+        "type": "pickupRequested",
+        "title": "New pickup RT-24779",
+        "body": "Wellawatte · about 9 kg",
+        "subjectId": "RT-24779",
+        "createdAt": "2026-11-05T08:47:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupRequested_RT-24777",
+        "type": "pickupRequested",
+        "title": "New pickup RT-24777",
+        "body": "Wellawatte · about 11 kg",
+        "subjectId": "RT-24777",
+        "createdAt": "2026-11-05T08:45:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupRequested_RT-24774",
+        "type": "pickupRequested",
+        "title": "New pickup RT-24774",
+        "body": "Nugegoda · about 7 kg",
+        "subjectId": "RT-24774",
+        "createdAt": "2026-11-05T08:39:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_orderPlaced_ORD-5128",
+        "type": "orderPlaced",
+        "title": "New order ORD-5128",
+        "body": "Malsha · click & collect",
+        "subjectId": "ORD-5128",
+        "createdAt": "2026-11-05T07:12:00Z",
+        "read": false
+      },
+      {
+        "id": "ntf_pickupRequested_RT-24770",
+        "type": "pickupRequested",
+        "title": "New pickup RT-24770",
+        "body": "Kotte · about 7 kg",
+        "subjectId": "RT-24770",
+        "createdAt": "2026-11-05T06:55:00Z",
+        "read": false
+      }
+    ],
+    "nextCursor": null,
+    "unreadCount": 36
+  }
+}

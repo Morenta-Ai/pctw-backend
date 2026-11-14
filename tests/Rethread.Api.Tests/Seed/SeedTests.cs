@@ -7,8 +7,8 @@ using Rethread.Api.Common;
 using Rethread.Api.Data;
 using Rethread.Api.Data.Entities;
 using Rethread.Api.Domain;
+using Rethread.Api.Tests.Contract;
 using Rethread.Api.Tests.Infrastructure;
-using Xunit.Sdk;
 
 namespace Rethread.Api.Tests.Seed;
 
@@ -31,10 +31,7 @@ public sealed class SeedTests(PostgresServer server)
             .OrderBy(p => p!["id"]!.GetValue<string>(), StringComparer.Ordinal)
             .Select(p => p!.DeepClone()).ToArray());
 
-        var problems = new List<string>();
-        Compare(expected, actual, "$", problems);
-        if (problems.Count > 0)
-            throw new XunitException($"{problems.Count} differences:\n  " + string.Join("\n  ", problems.Take(25)));
+        JsonDiff.AssertSame(expected, actual);
     }
 
     [Fact]
@@ -185,41 +182,5 @@ public sealed class SeedTests(PostgresServer server)
         };
 
         return JsonSerializer.SerializeToNode(Dump())!;
-    }
-
-    private static void Compare(JsonNode? expected, JsonNode? actual, string path, List<string> problems)
-    {
-        switch (expected)
-        {
-            case null:
-                if (actual is not null) problems.Add($"{path}: expected null, got {actual.ToJsonString()}");
-                return;
-            case JsonObject eo:
-                if (actual is not JsonObject ao) { problems.Add($"{path}: expected an object"); return; }
-                foreach (var (key, value) in eo) Compare(value, ao[key], $"{path}.{key}", problems);
-                return;
-            case JsonArray ea:
-                if (actual is not JsonArray aa) { problems.Add($"{path}: expected an array"); return; }
-                if (ea.Count != aa.Count) problems.Add($"{path}: expected {ea.Count} items, got {aa.Count}");
-                for (var i = 0; i < Math.Min(ea.Count, aa.Count); i++) Compare(ea[i], aa[i], $"{path}[{i}]", problems);
-                return;
-            default:
-                var ev = expected.AsValue();
-                if (actual is null) { problems.Add($"{path}: expected {ev.ToJsonString()}, got null"); return; }
-                if (ev.GetValueKind() == JsonValueKind.Number)
-                {
-                    var a = actual.GetValue<JsonElement>().ValueKind == JsonValueKind.Number
-                        ? double.Parse(actual.ToJsonString(), CultureInfo.InvariantCulture)
-                        : double.NaN;
-                    var e = double.Parse(ev.ToJsonString(), CultureInfo.InvariantCulture);
-                    if (Math.Abs(a - e) > 1e-9) problems.Add($"{path}: expected {e}, got {actual.ToJsonString()}");
-                }
-                else if (ev.ToJsonString() != actual.ToJsonString())
-                {
-                    problems.Add($"{path}: expected {ev.ToJsonString()}, got {actual.ToJsonString()}");
-                }
-
-                return;
-        }
     }
 }

@@ -43,8 +43,10 @@ dotnet run --project src/Rethread.Api -- seed --reset
 | Collector Ruwan Silva | code `COL-0457`, mobile `+94771234567`, code `123456` in Development |
 | Customer Nadeesha Perera | mobile `+94764821190`, code `123456` in Development |
 
-`tests/Rethread.Api.Tests/Seed/portal-mock-world.json` pins the seed to the portal's mock world. If the
-portal's seed changes, regenerate it (see the test) and update `Data/Seed` to match.
+`tests/Rethread.Api.Tests/Seed/portal-mock-world.json` pins the seed to the portal's mock world, and
+`portal-operations.json` pins the portal's dashboard, lists, dispatch map and alerts to what its mock
+sources show. If the portal's mock changes, regenerate them (each test says how) and update the API to
+match.
 
 ## Tests
 
@@ -74,6 +76,7 @@ export TEST_DATABASE_URL="Host=localhost;Port=5432;Username=rethread;Password=re
 | `Maintenance:StaleCollectorMinutes` | 30 (0, off, in Development) | Take collectors offline when their app stops reporting |
 | `Storage:Root` | `storage/` beside the app | Where uploaded photos are kept (local disk for now) |
 | `Storage:PublicBaseUrl` | the request's host | Base of catalogue photo URLs, such as `https://api.rethread.lk` |
+| `Portal:BaseUrl` | `http://localhost:3000` | Where staff invite links point (`/set-password?token=…`) |
 | `Simulation:AutoAnswerOffers` | `false` | Development only: answer call-centre offers like the portal's mock collectors, to demo the portal without a phone |
 
 ## Auth
@@ -106,6 +109,6 @@ Set secrets with `dotnet user-secrets` locally and environment variables elsewhe
 | 8 | Call-centre assignments | Done |
 | 9 | Wallet and redemptions | Done |
 | 10 | Shop, orders and catalogue | Done |
-| 11 | Admin operations | Planned |
+| 11 | Admin operations | Done |
 | 12 | Rates and impact | Planned |
 | 13 | Deploy readiness | Planned |

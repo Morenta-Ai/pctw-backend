@@ -7,6 +7,8 @@ using Rethread.Api.Data.Entities;
 using Rethread.Api.Data.Seed;
 using Rethread.Api.Features.Admin.Assignments;
 using Rethread.Api.Features.Admin.Auth;
+using Rethread.Api.Features.Admin.DonationProjects;
+using Rethread.Api.Features.Admin.Redemptions;
 using Rethread.Api.Features.Collector.Assignments;
 using Rethread.Api.Features.Collector.Auth;
 using Rethread.Api.Features.Collector.Earnings;
@@ -64,6 +66,7 @@ public static class RethreadPipeline
         customer.MapBankDetails();
         customer.MapCustomerNotifications();
         customer.MapCustomerPickups();
+        customer.MapWallet();
 
         var collector = api.MapGroup("/collector").WithTags("Collector app")
             .RequireAuthorization(Policies.Collector)
@@ -81,6 +84,8 @@ public static class RethreadPipeline
             .AddEndpointFilter(new ActiveAccountFilter(Audience.Staff));
         admin.MapStaffAuth();
         admin.MapAdminAssignments();
+        admin.MapAdminRedemptions();
+        admin.MapAdminDonationProjects();
 
         return app;
     }

@@ -15,6 +15,7 @@ public sealed class Maintenance(
     AssignmentService assignments,
     NotificationService notifications,
     OfferSimulator simulator,
+    OrderWorkflow orders,
     IConfiguration config,
     TimeProvider time)
 {
@@ -26,6 +27,7 @@ public sealed class Maintenance(
         await assignments.ExpireStaleAsync(ct);
         await AlertWaitingPickupsAsync(ct);
         await TakeSilentCollectorsOfflineAsync(ct);
+        await orders.ReleaseUnpaidAsync(ct);
     }
 
     public async Task AlertWaitingPickupsAsync(CancellationToken ct)

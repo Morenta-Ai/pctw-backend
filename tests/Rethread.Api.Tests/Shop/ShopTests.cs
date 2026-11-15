@@ -1,5 +1,5 @@
 using System.Net;
-using System.Text.Json.Nodes;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Rethread.Api.Data.Entities;
 using Rethread.Api.Tests.Contract;
@@ -9,127 +9,181 @@ namespace Rethread.Api.Tests.Shop;
 
 public sealed class ShopTests(PostgresServer server)
 {
+    private const string Contract = "user-next";
     private static readonly byte[] Png = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0, 0, 0, 0x0D];
 
-    /// <summary>The customer with the most in their wallet, so wallet orders go through.</summary>
-    private static async Task<HttpClient> RichCustomerAsync(TestApi api)
+    private static object Cart(string method, long total, params (string Id, int Qty)[] items) => new
     {
-        var mobile = await api.DbAsync(async db =>
-        {
-            var active = db.Customers.Where(c => c.Status == AccountStatus.Active).Select(c => c.Id);
-            var id = await db.WalletTransactions.Where(t => t.Status != TransactionStatus.Failed && active.Contains(t.CustomerId))
-                .GroupBy(t => t.CustomerId).OrderByDescending(g => g.Sum(t => t.AmountCents)).Select(g => g.Key).FirstAsync();
-            return await db.Customers.Where(c => c.Id == id).Select(c => c.Mobile!).SingleAsync();
-        });
-        return await api.CustomerAsync(mobile);
+        items = items.Select(i => new { productId = i.Id, quantity = i.Qty }).ToArray(),
+        deliveryMethod = method,
+        addressId = method == "homeDelivery" ? "adr_1" : null,
+        vendorId = method == "clickAndCollect" ? "vnd_nugegoda" : null,
+        contactName = "Nadeesha Perera",
+        contactMobile = SignIn.NadeeshaMobile,
+        quoteTotalCents = total,
+    };
+
+    private static Task<HttpResponseMessage> PlaceAsync(HttpClient client, object body, string? key = null)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, "/api/v1/orders") { Content = JsonContent.Create(body) };
+        request.Headers.Add("Idempotency-Key", key ?? Guid.NewGuid().ToString());
+        return client.SendAsync(request);
     }
 
-    private static object Address(string line, string city, double lat, double lng) => new
-    {
-        label = "home",
-        customLabel = (string?)null,
-        addressLine = line,
-        unitNo = (string?)null,
-        city,
-        landmark = (string?)null,
-        notes = (string?)null,
-        lat,
-        lng,
-        isDefault = true,
-    };
-
-    private static async Task<string> DefaultAddressAsync(HttpClient client) =>
-        (await client.GetJsonAsync("/api/v1/addresses")).GetProperty("items")[0].Str("id");
-
-    private static object Order(string productId, string size, int quantity, string addressId, string payment = "wallet") => new
-    {
-        items = new[] { new { productId, size, quantity } },
-        fulfilmentType = "homeDelivery",
-        addressId,
-        vendorId = (string?)null,
-        paymentMethod = payment,
-    };
+    private static Task<int> StockAsync(TestApi api, string id) =>
+        api.DbAsync(db => db.Products.Where(p => p.Id == id).Select(p => p.Stock).SingleAsync());
 
     [Fact]
-    public async Task The_shop_shows_published_stock_with_filters_and_sorting()
+    public async Task The_shop_lists_pieces_with_filters_and_detail()
     {
         await using var api = await TestApi.StartAsync(server);
         var client = await api.CustomerAsync();
 
-        var all = await client.GetJsonAsync("/api/v1/products");
-        Assert.Equal(9, all.GetProperty("items").GetArrayLength());
-        foreach (var p in all.GetProperty("items").EnumerateArray()) p.MatchesContract("user", "GET /products/{id}");
-        var jacket = await client.GetJsonAsync("/api/v1/products/prd_1");
-        Assert.Equal(("M", true), (jacket.Str("defaultSize"), jacket.GetProperty("isAvailable").GetBoolean()));
+        var categories = await client.GetJsonAsync("/api/v1/shop/categories");
+        categories.MatchesContract(Contract, "GET /shop/categories");
+        Assert.Equal((2, 345000L), (categories.GetProperty("newTodayCount").GetInt32(), categories.GetProperty("maxPriceCents").GetInt64()));
 
-        var women = await client.GetJsonAsync("/api/v1/products?category=women&maxPriceCents=300000");
-        Assert.All(women.GetProperty("items").EnumerateArray(), p =>
-            Assert.True(p.Str("category") == "women" && p.GetProperty("priceCents").GetInt64() <= 300000));
-        var cheapest = await client.GetJsonAsync("/api/v1/products?sort=priceAsc");
-        var prices = cheapest.GetProperty("items").EnumerateArray().Select(p => p.GetProperty("priceCents").GetInt64()).ToList();
+        var all = await client.GetJsonAsync("/api/v1/shop/products");
+        all.MatchesContract(Contract, "GET /shop/products");
+        Assert.Equal((9, false), (all.GetProperty("totalCount").GetInt32(), all.GetProperty("hasMore").GetBoolean()));
+
+        var women = await client.GetJsonAsync("/api/v1/shop/products?gender=women&sort=priceAsc");
+        var prices = women.GetProperty("items").EnumerateArray().Select(p => p.GetProperty("priceCents").GetInt64()).ToList();
         Assert.Equal(prices.Order(), prices);
+        Assert.All(women.GetProperty("items").EnumerateArray(), p => Assert.Contains(p.Str("gender"), new[] { "women", "unisex" }));
+        Assert.Equal(["prd_1", "prd_2"], (await client.GetJsonAsync("/api/v1/shop/products?newToday=true")).GetProperty("items")
+            .EnumerateArray().Select(p => p.Str("id")).Order());
+        Assert.All((await client.GetJsonAsync("/api/v1/shop/products?sizes=XL,XXL")).GetProperty("items").EnumerateArray(),
+            p => Assert.Contains(p.Str("id"), new[] { "prd_1", "prd_2" }));
+        Assert.Equal(2, (await client.GetJsonAsync("/api/v1/shop/products?search=denim&pageSize=2")).GetProperty("items").GetArrayLength());
 
-        await (await client.GetAsync("/api/v1/products/prd_9")).ErrorAsync(HttpStatusCode.NotFound, "NOT_FOUND");
-        await (await client.GetAsync("/api/v1/products?sort=random")).ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_ERROR");
+        var jacket = await client.GetJsonAsync("/api/v1/shop/products/prd_1");
+        jacket.MatchesContract(Contract, "GET /shop/products/{id}");
+        Assert.Equal(("M", true, "Cut from 4 pairs of collected jeans, re-stitched in Moratuwa."),
+            (jacket.Str("size"), jacket.GetProperty("isNewToday").GetBoolean(), jacket.Str("description")));
+        Assert.All(jacket.GetProperty("related").EnumerateArray(), r => Assert.Equal("women", r.Str("categoryId")));
+        await (await client.GetAsync("/api/v1/shop/products/prd_9")).ErrorAsync(HttpStatusCode.NotFound, "NOT_FOUND");
 
-        var options = await client.GetJsonAsync("/api/v1/fulfilment-options");
-        options.MatchesContract("user", "GET /fulfilment-options");
-        Assert.Equal((35000L, 25000L), (options.GetProperty("homeDeliveryChargeCents").GetInt64(), options.GetProperty("clickAndCollectChargeCents").GetInt64()));
+        var vendors = await client.GetJsonAsync("/api/v1/shop/franchise-vendors?lat=6.9022&lng=79.853");
+        vendors.MatchesContract(Contract, "GET /shop/franchise-vendors");
+        Assert.Equal("vnd_kollupitiya", vendors.GetProperty("items")[0].Str("id"));
+        Assert.Equal(JsonValueKind.Null, (await client.GetJsonAsync("/api/v1/shop/franchise-vendors")).GetProperty("items")[0].GetProperty("distanceKm").ValueKind);
     }
 
     [Fact]
-    public async Task A_wallet_order_takes_stock_and_money_and_alerts_the_call_centre()
+    public async Task Quotes_price_the_cart_and_flag_what_has_gone()
     {
         await using var api = await TestApi.StartAsync(server);
-        var client = await RichCustomerAsync(api);
-        var balance = (await client.GetJsonAsync("/api/v1/wallet")).GetProperty("balanceCents").GetInt64();
+        var client = await api.CustomerAsync();
 
-        var body = JsonNode.Parse(ContractSamples.Request("user", "POST /orders").GetRawText())!;
-        body["addressId"] = await DefaultAddressAsync(client);
-        var order = await (await client.PostAsJsonAsync("/api/v1/orders", body)).JsonAsync(HttpStatusCode.Created);
-        order.MatchesContract("user", "GET /orders/{id}");
-        Assert.Equal(("placed", 345000L, 35000L, 380000L), (order.Str("status"), order.GetProperty("subtotalCents").GetInt64(),
-            order.GetProperty("transportChargeCents").GetInt64(), order.GetProperty("totalCents").GetInt64()));
-        Assert.Equal("ORD-5135", order.Str("id"));
+        var quote = await client.PostJsonAsync("/api/v1/orders/quote", new
+        {
+            items = new[] { new { productId = "prd_1", quantity = 1 }, new { productId = "prd_9", quantity = 1 } },
+            deliveryMethod = "clickAndCollect",
+            vendorId = "vnd_nugegoda",
+        });
+        quote.MatchesContract(Contract, "POST /orders/quote");
+        Assert.Equal((345000L, 25000L, 370000L), (quote.GetProperty("subtotalCents").GetInt64(),
+            quote.GetProperty("transportChargeCents").GetInt64(), quote.GetProperty("totalCents").GetInt64()));
+        Assert.Equal(["prd_9"], quote.GetProperty("unavailableItemIds").EnumerateArray().Select(i => i.GetString()));
+        Assert.Equal(JsonValueKind.Null, quote.GetProperty("shippingFeeCents").ValueKind);
 
-        Assert.Equal(balance - 380000, (await client.GetJsonAsync("/api/v1/wallet")).GetProperty("balanceCents").GetInt64());
-        Assert.Equal(5, await api.DbAsync(db => db.Products.Where(p => p.Id == "prd_1").Select(p => p.Stock).SingleAsync()));
+        var home = await client.PostJsonAsync("/api/v1/orders/quote", new
+        {
+            items = new[] { new { productId = "prd_1", quantity = 1 } },
+            deliveryMethod = "homeDelivery",
+            addressId = "adr_1",
+        });
+        Assert.Equal((35000L, 380000L), (home.GetProperty("shippingFeeCents").GetInt64(), home.GetProperty("totalCents").GetInt64()));
+
+        var nothing = await client.PostJsonAsync("/api/v1/orders/quote", new
+        {
+            items = new[] { new { productId = "prd_9", quantity = 1 } },
+            deliveryMethod = "homeDelivery",
+        });
+        Assert.Equal(JsonValueKind.Null, nothing.GetProperty("shippingFeeCents").ValueKind);
+        await (await client.PostAsJsonAsync("/api/v1/orders/quote", new
+        {
+            items = new[] { new { productId = "prd_1", quantity = 1 } },
+            deliveryMethod = "clickAndCollect",
+            vendorId = "vnd_nope",
+        })).ErrorAsync(HttpStatusCode.Conflict, "VENDOR_UNAVAILABLE");
+    }
+
+    [Fact]
+    public async Task An_order_holds_its_pieces_until_the_card_payment_is_confirmed()
+    {
+        await using var api = await TestApi.StartAsync(server);
+        var client = await api.CustomerAsync();
+        var staff = await api.CallCentreAsync();
+        var key = Guid.NewGuid().ToString();
+
+        var placed = await (await PlaceAsync(client, Cart("homeDelivery", 380000, ("prd_1", 1)), key)).JsonAsync(HttpStatusCode.Created);
+        placed.MatchesContract(Contract, "POST /orders");
+        Assert.Equal(("ORD-5135", 380000L, true), (placed.Str("orderNumber"), placed.GetProperty("totalCents").GetInt64(),
+            placed.GetProperty("paymentRequired").GetBoolean()));
+        Assert.Equal(5, await StockAsync(api, "prd_1"));
+        Assert.Equal("ORD-5135", (await (await PlaceAsync(client, Cart("homeDelivery", 380000, ("prd_1", 1)), key)).JsonAsync(HttpStatusCode.Created)).Str("orderId"));
+        await (await PlaceAsync(client, Cart("homeDelivery", 380000, ("prd_1", 2)), key)).ErrorAsync(HttpStatusCode.Conflict, "DUPLICATE_REQUEST");
+
+        // Not an order for the call centre until it's paid.
+        await (await staff.GetAsync("/api/v1/admin/orders/ORD-5135")).ErrorAsync(HttpStatusCode.NotFound, "ORDER_NOT_FOUND");
+        var order = await client.GetJsonAsync("/api/v1/orders/ORD-5135");
+        order.MatchesContract(Contract, "GET /orders/{id}");
+        Assert.Equal(("placed", "pending", "adr_1"), (order.Str("status"), order.Str("paymentStatus"), order.GetProperty("address").Str("id")));
+
+        await (await client.PostAsJsonAsync("/api/v1/orders/ORD-5135/payment-confirmation", new { status = "succeeded", paymentReference = "forged" }))
+            .ErrorAsync(HttpStatusCode.PaymentRequired, "PAYMENT_FAILED");
+        Assert.Equal("failed", (await client.PostJsonAsync("/api/v1/orders/ORD-5135/payment-confirmation", new { status = "cancelled" })).Str("paymentStatus"));
+        var paid = await client.PostJsonAsync("/api/v1/orders/ORD-5135/payment-confirmation", new { status = "succeeded", paymentReference = "mock_7f3a9c" });
+        Assert.Equal("paid", paid.Str("paymentStatus"));
         Assert.True(await api.DbAsync(db => db.Notifications.AnyAsync(n => n.Id == "ntf_orderPlaced_ORD-5135")));
 
-        Assert.Equal("ORD-5135", (await client.GetJsonAsync("/api/v1/orders")).GetProperty("items")[0].Str("id"));
-        (await client.GetJsonAsync("/api/v1/orders/ORD-5135")).MatchesContract("user", "GET /orders/{id}");
-        await (await (await api.CustomerAsync()).GetAsync("/api/v1/orders/ORD-5135")).ErrorAsync(HttpStatusCode.NotFound, "NOT_FOUND");
+        await staff.PostJsonAsync("/api/v1/admin/orders/ORD-5135/status", new { status = "confirmed" });
+        await staff.PostJsonAsync("/api/v1/admin/orders/ORD-5135/status", new { status = "outForDelivery" });
+        await staff.PostJsonAsync("/api/v1/admin/orders/ORD-5135/status", new { status = "completed" });
+        var delivered = await client.GetJsonAsync("/api/v1/orders/ORD-5135");
+        Assert.Equal(["placed", "confirmed", "outForDelivery", "delivered"], delivered.GetProperty("statusHistory").EnumerateArray().Select(s => s.Str("status")));
+
+        var list = await client.GetJsonAsync("/api/v1/orders?page=1&pageSize=20");
+        list.MatchesContract(Contract, "GET /orders");
+        Assert.Equal("ORD-5135", list.GetProperty("items")[0].Str("id"));
     }
 
     [Fact]
-    public async Task Orders_are_refused_for_missing_stock_money_or_destination()
+    public async Task Orders_are_refused_for_sold_out_pieces_changed_prices_or_no_address()
     {
         await using var api = await TestApi.StartAsync(server);
-        var client = await RichCustomerAsync(api);
-        var address = await DefaultAddressAsync(client);
-
-        await (await client.PostAsJsonAsync("/api/v1/orders", Order("prd_9", "M", 1, address))).ErrorAsync(HttpStatusCode.Conflict, "PRODUCT_UNAVAILABLE");
-        await (await client.PostAsJsonAsync("/api/v1/orders", Order("prd_6", "M", 5, address))).ErrorAsync(HttpStatusCode.Conflict, "PRODUCT_UNAVAILABLE");
-        await (await client.PostAsJsonAsync("/api/v1/orders", Order("prd_1", "XXXL", 1, address))).ErrorAsync(HttpStatusCode.Conflict, "PRODUCT_UNAVAILABLE");
-        Assert.Equal(4, await api.DbAsync(db => db.Products.Where(p => p.Id == "prd_6").Select(p => p.Stock).SingleAsync()));
-
-        var poor = await api.CustomerAsync("+94700000009");
-        var home = await poor.PostJsonAsync("/api/v1/addresses", Address("1 Galle Road", "Dehiwala", 6.85, 79.86), HttpStatusCode.Created);
-        await (await poor.PostAsJsonAsync("/api/v1/orders", Order("prd_1", "M", 1, home.Str("id")))).ErrorAsync(HttpStatusCode.Conflict, "INSUFFICIENT_BALANCE");
-        Assert.Equal(6, await api.DbAsync(db => db.Products.Where(p => p.Id == "prd_1").Select(p => p.Stock).SingleAsync()));
-
-        var card = await poor.PostJsonAsync("/api/v1/orders", Order("prd_1", "M", 1, home.Str("id"), "card"), HttpStatusCode.Created);
-        Assert.Equal(PaymentStatus.Unpaid, await api.DbAsync(db => db.Orders.Where(o => o.Id == card.Str("id")).Select(o => o.PaymentStatus).SingleAsync()));
-
-        await (await poor.PostAsJsonAsync("/api/v1/orders", Order("prd_1", "M", 1, address))).ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_ERROR");
-        await (await poor.PostAsJsonAsync("/api/v1/orders", new
+        var client = await api.CustomerAsync();
+        var error = await (await PlaceAsync(client, Cart("homeDelivery", 380000, ("prd_1", 1), ("prd_9", 1))))
+            .ErrorAsync(HttpStatusCode.Conflict, "OUT_OF_STOCK");
+        Assert.Equal(["prd_9"], error.GetProperty("details").GetProperty("productIds").EnumerateArray().Select(i => i.GetString()));
+        var changed = await (await PlaceAsync(client, Cart("homeDelivery", 300000, ("prd_1", 1)))).ErrorAsync(HttpStatusCode.Conflict, "PRICE_CHANGED");
+        Assert.Equal(380000, changed.GetProperty("details").GetProperty("totalCents").GetInt64());
+        await (await PlaceAsync(client, new
         {
-            items = new[] { new { productId = "prd_1", size = "M", quantity = 1 } },
-            fulfilmentType = "clickAndCollect",
-            addressId = (string?)null,
-            vendorId = "vnd_nope",
-            paymentMethod = "card",
-        })).ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_ERROR");
+            items = new[] { new { productId = "prd_1", quantity = 1 } },
+            deliveryMethod = "homeDelivery",
+            addressId = "adr_2",
+            quoteTotalCents = 380000,
+        })).ErrorAsync(HttpStatusCode.UnprocessableEntity, "ADDRESS_REQUIRED");
+        Assert.Equal(6, await StockAsync(api, "prd_1"));
+    }
+
+    [Fact]
+    public async Task Unpaid_orders_are_released_after_thirty_minutes()
+    {
+        await using var api = await TestApi.StartAsync(server);
+        var client = await api.CustomerAsync();
+        var placed = await (await PlaceAsync(client, Cart("clickAndCollect", 100000, ("prd_7", 1)))).JsonAsync(HttpStatusCode.Created);
+        Assert.Equal(29, await StockAsync(api, "prd_7"));
+
+        api.Clock.Advance(TimeSpan.FromMinutes(31));
+        var staff = await api.CallCentreAsync();
+        await staff.GetJsonAsync("/api/v1/admin/counts");
+        Assert.Equal(30, await StockAsync(api, "prd_7"));
+        var order = await client.GetJsonAsync($"/api/v1/orders/{placed.Str("orderId")}");
+        Assert.Equal(("cancelled", JsonValueKind.Null), (order.Str("status"), order.GetProperty("estimatedDeliveryDate").ValueKind));
     }
 
     [Fact]
@@ -139,18 +193,47 @@ public sealed class ShopTests(PostgresServer server)
         await api.DbAsync(db => db.Products.Where(p => p.Id == "prd_3").ExecuteUpdateAsync(s => s.SetProperty(p => p.Stock, 1)));
         var a = await api.CustomerAsync("+94700000011");
         var b = await api.CustomerAsync("+94700000012");
-        var orderBody = new
+        var body = new
         {
-            items = new[] { new { productId = "prd_3", size = "One size", quantity = 1 } },
-            fulfilmentType = "clickAndCollect",
-            addressId = (string?)null,
+            items = new[] { new { productId = "prd_3", quantity = 1 } },
+            deliveryMethod = "clickAndCollect",
             vendorId = "vnd_nugegoda",
-            paymentMethod = "card",
+            quoteTotalCents = 120000,
         };
-        var results = await Task.WhenAll(a.PostAsJsonAsync("/api/v1/orders", orderBody), b.PostAsJsonAsync("/api/v1/orders", orderBody));
+        var results = await Task.WhenAll(PlaceAsync(a, body), PlaceAsync(b, body));
         Assert.Single(results, r => r.StatusCode == HttpStatusCode.Created);
-        await results.Single(r => r.StatusCode != HttpStatusCode.Created).ErrorAsync(HttpStatusCode.Conflict, "PRODUCT_UNAVAILABLE");
-        Assert.Equal(0, await api.DbAsync(db => db.Products.Where(p => p.Id == "prd_3").Select(p => p.Stock).SingleAsync()));
+        await results.Single(r => r.StatusCode != HttpStatusCode.Created).ErrorAsync(HttpStatusCode.Conflict, "OUT_OF_STOCK");
+        Assert.Equal(0, await StockAsync(api, "prd_3"));
+    }
+
+    [Fact]
+    public async Task Cancelling_a_wallet_paid_order_refunds_it_and_restocks()
+    {
+        await using var api = await TestApi.StartAsync(server);
+        var order = await api.DbAsync(async db =>
+        {
+            var o = await db.Orders.Include(x => x.Items).SingleAsync(x => x.Id == "ORD-5133");
+            o.PaymentMethod = PaymentMethod.Wallet;
+            db.WalletTransactions.Add(new WalletTransaction
+            {
+                Id = "txn_ORD-5133",
+                CustomerId = o.CustomerId,
+                Type = TransactionType.ShopOrder,
+                Status = TransactionStatus.Completed,
+                Title = "Order ORD-5133",
+                AmountCents = -o.TotalCents,
+                OccurredAt = o.CreatedAt,
+                OrderId = o.Id,
+            });
+            await db.SaveChangesAsync();
+            return o;
+        });
+        var stockBefore = await StockAsync(api, order.Items[0].ProductId);
+        var staff = await api.CallCentreAsync();
+        await staff.PostJsonAsync("/api/v1/admin/orders/ORD-5133/status", new { status = "cancelled" });
+        Assert.True(await api.DbAsync(db => db.WalletTransactions.AnyAsync(t => t.Id == "txn_ORD-5133_refund" && t.AmountCents == order.TotalCents)));
+        Assert.Equal(stockBefore + order.Items.Where(i => i.ProductId == order.Items[0].ProductId).Sum(i => i.Quantity),
+            await StockAsync(api, order.Items[0].ProductId));
     }
 
     [Fact]
@@ -187,21 +270,6 @@ public sealed class ShopTests(PostgresServer server)
     }
 
     [Fact]
-    public async Task Cancelling_a_wallet_order_refunds_it_and_restocks()
-    {
-        await using var api = await TestApi.StartAsync(server);
-        var client = await RichCustomerAsync(api);
-        var balance = (await client.GetJsonAsync("/api/v1/wallet")).GetProperty("balanceCents").GetInt64();
-        var order = await client.PostJsonAsync("/api/v1/orders", Order("prd_2", "M", 2, await DefaultAddressAsync(client)), HttpStatusCode.Created);
-
-        var staff = await api.CallCentreAsync();
-        await staff.PostJsonAsync($"/api/v1/admin/orders/{order.Str("id")}/status", new { status = "cancelled" });
-        Assert.Equal(balance, (await client.GetJsonAsync("/api/v1/wallet")).GetProperty("balanceCents").GetInt64());
-        Assert.Equal(9, await api.DbAsync(db => db.Products.Where(p => p.Id == "prd_2").Select(p => p.Stock).SingleAsync()));
-        Assert.Equal("cancelled", (await client.GetJsonAsync($"/api/v1/orders/{order.Str("id")}")).Str("status"));
-    }
-
-    [Fact]
     public async Task Admins_manage_the_catalogue()
     {
         await using var api = await TestApi.StartAsync(server);
@@ -232,7 +300,7 @@ public sealed class ShopTests(PostgresServer server)
         Assert.Equal(0, soldOut.GetProperty("stock").GetInt32());
         Assert.Contains((await admin.GetJsonAsync("/api/v1/admin/products?status=outOfStock")).GetProperty("items").EnumerateArray(), p => p.Str("id") == created.Str("id"));
         var customer = await api.CustomerAsync();
-        Assert.False((await customer.GetJsonAsync($"/api/v1/products/{created.Str("id")}")).GetProperty("isAvailable").GetBoolean());
+        Assert.Equal(0, (await customer.GetJsonAsync($"/api/v1/shop/products/{created.Str("id")}")).GetProperty("stock").GetInt32());
         await (await admin.GetAsync("/api/v1/admin/products/prd_nope")).ErrorAsync(HttpStatusCode.NotFound, "PRODUCT_NOT_FOUND");
     }
 

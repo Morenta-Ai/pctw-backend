@@ -7,6 +7,7 @@ using Rethread.Api.Data;
 using Rethread.Api.Data.Entities;
 using Rethread.Api.Domain;
 using Rethread.Api.Features.Admin.Notifications;
+using Rethread.Api.Features.Admin.Orders;
 
 namespace Rethread.Api.Features.Admin.Dashboard;
 
@@ -88,8 +89,8 @@ public static class DashboardEndpoints
                 await db.Collectors.CountAsync(c => c.Status == AccountStatus.Active && c.Online, ct),
                 await db.Collectors.CountAsync(c => c.Status == AccountStatus.Active, ct)),
             new DashboardDto.OrderCounts(
-                await db.Orders.CountAsync(o => o.Status != OrderStatus.Completed && o.Status != OrderStatus.Cancelled, ct),
-                await db.Orders.CountAsync(o => o.CreatedAt >= dayStart, ct)),
+                await AdminOrderEndpoints.VisibleToStaff(db.Orders).CountAsync(o => o.Status != OrderStatus.Completed && o.Status != OrderStatus.Cancelled, ct),
+                await AdminOrderEndpoints.VisibleToStaff(db.Orders).CountAsync(o => o.CreatedAt >= dayStart, ct)),
             daily,
             await RecentActivityAsync(db, now, ct)));
     }
@@ -109,7 +110,7 @@ public static class DashboardEndpoints
             .OrderByDescending(e => e.OccurredAt).Take(10)
             .Join(db.Pickups.Include(p => p.Collector), e => e.PickupId, p => p.Id, (e, p) => new { Event = e, Pickup = p })
             .ToListAsync(ct);
-        var orders = await db.Orders.Include(o => o.Customer).Include(o => o.Items)
+        var orders = await AdminOrderEndpoints.VisibleToStaff(db.Orders).Include(o => o.Customer).Include(o => o.Items)
             .Where(o => o.CreatedAt <= now).OrderByDescending(o => o.CreatedAt).Take(10).AsSplitQuery().ToListAsync(ct);
 
         return events.Select(x => new DashboardDto.Activity(
@@ -151,7 +152,7 @@ public static class DashboardEndpoints
         var staff = await user.StaffAsync(ct);
         await maintenance.RunAsync(ct);
         return TypedResults.Ok(new CountsDto(
-            await db.Orders.CountAsync(o => o.Status == OrderStatus.Placed, ct),
+            await AdminOrderEndpoints.VisibleToStaff(db.Orders).CountAsync(o => o.Status == OrderStatus.Placed, ct),
             await db.Pickups.CountAsync(p => p.Status == PickupStatus.Pending, ct),
             await db.Redemptions.CountAsync(r => r.Type == RedemptionType.Cash && r.Status == RedemptionStatus.Pending, ct),
             await StaffNotificationEndpoints.Unread(db, staff).CountAsync(ct)));

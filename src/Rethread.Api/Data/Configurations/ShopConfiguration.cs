@@ -12,6 +12,11 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
         b.Property(x => x.Name).HasMaxLength(80);
         b.Property(x => x.Version).IsRowVersion();
         b.HasIndex(x => x.CreatedAt);
+        b.Property(x => x.ConditionGrade).HasMaxLength(20);
+        b.Property(x => x.Gender).HasMaxLength(20);
+        b.Property(x => x.ImpactKg).HasPrecision(6, 2);
+        b.Ignore(x => x.DefaultSize);
+        b.Ignore(x => x.GenderOrDefault);
     }
 }
 

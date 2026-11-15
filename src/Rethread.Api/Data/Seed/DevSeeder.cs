@@ -467,6 +467,9 @@ public sealed class DevSeeder(
 
     // ── Shop ─────────────────────────────────────────────────────────────────────────────────────────
 
+    private static readonly string[] ConditionGrades =
+        ["excellent", "likeNew", "good", "excellent", "good", "likeNew", "excellent", "good", "fair", "excellent"];
+
     private List<Product> Products() =>
         SeedRows.Products.Select((row, i) =>
         {
@@ -486,6 +489,14 @@ public sealed class DevSeeder(
                 Story = row.Story,
                 CreatedAt = created,
                 UpdatedAt = created,
+                ConditionGrade = ConditionGrades[i % ConditionGrades.Length],
+                RejuvenatedBy = "ReThread Moratuwa Studio",
+                ImpactKg = row.Category switch
+                {
+                    ProductCategory.Kids => 0.3m,
+                    ProductCategory.Accessories => 0.2m,
+                    _ => 0.6m,
+                },
             };
         }).ToList();
 

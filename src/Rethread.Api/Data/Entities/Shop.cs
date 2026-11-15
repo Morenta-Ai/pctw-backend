@@ -13,9 +13,31 @@ public sealed class Product : ICursorRow
     public bool Published { get; set; }
     public string Story { get; set; } = "";
     public List<string> ImageUrls { get; set; } = [];
+    /// <summary><c>likeNew</c>, <c>excellent</c>, <c>good</c> or <c>fair</c>.</summary>
+    public string ConditionGrade { get; set; } = "excellent";
+    /// <summary><c>women</c>, <c>men</c>, <c>kids</c> or <c>unisex</c>; from the category when not set.</summary>
+    public string? Gender { get; set; }
+    public string? Material { get; set; }
+    public int? ChestCm { get; set; }
+    public int? LengthCm { get; set; }
+    public int? WaistCm { get; set; }
+    public string? RejuvenatedBy { get; set; }
+    /// <summary>Textile kept out of landfill by this piece.</summary>
+    public decimal? ImpactKg { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public uint Version { get; set; }
+
+    /// <summary>The size the user app shows for the piece: the middle of its sizes.</summary>
+    public string DefaultSize => Sizes.Count == 0 ? "" : Sizes[Sizes.Count / 2];
+
+    public string GenderOrDefault => Gender ?? Category switch
+    {
+        ProductCategory.Women => "women",
+        ProductCategory.Men => "men",
+        ProductCategory.Kids => "kids",
+        _ => "unisex",
+    };
 }
 
 public sealed class Order : ICursorRow
@@ -30,6 +52,10 @@ public sealed class Order : ICursorRow
     public string? VendorId { get; set; }
     public PaymentMethod PaymentMethod { get; set; }
     public PaymentStatus PaymentStatus { get; set; }
+    /// <summary>The card gateway's reference once a payment went through.</summary>
+    public string? PaymentReference { get; set; }
+    public string? ContactName { get; set; }
+    public string? ContactMobile { get; set; }
     public long SubtotalCents { get; set; }
     public long TransportChargeCents { get; set; }
     public long TotalCents { get; set; }

@@ -6,9 +6,13 @@ using Rethread.Api.Data;
 using Rethread.Api.Data.Entities;
 using Rethread.Api.Domain;
 using Rethread.Api.Features.Admin.Redemptions;
-using Rethread.Api.Features.Customer.Orders;
 
 namespace Rethread.Api.Features.Admin.Orders;
+
+public sealed record OrderLineDto(string ProductId, string Name, string Size, int Quantity, long UnitPriceCents)
+{
+    public static OrderLineDto From(OrderItem i) => new(i.ProductId, i.Name, i.Size, i.Quantity, i.UnitPriceCents);
+}
 
 public sealed record OrderRow(
     string Id,
@@ -66,7 +70,7 @@ public static class AdminOrderEndpoints
     private static async Task<Ok<PagedList<OrderRow>>> List(string? status, string? fulfilmentType, string? q,
         int? page, int? pageSize, AppDbContext db, CancellationToken ct)
     {
-        var query = db.Orders.Include(o => o.Customer).Include(o => o.Vendor).Include(o => o.Items).AsNoTracking();
+        var query = VisibleToStaff(db.Orders).Include(o => o.Customer).Include(o => o.Vendor).Include(o => o.Items).AsNoTracking();
         if (status is not null)
         {
             var s = CamelCaseEnumConverter<OrderStatus>.TryParse(status)
@@ -109,8 +113,12 @@ public static class AdminOrderEndpoints
         return TypedResults.Ok(OrderDetail.From(await FindAsync(db, id, ct)));
     }
 
+    /// <summary>Card orders reach the call centre once paid; an unpaid checkout isn't an order yet.</summary>
+    public static IQueryable<Order> VisibleToStaff(IQueryable<Order> orders) =>
+        orders.Where(o => o.PaymentStatus == PaymentStatus.Paid || o.PaymentStatus == PaymentStatus.Refunded);
+
     private static async Task<Order> FindAsync(AppDbContext db, string id, CancellationToken ct) =>
-        await db.Orders.Include(o => o.Customer).Include(o => o.Vendor).Include(o => o.Items).Include(o => o.Events)
+        await VisibleToStaff(db.Orders).Include(o => o.Customer).Include(o => o.Vendor).Include(o => o.Items).Include(o => o.Events)
             .AsSplitQuery().SingleOrDefaultAsync(o => o.Id == id, ct)
         ?? throw ApiException.NotFound(OrderWorkflow.OrderNotFound, "Order not found.");
 }

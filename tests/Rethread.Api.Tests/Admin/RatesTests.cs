@@ -86,22 +86,21 @@ public sealed class RatesTests(PostgresServer server)
         multipliers.MatchesContract("admin", "GET /admin/impact-multipliers");
 
         var customer = await api.CustomerAsync("+94764853329"); // Dinesh: plenty of history.
-        var impact = await customer.GetJsonAsync("/api/v1/impact");
-        impact.MatchesContract("user", "GET /impact");
-        var total = impact.GetProperty("totalWeightKg").GetDecimal();
+        var summary = await customer.GetJsonAsync("/api/v1/impact/summary?period=all");
+        var total = summary.GetProperty("totalKg").GetDecimal();
         Assert.True(total > 0);
-        Assert.Equal(8, impact.GetProperty("metrics").GetArrayLength());
-        var ghg = impact.GetProperty("metrics").EnumerateArray().Single(m => m.Str("key") == "ghgSaved");
-        Assert.Equal(Math.Round(total * 3.5m, 1, MidpointRounding.AwayFromZero), ghg.GetProperty("value").GetDecimal());
-        Assert.Equal(6, ghg.GetProperty("series").GetArrayLength());
-        Assert.Equal("2026-11", impact.GetProperty("monthlyWeights").EnumerateArray().Last().Str("month"));
+        Assert.Equal(Math.Round(total * 3.5m, 1, MidpointRounding.AwayFromZero),
+            summary.GetProperty("metrics").GetProperty("ghgSavedKg").GetDecimal());
 
         var updated = await (await admin.PutAsJsonAsync("/api/v1/admin/impact-multipliers",
             ContractSamples.Request("admin", "PUT /admin/impact-multipliers"))).JsonAsync();
         Assert.Equal((50m, "Nadeesha Perera"), (updated.GetProperty("items").EnumerateArray().Single(m => m.Str("key") == "forexSaved").GetProperty("perKg").GetDecimal(),
             updated.Str("updatedBy")));
-        var forex = (await customer.GetJsonAsync("/api/v1/impact")).GetProperty("metrics").EnumerateArray().Single(m => m.Str("key") == "forexSaved");
-        Assert.Equal(Math.Round(total * 50, 0, MidpointRounding.AwayFromZero), forex.GetProperty("value").GetDecimal());
+        var forex = (await customer.GetJsonAsync("/api/v1/impact/summary")).GetProperty("metrics").GetProperty("forexSavedUsdCents").GetInt64();
+        Assert.Equal((long)Math.Round(total * 50, 0, MidpointRounding.AwayFromZero), forex);
+        var factor = (await customer.GetJsonAsync("/api/v1/impact/factors")).GetProperty("factors").EnumerateArray()
+            .Single(f => f.Str("key") == "forexSavedUsdCents");
+        Assert.Equal(50m, factor.GetProperty("perKg").GetDecimal());
 
         async Task Refused(object body, string key)
         {

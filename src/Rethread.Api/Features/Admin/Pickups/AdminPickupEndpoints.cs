@@ -62,8 +62,11 @@ public sealed record PickupDetail(
     PickupDetail.HubRef? Hub,
     string? CancelReason,
     DateTime CreatedAt,
-    IReadOnlyList<PickupDetail.Step> Timeline)
+    IReadOnlyList<PickupDetail.Step> Timeline,
+    IReadOnlyList<PickupDetail.PreferredDate> PreferredDates)
 {
+    public sealed record PreferredDate(int Priority, DateOnly Date, Slot Slot);
+
     public sealed record Item(string Name, int? Quantity, string? Size, ItemCondition Condition);
 
     public sealed record CollectorInfo(string Id, string Code, string Name, string Mobile, string VehiclePlate);
@@ -81,10 +84,13 @@ public sealed record PickupDetail(
             p.Collector.Mobile, p.Collector.VehiclePlate),
         p.CustomerRatePerKgCents, p.CollectorRatePerKgCents, p.CustomerPayoutCents, p.CollectorPayoutCents,
         p.Hub is null ? null : new HubRef(p.Hub.Id, p.Hub.Name), p.CancelReason, p.CreatedAt,
-        p.Events.OrderBy(e => e.OccurredAt).ThenBy(e => e.Id).Select(e => new Step(e.Status, e.OccurredAt, e.Actor)).ToList());
+        p.Events.OrderBy(e => e.OccurredAt).ThenBy(e => e.Id).Select(e => new Step(e.Status, e.OccurredAt, e.Actor)).ToList(),
+        p.PreferredDates.OrderBy(d => d.Priority).Select(d => new PreferredDate(d.Priority, d.Date, d.Slot)).ToList());
 }
 
 public sealed record CancelRequest(string Reason);
+
+public sealed record ScheduleRequest(DateOnly Date, Slot Slot);
 
 public sealed class CancelRequestValidator : AbstractValidator<CancelRequest>
 {
@@ -100,6 +106,7 @@ public static class AdminPickupEndpoints
         pickups.MapGet("", List);
         pickups.MapGet("/{id}", Get);
         pickups.MapPost("/{id}/cancel", Cancel).Validate<CancelRequest>();
+        pickups.MapPost("/{id}/schedule", Schedule);
     }
 
     private static async Task<Ok<PagedList<PickupRow>>> List(string? status, DateOnly? date, string? source, string? q,
@@ -160,8 +167,30 @@ public static class AdminPickupEndpoints
         return TypedResults.Ok(PickupDetail.From(await FindAsync(db, id, ct)));
     }
 
+    /// <summary>
+    /// Moves a pickup that's still waiting for a collector to another day or slot: the call centre agreed it with
+    /// the customer. A collector taking it then confirms this date.
+    /// </summary>
+    private static async Task<Ok<PickupDetail>> Schedule(string id, ScheduleRequest request, AppDbContext db,
+        TimeProvider time, CancellationToken ct)
+    {
+        var pickup = await FindAsync(db, id, ct);
+        if (pickup.Status != PickupStatus.Pending)
+            throw ApiException.Conflict(AssignmentService.PickupAlreadyAssigned, "This pickup already has a collector.");
+        var (start, end) = PickupWorkflow.SlotHours(request.Slot);
+        if (Colombo.At(request.Date, end) <= time.UtcNow())
+            throw ApiException.Validation("date", "Choose a day and slot that haven't passed.");
+        pickup.ScheduledDate = request.Date;
+        pickup.Slot = request.Slot;
+        pickup.WindowStart = Colombo.At(request.Date, start);
+        pickup.WindowEnd = Colombo.At(request.Date, end);
+        await db.SaveChangesAsync(ct);
+        return TypedResults.Ok(PickupDetail.From(pickup));
+    }
+
     public static async Task<Pickup> FindAsync(AppDbContext db, string id, CancellationToken ct) =>
         await db.Pickups.Include(p => p.Customer).Include(p => p.Collector).Include(p => p.Hub)
-            .Include(p => p.Items).Include(p => p.Events).AsSplitQuery().SingleOrDefaultAsync(p => p.Id == id, ct)
+            .Include(p => p.Items).Include(p => p.Events).Include(p => p.PreferredDates).AsSplitQuery()
+            .SingleOrDefaultAsync(p => p.Id == id, ct)
         ?? throw ApiException.NotFound(PickupWorkflow.PickupNotFound, "Pickup not found.");
 }

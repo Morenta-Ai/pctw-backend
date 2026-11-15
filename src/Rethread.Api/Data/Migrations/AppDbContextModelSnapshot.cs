@@ -32,6 +32,9 @@ namespace Rethread.Api.Data.Migrations
             modelBuilder.HasSequence("pickup_number_seq")
                 .StartsAt(24850L);
 
+            modelBuilder.HasSequence("ticket_number_seq")
+                .StartsAt(1000L);
+
             modelBuilder.HasSequence("waybill_number_seq")
                 .StartsAt(100L);
 
@@ -475,6 +478,46 @@ namespace Rethread.Api.Data.Migrations
                     b.ToTable("customers", (string)null);
                 });
 
+            modelBuilder.Entity("Rethread.Api.Data.Entities.Device", b =>
+                {
+                    b.Property<string>("Token")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("token");
+
+                    b.Property<string>("AppVersion")
+                        .HasColumnType("text")
+                        .HasColumnName("app_version");
+
+                    b.Property<string>("CustomerId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("customer_id");
+
+                    b.Property<string>("Locale")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("locale");
+
+                    b.Property<string>("Platform")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("platform");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Token")
+                        .HasName("pk_devices");
+
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("ix_devices_customer_id");
+
+                    b.ToTable("devices", (string)null);
+                });
+
             modelBuilder.Entity("Rethread.Api.Data.Entities.DonationProject", b =>
                 {
                     b.Property<string>("Id")
@@ -848,6 +891,30 @@ namespace Rethread.Api.Data.Migrations
                         .HasDatabaseName("ix_notifications_audience_recipient_id_created_at");
 
                     b.ToTable("notifications", (string)null);
+                });
+
+            modelBuilder.Entity("Rethread.Api.Data.Entities.NotificationPreferences", b =>
+                {
+                    b.Property<string>("CustomerId")
+                        .HasColumnType("text")
+                        .HasColumnName("customer_id");
+
+                    b.Property<bool>("Offers")
+                        .HasColumnType("boolean")
+                        .HasColumnName("offers");
+
+                    b.Property<bool>("Orders")
+                        .HasColumnType("boolean")
+                        .HasColumnName("orders");
+
+                    b.Property<bool>("Payments")
+                        .HasColumnType("boolean")
+                        .HasColumnName("payments");
+
+                    b.HasKey("CustomerId")
+                        .HasName("pk_notification_preferences");
+
+                    b.ToTable("notification_preferences", (string)null);
                 });
 
             modelBuilder.Entity("Rethread.Api.Data.Entities.Order", b =>
@@ -1908,6 +1975,58 @@ namespace Rethread.Api.Data.Migrations
                         .HasName("pk_files");
 
                     b.ToTable("files", (string)null);
+                });
+
+            modelBuilder.Entity("Rethread.Api.Data.Entities.SupportTicket", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("category");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CustomerId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("customer_id");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("message");
+
+                    b.Property<string>("PickupId")
+                        .HasColumnType("text")
+                        .HasColumnName("pickup_id");
+
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reference");
+
+                    b.Property<string>("ScreenshotFileId")
+                        .HasColumnType("text")
+                        .HasColumnName("screenshot_file_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_support_tickets");
+
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("ix_support_tickets_customer_id");
+
+                    b.HasIndex("Reference")
+                        .IsUnique()
+                        .HasDatabaseName("ix_support_tickets_reference");
+
+                    b.ToTable("support_tickets", (string)null);
                 });
 
             modelBuilder.Entity("Rethread.Api.Data.Entities.Vendor", b =>

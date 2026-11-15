@@ -46,6 +46,9 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
 
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<StaffNotificationRead> StaffNotificationReads => Set<StaffNotificationRead>();
+    public DbSet<Device> Devices => Set<Device>();
+    public DbSet<NotificationPreferences> NotificationPreferences => Set<NotificationPreferences>();
+    public DbSet<SupportTicket> SupportTickets => Set<SupportTicket>();
 
     /// <summary>Next value of one of the ID sequences in <see cref="Sequences"/>.</summary>
     public async Task<long> NextAsync(string sequence, CancellationToken ct) =>
@@ -70,6 +73,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
         modelBuilder.HasSequence<long>(Sequences.OrderNumber).StartsAt(5_135);
         modelBuilder.HasSequence<long>(Sequences.CollectorNumber).StartsAt(542);
         modelBuilder.HasSequence<long>(Sequences.WaybillNumber).StartsAt(100);
+        modelBuilder.HasSequence<long>(Sequences.TicketNumber).StartsAt(1000);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
 }
@@ -80,4 +84,5 @@ public static class Sequences
     public const string OrderNumber = "order_number_seq";
     public const string CollectorNumber = "collector_number_seq";
     public const string WaybillNumber = "waybill_number_seq";
+    public const string TicketNumber = "ticket_number_seq";
 }

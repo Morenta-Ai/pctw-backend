@@ -33,15 +33,22 @@ public static class NotificationTexts
     public static (string Title, string Body) TransferRequested(Redemption r, string? customerName) =>
         ("Bank transfer requested", $"{(string.IsNullOrWhiteSpace(customerName) ? "A customer" : customerName)} · {Money.Format(r.AmountCents)}");
 
-    public static (string Title, string Body) WeightUpdated(Pickup p) =>
-        ("Weight updated by collector",
-            $"Declared {Weight.Format(p.EstimatedKg)} → Actual {Weight.Format(p.ActualWeightKg ?? 0)}. Earnings {Money.Format(p.CustomerPayoutCents ?? 0)}.");
+    public static (string Title, string Body) PickupCollected(Pickup p) =>
+        ("Clothes weighed", $"{Weight.Format(p.ActualWeightKg ?? 0)} weighed at your door. You earned {Money.Format(p.CustomerPayoutCents ?? 0)}.");
+
+    public static (string Title, string Body) PickupDateConfirmed(Pickup p) =>
+        ("Pickup confirmed",
+            $"Your pickup is confirmed for {p.ScheduledDate.ToString("ddd, d MMM", CultureInfo.InvariantCulture)} · {PickupSlots.Info(p.Slot).Label}.");
+
+    public static (string Title, string Body) PickupCancelled(Pickup p, string reason) =>
+        ("Pickup cancelled", $"{p.Id} was cancelled: {reason}");
 
     public static (string Title, string Body) PaymentCredited(Pickup p) =>
         ("Payment credited", $"{Money.Format(p.CustomerPayoutCents ?? 0)} added to your wallet for {p.Id}.");
 
-    public static (string Title, string Body) CollectorEnRoute(Pickup p, string collectorName) =>
-        ("Collector on the way", $"{collectorName} is coming for {p.Id}.");
+    public static (string Title, string Body) CollectorEnRoute(Pickup p, string collectorName, int? etaMinutes) =>
+        ($"{collectorName.Split(' ')[0]} is en route",
+            etaMinutes is { } eta ? $"Your collector is ~{eta} min from {p.AddressLine}." : $"Your collector is on the way to {p.AddressLine}.");
 
     public static (string Title, string Body) HubArrival(Pickup p, string hubName) =>
         ("Your clothes reached the hub", $"{p.Id} arrived at {hubName}. Thank you for recycling!");

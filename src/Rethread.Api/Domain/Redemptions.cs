@@ -92,7 +92,7 @@ public sealed class Redemptions(
                     redemption.ProjectId = project.Id;
                     title = $"Donation · {project.Name}";
                     var (thanksTitle, thanksBody) = NotificationTexts.DonationThanks(request.AmountCents, project.Name);
-                    notifications.ToCustomer(customer.Id, NotificationService.CustomerTypes.DonationThanks, thanksTitle,
+                    notifications.ToCustomer(customer.Id, NotificationService.CustomerTypes.System, thanksTitle,
                         thanksBody, "wallet", null);
                     break;
                 }
@@ -163,7 +163,7 @@ public sealed class Redemptions(
         redemption.ProcessedBy = staff.Name;
         await db.WalletTransactions.Where(t => t.RedemptionId == redemption.Id)
             .ExecuteUpdateAsync(s => s.SetProperty(t => t.Status, ledgerStatus), ct);
-        notifications.ToCustomer(redemption.CustomerId, NotificationService.CustomerTypes.TransferUpdate, text.Title,
+        notifications.ToCustomer(redemption.CustomerId, NotificationService.CustomerTypes.System, text.Title,
             text.Body, "wallet", null);
         await db.SaveChangesAsync(ct);
     }

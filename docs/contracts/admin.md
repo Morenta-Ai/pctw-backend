@@ -109,12 +109,12 @@ without waiting for the token to expire.
 
 ## Shared enums
 
-| Enum            | Values                                                                                                                                                                                                                       |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Item `condition` | `good`, `fair`, `worn` or `damaged`, as the customer described it |
-| Pickup `status` | `pending` (no collector yet), `assigned`, `enRoute`, `arrived`, `collected`, `deliveredToHub`, `cancelled`. The user app folds `arrived` into `enRoute`; the collector app calls `pending` `open` and `assigned` `accepted`. |
-| Pickup `source` | `app` (booked by the customer), `callCentre` (booked or rescued by the call centre)                                                                                                                                          |
-| Order `status`  | `placed`, `confirmed`, `outForDelivery`, `readyAtVendor`, `completed`, `cancelled`, as in the user app                                                                                                                       |
+| Enum             | Values                                                                                                                                                                                                                       |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Item `condition` | `good`, `fair`, `worn` or `damaged`, as the customer described it                                                                                                                                                            |
+| Pickup `status`  | `pending` (no collector yet), `assigned`, `enRoute`, `arrived`, `collected`, `deliveredToHub`, `cancelled`. The user app folds `arrived` into `enRoute`; the collector app calls `pending` `open` and `assigned` `accepted`. |
+| Pickup `source`  | `app` (booked by the customer), `callCentre` (booked or rescued by the call centre)                                                                                                                                          |
+| Order `status`   | `placed`, `confirmed`, `outForDelivery`, `readyAtVendor`, `completed`, `cancelled`, as in the user app                                                                                                                       |
 
 ## Dashboard
 

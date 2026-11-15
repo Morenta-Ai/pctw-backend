@@ -5,7 +5,7 @@ document is the agreement both sides build against. The DTOs in `lib/features/*/
 field for field, and the mock sources return the same shapes, which is why switching from mock to real
 needs no UI changes.
 
-The collector API shares a server, conventions and error format with the user app's contract in
+The collector API shares a server (pctw-backend), conventions and error format with the user app's contract in
 [pctw-user](https://github.com/Morenta-Ai/pctw-user/blob/main/docs/API_CONTRACT.md). A pickup is one record
 on the server: the customer sees it as a pickup and the collector sees it as a job.
 
@@ -187,8 +187,8 @@ Everything the Home screen needs in one call.
 
 ### `GET /jobs?radiusKm=5&slot=morning&size=small`
 
-Open jobs near the collector, closest first. All filters are optional. `slot` is `morning` or
-`afternoon`; `size` is `small` (under 5 kg), `medium` (5–10 kg) or `large` (10 kg and over), by the
+Open jobs near the collector, closest first. All filters are optional. `slot` is `morning`,
+`afternoon` or `evening`; `size` is `small` (under 5 kg), `medium` (5–10 kg) or `large` (10 kg and over), by the
 customer's estimate.
 
 ```json

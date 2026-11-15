@@ -10,7 +10,7 @@ namespace Rethread.Api.Tests.Customer;
 
 public sealed class PickupTests(PostgresServer server)
 {
-    private const string Contract = "user-next";
+    private const string Contract = "user";
 
     /// <summary>The contract's bulk sample, on Sunday to Tuesday after the test clock's Saturday.</summary>
     private static JsonNode Booking(string addressId = "adr_1")

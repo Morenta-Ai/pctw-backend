@@ -9,7 +9,7 @@ namespace Rethread.Api.Tests.Shop;
 
 public sealed class ShopTests(PostgresServer server)
 {
-    private const string Contract = "user-next";
+    private const string Contract = "user";
     private static readonly byte[] Png = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0, 0, 0, 0x0D];
 
     private static object Cart(string method, long total, params (string Id, int Qty)[] items) => new

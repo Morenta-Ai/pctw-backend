@@ -58,6 +58,9 @@ The rest are the same everywhere.
 | `RateBook` | Which rates apply on a Colombo day |
 | `ImpactCalculator` | Kilograms × multipliers for the impact screen |
 | `NotificationService`, `NotificationTexts` | Alerts for all three audiences, and their wording |
+| `PickupSlots` | The daily slots and whether each can still be chosen |
+| `IPaymentGateway` | Confirming card payments (a development stand-in until a gateway is chosen) |
+| `Idempotency` | `Idempotency-Key` replays for the user app's create calls |
 | `Maintenance` | Offer expiry, 30-minute waiting alerts, silent collectors going offline |
 
 Money moves under database guarantees: accepting a job and buying stock are conditional updates, and
@@ -71,7 +74,11 @@ doesn't run, such as on a platform that sleeps between requests.
 
 ## Errors
 
-Every non-2xx response is `{ code, message, details }`:
+Every non-2xx response is `{ code, message, details }`. The three contracts name a few errors differently
+(the user app's `VALIDATION_ERROR`, `NOT_FOUND` and `OTP_INVALID` are the portal's `VALIDATION_FAILED`,
+`PICKUP_NOT_FOUND` and the collector app's `INVALID_OTP`), so domain code throws one set of codes and
+`ErrorDialect` renames them on the way out, by the API the request was for.
+
 
 - Endpoints and services throw `ApiException` (`ApiException.Conflict("JOB_TAKEN", …)`).
 - `ApiExceptionHandler` renders it; anything else becomes 500 `INTERNAL_ERROR` and is logged.

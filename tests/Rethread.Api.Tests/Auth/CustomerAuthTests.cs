@@ -8,7 +8,7 @@ namespace Rethread.Api.Tests.Auth;
 
 public sealed class CustomerAuthTests(PostgresServer server)
 {
-    private const string Contract = "user-next";
+    private const string Contract = "user";
 
     private static object Request(string destination, string channel = "sms") => new { channel, destination };
 

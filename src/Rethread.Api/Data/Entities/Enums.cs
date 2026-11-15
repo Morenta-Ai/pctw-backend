@@ -55,6 +55,6 @@ public enum FulfilmentType { HomeDelivery, ClickAndCollect }
 
 public enum PaymentMethod { Card, Wallet }
 
-public enum PaymentStatus { Unpaid, Paid, Refunded }
+public enum PaymentStatus { Unpaid, Paid, Refunded, Failed }
 
 public enum OrderStatus { Placed, Confirmed, OutForDelivery, ReadyAtVendor, Completed, Cancelled }

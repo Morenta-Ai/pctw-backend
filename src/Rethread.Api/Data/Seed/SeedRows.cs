@@ -79,8 +79,8 @@ internal static class SeedRows
 
     public static Vendor[] Vendors() =>
     [
-        new() { Id = "vnd_nugegoda", Name = "ReThread Point – Nugegoda", Address = "88 High Level Rd, Nugegoda", Latitude = 6.8649, Longitude = 79.8997 },
-        new() { Id = "vnd_kollupitiya", Name = "ReThread Point – Kollupitiya", Address = "21 Duplication Rd, Colombo 03", Latitude = 6.91, Longitude = 79.85 },
+        new() { Id = "vnd_nugegoda", Name = "ReThread Point – Nugegoda", Address = "88 High Level Rd, Nugegoda", Latitude = 6.8649, Longitude = 79.8997, OpeningHours = "Mon–Sat 9:00–19:00", Phone = "+94112345602" },
+        new() { Id = "vnd_kollupitiya", Name = "ReThread Point – Kollupitiya", Address = "21 Duplication Rd, Colombo 03", Latitude = 6.91, Longitude = 79.85, OpeningHours = "Mon–Sat 9:00–19:00", Phone = "+94112345601" },
     ];
 
     public static GarmentType[] GarmentTypes() =>

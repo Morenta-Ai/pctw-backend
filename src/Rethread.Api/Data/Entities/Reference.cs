@@ -19,6 +19,10 @@ public sealed class Vendor
     public required string Address { get; set; }
     public double Latitude { get; set; }
     public double Longitude { get; set; }
+    public string OpeningHours { get; set; } = "";
+    public string? Phone { get; set; }
+    /// <summary>Taking click &amp; collect orders.</summary>
+    public bool Active { get; set; } = true;
 }
 
 /// <summary>Reference weights for the itemised pickup flow.</summary>

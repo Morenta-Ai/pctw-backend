@@ -861,6 +861,14 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("address_id");
 
+                    b.Property<string>("ContactMobile")
+                        .HasColumnType("text")
+                        .HasColumnName("contact_mobile");
+
+                    b.Property<string>("ContactName")
+                        .HasColumnType("text")
+                        .HasColumnName("contact_name");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -891,6 +899,10 @@ namespace Rethread.Api.Data.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)")
                         .HasColumnName("payment_method");
+
+                    b.Property<string>("PaymentReference")
+                        .HasColumnType("text")
+                        .HasColumnName("payment_reference");
 
                     b.Property<string>("PaymentStatus")
                         .IsRequired()
@@ -1480,14 +1492,42 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnType("character varying(32)")
                         .HasColumnName("category");
 
+                    b.Property<int?>("ChestCm")
+                        .HasColumnType("integer")
+                        .HasColumnName("chest_cm");
+
+                    b.Property<string>("ConditionGrade")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("condition_grade");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<string>("Gender")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("gender");
 
                     b.PrimitiveCollection<List<string>>("ImageUrls")
                         .IsRequired()
                         .HasColumnType("text[]")
                         .HasColumnName("image_urls");
+
+                    b.Property<decimal?>("ImpactKg")
+                        .HasPrecision(6, 2)
+                        .HasColumnType("numeric(6,2)")
+                        .HasColumnName("impact_kg");
+
+                    b.Property<int?>("LengthCm")
+                        .HasColumnType("integer")
+                        .HasColumnName("length_cm");
+
+                    b.Property<string>("Material")
+                        .HasColumnType("text")
+                        .HasColumnName("material");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1502,6 +1542,10 @@ namespace Rethread.Api.Data.Migrations
                     b.Property<bool>("Published")
                         .HasColumnType("boolean")
                         .HasColumnName("published");
+
+                    b.Property<string>("RejuvenatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("rejuvenated_by");
 
                     b.PrimitiveCollection<List<string>>("Sizes")
                         .IsRequired()
@@ -1526,6 +1570,10 @@ namespace Rethread.Api.Data.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("xid")
                         .HasColumnName("xmin");
+
+                    b.Property<int?>("WaistCm")
+                        .HasColumnType("integer")
+                        .HasColumnName("waist_cm");
 
                     b.HasKey("Id")
                         .HasName("pk_products");
@@ -1868,6 +1916,10 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("id");
 
+                    b.Property<bool>("Active")
+                        .HasColumnType("boolean")
+                        .HasColumnName("active");
+
                     b.Property<string>("Address")
                         .IsRequired()
                         .HasColumnType("text")
@@ -1885,6 +1937,15 @@ namespace Rethread.Api.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
+
+                    b.Property<string>("OpeningHours")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("opening_hours");
+
+                    b.Property<string>("Phone")
+                        .HasColumnType("text")
+                        .HasColumnName("phone");
 
                     b.HasKey("Id")
                         .HasName("pk_vendors");

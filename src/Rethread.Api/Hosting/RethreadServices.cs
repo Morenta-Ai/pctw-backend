@@ -49,6 +49,7 @@ public static class RethreadServices
         services.AddScoped<OrderWorkflow>();
         services.AddScoped<ImpactCalculator>();
         services.AddScoped<PublicUrls>();
+        services.AddScoped<PickupSlots>();
         services.AddScoped<OfferSimulator>();
         services.AddScoped<Maintenance>();
         services.AddHostedService<MaintenanceService>();

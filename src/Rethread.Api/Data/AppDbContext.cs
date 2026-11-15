@@ -32,6 +32,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<PickupPhoto> PickupPhotos => Set<PickupPhoto>();
     public DbSet<Assignment> Assignments => Set<Assignment>();
     public DbSet<HubDelivery> HubDeliveries => Set<HubDelivery>();
+    public DbSet<PickupPreferredDate> PickupPreferredDates => Set<PickupPreferredDate>();
+    public DbSet<IdempotencyRecord> IdempotencyRecords => Set<IdempotencyRecord>();
 
     public DbSet<WalletTransaction> WalletTransactions => Set<WalletTransaction>();
     public DbSet<Redemption> Redemptions => Set<Redemption>();

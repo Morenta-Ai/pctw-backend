@@ -29,7 +29,7 @@ public enum BulkMode { Weight, Pieces }
 
 public enum Slot { Morning, Afternoon, Evening }
 
-public enum ItemCondition { Good, Fair, Worn }
+public enum ItemCondition { Good, Fair, Worn, Damaged }
 
 public enum VehicleType { ThreeWheeler, Motorbike, Van, Lorry }
 

@@ -11,16 +11,19 @@ namespace Rethread.Api.Domain;
 /// </summary>
 public sealed class NotificationService(AppDbContext db, TimeProvider time)
 {
+    /// <summary>The user app's types. It shows anything else as <c>system</c>.</summary>
     public static class CustomerTypes
     {
-        public const string WeightUpdated = "weightUpdated";
-        public const string CollectorEnRoute = "collectorEnRoute";
-        public const string HubArrival = "hubArrival";
-        public const string OrderUpdate = "orderUpdate";
+        /// <summary>With <c>pickupStatus</c>: enRoute, collected, deliveredToHub or cancelled.</summary>
+        public const string PickupStatus = "pickupStatus";
+        public const string PickupDateConfirmed = "pickupDateConfirmed";
+        public const string WeightFlagged = "weightFlagged";
+        /// <summary>Its target is the pickup that earned the money.</summary>
         public const string PaymentCredited = "paymentCredited";
-        public const string DonationThanks = "donationThanks";
-        public const string PickupCancelled = "pickupCancelled";
-        public const string TransferUpdate = "transferUpdate";
+        public const string OrderUpdate = "orderUpdate";
+        public const string Milestone = "milestone";
+        public const string Promotion = "promotion";
+        public const string System = "system";
     }
 
     public static class CollectorTypes
@@ -42,8 +45,17 @@ public sealed class NotificationService(AppDbContext db, TimeProvider time)
     }
 
     public Notification ToCustomer(string customerId, string type, string title, string body, string? targetType,
-        string? targetId, DateTime? at = null) =>
-        Add(Audience.Customer, customerId, Ids.New("ntf"), type, title, body, targetType, targetId, at);
+        string? targetId, DateTime? at = null, string? pickupStatus = null)
+    {
+        var notification = Add(Audience.Customer, customerId, Ids.New("ntf"), type, title, body, targetType, targetId, at);
+        notification.PickupStatus = pickupStatus;
+        return notification;
+    }
+
+    /// <summary>A pickup reached a status the customer hears about (enRoute, collected, deliveredToHub, cancelled).</summary>
+    public Notification PickupStatusToCustomer(Pickup pickup, string status, (string Title, string Body) text,
+        DateTime? at = null) =>
+        ToCustomer(pickup.CustomerId, CustomerTypes.PickupStatus, text.Title, text.Body, "pickup", pickup.Id, at, status);
 
     public Notification ToCollector(string collectorId, string type, string title, string body,
         string? targetType, string? targetId, DateTime? at = null) =>

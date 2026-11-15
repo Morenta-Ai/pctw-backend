@@ -716,6 +716,42 @@ namespace Rethread.Api.Data.Migrations
                     b.ToTable("hub_deliveries", (string)null);
                 });
 
+            modelBuilder.Entity("Rethread.Api.Data.Entities.IdempotencyRecord", b =>
+                {
+                    b.Property<string>("CustomerId")
+                        .HasColumnType("text")
+                        .HasColumnName("customer_id");
+
+                    b.Property<string>("Scope")
+                        .HasColumnType("text")
+                        .HasColumnName("scope");
+
+                    b.Property<string>("Key")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("key");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("RequestHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("request_hash");
+
+                    b.Property<string>("ResourceId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("resource_id");
+
+                    b.HasKey("CustomerId", "Scope", "Key")
+                        .HasName("pk_idempotency_records");
+
+                    b.ToTable("idempotency_records", (string)null);
+                });
+
             modelBuilder.Entity("Rethread.Api.Data.Entities.ImpactMultiplier", b =>
                 {
                     b.Property<string>("Key")
@@ -772,6 +808,10 @@ namespace Rethread.Api.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<string>("PickupStatus")
+                        .HasColumnType("text")
+                        .HasColumnName("pickup_status");
 
                     b.Property<DateTime?>("ReadAt")
                         .HasColumnType("timestamp with time zone")
@@ -1075,6 +1115,12 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("address_id");
 
+                    b.Property<string>("AddressLabel")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("address_label");
+
                     b.Property<string>("AddressLine")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -1120,6 +1166,11 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("CustomerCancelReason")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("customer_cancel_reason");
+
                     b.Property<string>("CustomerId")
                         .IsRequired()
                         .HasColumnType("character varying(40)")
@@ -1132,6 +1183,10 @@ namespace Rethread.Api.Data.Migrations
                     b.Property<long>("CustomerRatePerKgCents")
                         .HasColumnType("bigint")
                         .HasColumnName("customer_rate_per_kg_cents");
+
+                    b.Property<int?>("DeclaredBagCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("declared_bag_count");
 
                     b.Property<int?>("DeclaredPieces")
                         .HasColumnType("integer")
@@ -1180,6 +1235,10 @@ namespace Rethread.Api.Data.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("text")
                         .HasColumnName("note");
+
+                    b.Property<int?>("PieceCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("piece_count");
 
                     b.Property<DateOnly>("ScheduledDate")
                         .HasColumnType("date")
@@ -1377,6 +1436,35 @@ namespace Rethread.Api.Data.Migrations
                         .HasDatabaseName("ix_pickup_photos_pickup_id");
 
                     b.ToTable("pickup_photos", (string)null);
+                });
+
+            modelBuilder.Entity("Rethread.Api.Data.Entities.PickupPreferredDate", b =>
+                {
+                    b.Property<string>("PickupId")
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("pickup_id");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer")
+                        .HasColumnName("priority");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date")
+                        .HasColumnName("date");
+
+                    b.Property<string>("Slot")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("slot");
+
+                    b.HasKey("PickupId", "Priority")
+                        .HasName("pk_pickup_preferred_dates");
+
+                    b.HasIndex("Date", "Slot")
+                        .HasDatabaseName("ix_pickup_preferred_dates_date_slot");
+
+                    b.ToTable("pickup_preferred_dates", (string)null);
                 });
 
             modelBuilder.Entity("Rethread.Api.Data.Entities.Product", b =>
@@ -2066,6 +2154,16 @@ namespace Rethread.Api.Data.Migrations
                         .HasConstraintName("fk_pickup_items_pickups_pickup_id");
                 });
 
+            modelBuilder.Entity("Rethread.Api.Data.Entities.PickupPreferredDate", b =>
+                {
+                    b.HasOne("Rethread.Api.Data.Entities.Pickup", null)
+                        .WithMany("PreferredDates")
+                        .HasForeignKey("PickupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_pickup_preferred_dates_pickups_pickup_id");
+                });
+
             modelBuilder.Entity("Rethread.Api.Data.Entities.Redemption", b =>
                 {
                     b.HasOne("Rethread.Api.Data.Entities.Customer", "Customer")
@@ -2124,6 +2222,8 @@ namespace Rethread.Api.Data.Migrations
                     b.Navigation("Events");
 
                     b.Navigation("Items");
+
+                    b.Navigation("PreferredDates");
                 });
 #pragma warning restore 612, 618
         }

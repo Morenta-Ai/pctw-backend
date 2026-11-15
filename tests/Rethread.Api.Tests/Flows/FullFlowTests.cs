@@ -30,19 +30,26 @@ public sealed class FullFlowTests(PostgresServer server)
             lng = 79.8661,
             isDefault = true,
         }, HttpStatusCode.Created);
-        var pickup = await customer.PostJsonAsync("/api/v1/pickups", new
+        var booking = new HttpRequestMessage(HttpMethod.Post, "/api/v1/pickups")
         {
-            method = "bulk",
-            bulkMode = "weight",
-            declaredWeightKg = 10.0,
-            declaredPieces = (int?)null,
-            items = Array.Empty<object>(),
-            scheduledDate = "2026-11-07",
-            slot = "afternoon",
-            addressId = home.Str("id"),
-            notes = "Blue gate",
-            fallbackToCallCentre = false,
-        }, HttpStatusCode.Created);
+            Content = JsonContent.Create(new
+            {
+                mode = "bulk",
+                pieceCount = 30,
+                bagCount = 3,
+                addressId = home.Str("id"),
+                notes = "Blue gate",
+                fallbackToCallCentre = false,
+                preferredDates = new[]
+                {
+                    new { priority = 1, date = "2026-11-08", slotId = "morning" },
+                    new { priority = 2, date = "2026-11-09", slotId = "morning" },
+                    new { priority = 3, date = "2026-11-10", slotId = "evening" },
+                },
+            }),
+        };
+        booking.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
+        var pickup = await (await customer.SendAsync(booking)).JsonAsync(HttpStatusCode.Created);
         var id = pickup.Str("id");
 
         // 2. The call centre sees it and offers it to Ruwan, who declines; then to Lahiru, who accepts.
@@ -52,7 +59,7 @@ public sealed class FullFlowTests(PostgresServer server)
         await ruwan.PostAsJsonAsync($"/api/v1/collector/assignments/{first.Str("id")}/decline", new { reason = "vehicleFull" });
         var second = await staff.PostJsonAsync($"/api/v1/admin/pickups/{id}/assignments", new { collectorId = "col_515", note = "Blue gate" }, HttpStatusCode.Created);
         Assert.Equal("accepted", (await lahiru.PostJsonAsync($"/api/v1/collector/assignments/{second.Str("id")}/accept", null)).Str("status"));
-        Assert.Equal("assigned", (await customer.GetJsonAsync($"/api/v1/pickups/{id}")).Str("status"));
+        Assert.Equal("confirmed", (await customer.GetJsonAsync($"/api/v1/pickups/{id}")).Str("status"));
 
         // 3. Lahiru drives there, weighs 9.25 kg and pays the customer.
         api.Clock.Advance(TimeSpan.FromMinutes(20));
@@ -68,8 +75,8 @@ public sealed class FullFlowTests(PostgresServer server)
         // minutes; the portal refreshes them, the test signs in again.)
         staff = await api.CallCentreAsync();
         var tracked = await customer.GetJsonAsync($"/api/v1/pickups/{id}");
-        Assert.Equal(("collected", 9.25m, 111000L), (tracked.Str("status"), tracked.GetProperty("actualWeightKg").GetDecimal(),
-            tracked.GetProperty("earningsCents").GetInt64()));
+        Assert.Equal(("collected", 9.25m, 111000L), (tracked.Str("status"), tracked.GetProperty("weighing").GetProperty("weightKg").GetDecimal(),
+            tracked.GetProperty("weighing").GetProperty("earningsCents").GetInt64()));
         Assert.Equal(111000, (await customer.GetJsonAsync("/api/v1/wallet")).GetProperty("balanceCents").GetInt64());
         var detail = await staff.GetJsonAsync($"/api/v1/admin/pickups/{id}");
         Assert.Equal((111000L, 37000L), (detail.GetProperty("customerPayoutCents").GetInt64(), detail.GetProperty("collectorPayoutCents").GetInt64()));
@@ -93,7 +100,7 @@ public sealed class FullFlowTests(PostgresServer server)
 
         // Everyone was told what they needed to know, and the timeline tells the story.
         var customerTypes = (await customer.GetJsonAsync("/api/v1/notifications")).GetProperty("items").EnumerateArray().Select(n => n.Str("type")).ToHashSet();
-        Assert.Superset(new HashSet<string> { "collectorEnRoute", "weightUpdated", "paymentCredited", "hubArrival", "transferUpdate" }, customerTypes);
+        Assert.Superset(new HashSet<string> { "pickupDateConfirmed", "pickupStatus", "paymentCredited", "system" }, customerTypes);
         var lahiruTypes = (await lahiru.GetJsonAsync("/api/v1/collector/notifications")).GetProperty("items").EnumerateArray().Select(n => n.Str("type"));
         Assert.Contains("assignment", lahiruTypes);
         var staffAlerts = await api.DbAsync(db => db.Notifications.Where(n => n.Audience == Audience.Staff && n.CreatedAt >= TestClock.Start.UtcDateTime)

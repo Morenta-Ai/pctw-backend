@@ -16,6 +16,10 @@ public sealed class Pickup : ICursorRow
     public PickupSource Source { get; set; }
     public PickupMethod Method { get; set; }
     public BulkMode? BulkMode { get; set; }
+    /// <summary>The customer's rough count of pieces, for a bulk request from the user app.</summary>
+    public int? PieceCount { get; set; }
+    /// <summary>Bags as the customer said; <see cref="BagCount"/> is what the collector plans for.</summary>
+    public int? DeclaredBagCount { get; set; }
     public decimal? DeclaredWeightKg { get; set; }
     public int? DeclaredPieces { get; set; }
     public decimal EstimatedKg { get; set; }
@@ -28,6 +32,7 @@ public sealed class Pickup : ICursorRow
     public DateTime WindowStart { get; set; }
     public DateTime WindowEnd { get; set; }
     public string? AddressId { get; set; }
+    public AddressLabel AddressLabel { get; set; } = AddressLabel.Home;
     public required string AddressLine { get; set; }
     public required string Area { get; set; }
     public double Latitude { get; set; }
@@ -40,6 +45,8 @@ public sealed class Pickup : ICursorRow
     public string? HubId { get; set; }
     public string? HubDeliveryId { get; set; }
     public string? CancelReason { get; set; }
+    /// <summary>The user app's reason (<c>changedMind</c>, …) when the customer cancelled.</summary>
+    public string? CustomerCancelReason { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? CollectedAt { get; set; }
     public DateTime? DeliveredAt { get; set; }
@@ -50,6 +57,16 @@ public sealed class Pickup : ICursorRow
     public Hub? Hub { get; set; }
     public List<PickupItem> Items { get; set; } = [];
     public List<PickupEvent> Events { get; set; } = [];
+    public List<PickupPreferredDate> PreferredDates { get; set; } = [];
+}
+
+/// <summary>One of the three dates the customer offered, first choice first.</summary>
+public sealed class PickupPreferredDate
+{
+    public required string PickupId { get; set; }
+    public int Priority { get; set; }
+    public DateOnly Date { get; set; }
+    public Slot Slot { get; set; }
 }
 
 public sealed class PickupItem

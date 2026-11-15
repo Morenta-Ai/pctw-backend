@@ -264,7 +264,7 @@ app tags call-centre jobs.
 
 `customerName` and `customerPhone` are `null` until this collector accepts the job; before that the app
 shows `customerFirstName`. `address` is always present, so a collector can judge the trip before accepting. An item has a `quantity` and usually a `size` on itemised jobs, and a
-`bagLabel` on bulk ones. `condition` is the customer's own description: `good`, `fair` or `worn`.
+`bagLabel` on bulk ones. `condition` is the customer's own description: `good`, `fair`, `worn` or `damaged`.
 
 ### `GET /jobs/active`
 

@@ -197,7 +197,7 @@ public sealed class JobTests(PostgresServer server)
         await using var api = await TestApi.StartAsync(server);
         var dilshan = await CollectorByCodeAsync(api, "COL-0466");
         Assert.Equal("onTheWay", (await dilshan.PostJsonAsync("/api/v1/collector/jobs/RT-24826/start", null)).Str("status"));
-        Assert.True(await api.DbAsync(db => db.Notifications.AnyAsync(n => n.RecipientId == "cus_9" && n.Type == "collectorEnRoute")));
+        Assert.True(await api.DbAsync(db => db.Notifications.AnyAsync(n => n.RecipientId == "cus_9" && n.Type == "pickupStatus" && n.PickupStatus == "enRoute")));
 
         var ruwan = await api.CollectorAsync();
         await (await ruwan.PostAsync("/api/v1/collector/jobs/RT-24826/arrive", null)).ErrorAsync(HttpStatusCode.NotFound, "JOB_NOT_FOUND");

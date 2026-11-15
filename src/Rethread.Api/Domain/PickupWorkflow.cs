@@ -27,20 +27,20 @@ public sealed class PickupWorkflow(AppDbContext db, RateBook rates, Notification
     public sealed record ItemDraft(GarmentType Type, string? MemberId, string? Size, ItemCondition Condition,
         int Quantity);
 
+    public sealed record PreferredDate(int Priority, DateOnly Date, Slot Slot);
+
     public sealed record Booking(
         Customer Customer,
         Address Address,
         PickupMethod Method,
-        BulkMode? BulkMode,
-        decimal? DeclaredWeightKg,
-        int? DeclaredPieces,
+        int? PieceCount,
+        int? BagCount,
         IReadOnlyList<ItemDraft> Items,
-        DateOnly ScheduledDate,
-        Slot Slot,
+        IReadOnlyList<PreferredDate> PreferredDates,
         string? Note,
         bool FallbackToCallCentre);
 
-    /// <summary>Per piece, for bulk bookings counted in pieces.</summary>
+    /// <summary>Per piece, to estimate a bulk request's weight for collectors and the portal.</summary>
     public const decimal KgPerPiece = 0.3m;
 
     public static (int StartHour, int EndHour) SlotHours(Slot slot) => slot switch
@@ -51,28 +51,24 @@ public sealed class PickupWorkflow(AppDbContext db, RateBook rates, Notification
     };
 
     /// <summary>
-    /// Books a pickup for a customer. For today, someone online has to cover the address, or the booking
-    /// fails with <c>NO_COLLECTORS_AVAILABLE</c>; retrying with the call-centre fallback books it anyway for
-    /// staff to assign by hand.
+    /// Books a pickup. The customer gives no weight: the estimate (for collectors and the portal) comes from
+    /// the piece count or each garment's average weight. It's scheduled on the first choice until a collector
+    /// confirms it. If no collector works near the address, it fails with <c>NO_COLLECTORS_AVAILABLE</c>
+    /// unless the customer falls back to the call centre.
     /// </summary>
     public async Task<Pickup> BookAsync(Booking booking, CancellationToken ct)
     {
         var now = time.UtcNow();
         var address = booking.Address;
-        if (booking.ScheduledDate == time.Today() && !booking.FallbackToCallCentre &&
-            !await AnyCollectorCoversAsync(address.Latitude, address.Longitude, ct))
-        {
-            throw ApiException.Conflict(NoCollectorsAvailable, "No collectors are free near you right now.");
-        }
+        if (!booking.FallbackToCallCentre && !await AnyCollectorWorksNearAsync(address.Latitude, address.Longitude, ct))
+            throw ApiException.Conflict(NoCollectorsAvailable, "No collectors work near you yet.");
 
-        var estimate = booking.Method == PickupMethod.Itemised
+        var estimate = Weight.Round(booking.Method == PickupMethod.Itemised
             ? booking.Items.Sum(i => i.Type.EstimatedKg * i.Quantity)
-            : booking.BulkMode == BulkMode.Pieces
-                ? booking.DeclaredPieces!.Value * KgPerPiece
-                : booking.DeclaredWeightKg!.Value;
-        estimate = Weight.Round(estimate);
+            : booking.PieceCount!.Value * KgPerPiece);
         var itemCount = booking.Method == PickupMethod.Itemised ? booking.Items.Sum(i => i.Quantity) : (int?)null;
-        var (start, end) = SlotHours(booking.Slot);
+        var first = booking.PreferredDates.OrderBy(d => d.Priority).First();
+        var (start, end) = SlotHours(first.Slot);
         var rate = await rates.CurrentAsync(ct);
         var id = $"RT-{await db.NextAsync(Sequences.PickupNumber, ct)}";
 
@@ -82,17 +78,20 @@ public sealed class PickupWorkflow(AppDbContext db, RateBook rates, Notification
             CustomerId = booking.Customer.Id,
             Source = booking.FallbackToCallCentre ? PickupSource.CallCentre : PickupSource.App,
             Method = booking.Method,
-            BulkMode = booking.Method == PickupMethod.Bulk ? booking.BulkMode : null,
-            DeclaredWeightKg = booking.BulkMode == BulkMode.Weight ? booking.DeclaredWeightKg : null,
-            DeclaredPieces = booking.BulkMode == BulkMode.Pieces ? booking.DeclaredPieces : null,
+            BulkMode = booking.Method == PickupMethod.Bulk ? BulkMode.Pieces : null,
+            PieceCount = booking.Method == PickupMethod.Bulk ? booking.PieceCount : null,
+            DeclaredBagCount = booking.Method == PickupMethod.Bulk ? booking.BagCount : null,
             EstimatedKg = estimate,
             ItemCount = itemCount,
-            BagCount = itemCount is { } n ? Math.Max(1, (int)Math.Ceiling(n / 10m)) : Math.Max(1, (int)Math.Ceiling(estimate / 4m)),
-            ScheduledDate = booking.ScheduledDate,
-            Slot = booking.Slot,
-            WindowStart = Colombo.At(booking.ScheduledDate, start),
-            WindowEnd = Colombo.At(booking.ScheduledDate, end),
+            BagCount = booking.BagCount ?? (itemCount is { } n
+                ? Math.Max(1, (int)Math.Ceiling(n / 10m))
+                : Math.Max(1, (int)Math.Ceiling(estimate / 4m))),
+            ScheduledDate = first.Date,
+            Slot = first.Slot,
+            WindowStart = Colombo.At(first.Date, start),
+            WindowEnd = Colombo.At(first.Date, end),
             AddressId = address.Id,
+            AddressLabel = address.Label,
             AddressLine = address.FullLine,
             Area = address.Area,
             Latitude = address.Latitude,
@@ -114,6 +113,9 @@ public sealed class PickupWorkflow(AppDbContext db, RateBook rates, Notification
                 SortOrder = i,
             }).ToList(),
             Events = [new PickupEvent { PickupId = id, Status = PickupStatus.Pending, OccurredAt = now }],
+            PreferredDates = booking.PreferredDates
+                .Select(d => new PickupPreferredDate { PickupId = id, Priority = d.Priority, Date = d.Date, Slot = d.Slot })
+                .ToList(),
         };
         db.Pickups.Add(pickup);
 
@@ -122,6 +124,9 @@ public sealed class PickupWorkflow(AppDbContext db, RateBook rates, Notification
         await db.SaveChangesAsync(ct);
         return pickup;
     }
+
+    /// <summary>Customers can cancel until a collector is on the way; staff until the clothes are collected.</summary>
+    public static readonly PickupStatus[] CustomerCancellable = [PickupStatus.Pending, PickupStatus.Assigned];
 
     /// <summary>
     /// Cancels a pickup that hasn't been collected yet. Open call-centre offers are withdrawn and an assigned
@@ -156,8 +161,7 @@ public sealed class PickupWorkflow(AppDbContext db, RateBook rates, Notification
 
         if (actor is not null)
         {
-            notifications.ToCustomer(pickup.CustomerId, NotificationService.CustomerTypes.PickupCancelled, "Pickup cancelled",
-                $"{pickup.Id} was cancelled: {reason}", "pickup", pickup.Id);
+            notifications.PickupStatusToCustomer(pickup, "cancelled", NotificationTexts.PickupCancelled(pickup, reason));
         }
 
         await db.SaveChangesAsync(ct);
@@ -195,6 +199,11 @@ public sealed class PickupWorkflow(AppDbContext db, RateBook rates, Notification
             OccurredAt = now,
             Actor = collector.FullName,
         });
+        // Taking it confirms its date: the customer hears which day and slot.
+        var confirmed = await db.Pickups.AsNoTracking().SingleAsync(p => p.Id == pickupId, ct);
+        var (confirmedTitle, confirmedBody) = NotificationTexts.PickupDateConfirmed(confirmed);
+        notifications.ToCustomer(confirmed.CustomerId, NotificationService.CustomerTypes.PickupDateConfirmed,
+            confirmedTitle, confirmedBody, "pickup", pickupId);
         await WithdrawOpenOffersAsync(pickupId, ct);
         await db.SaveChangesAsync(ct);
         if (own is not null) await own.CommitAsync(ct);
@@ -205,9 +214,10 @@ public sealed class PickupWorkflow(AppDbContext db, RateBook rates, Notification
     {
         RequireStatus(pickup, collector, PickupStatus.Assigned);
         Move(pickup, PickupStatus.EnRoute, collector.FullName);
-        var (title, body) = NotificationTexts.CollectorEnRoute(pickup, collector.FullName);
-        notifications.ToCustomer(pickup.CustomerId, NotificationService.CustomerTypes.CollectorEnRoute, title, body,
-            "pickup", pickup.Id);
+        int? eta = collector is { Latitude: { } lat, Longitude: { } lng }
+            ? Geo.EtaMinutes(Geo.DistanceKm(lat, lng, pickup.Latitude, pickup.Longitude))
+            : null;
+        notifications.PickupStatusToCustomer(pickup, "enRoute", NotificationTexts.CollectorEnRoute(pickup, collector.FullName, eta));
         await db.SaveChangesAsync(ct);
     }
 
@@ -245,16 +255,10 @@ public sealed class PickupWorkflow(AppDbContext db, RateBook rates, Notification
         Move(pickup, PickupStatus.Collected, collector.FullName);
         wallet.CreditPickup(pickup);
 
-        foreach (var (type, text) in new[]
-                 {
-                     (NotificationService.CustomerTypes.WeightUpdated, NotificationTexts.WeightUpdated(pickup)),
-                     (NotificationService.CustomerTypes.PaymentCredited, NotificationTexts.PaymentCredited(pickup)),
-                 })
-        {
-            notifications.ToCustomer(pickup.CustomerId, type, text.Title, text.Body,
-                type == NotificationService.CustomerTypes.PaymentCredited ? "wallet" : "pickup",
-                type == NotificationService.CustomerTypes.PaymentCredited ? null : pickup.Id);
-        }
+        notifications.PickupStatusToCustomer(pickup, "collected", NotificationTexts.PickupCollected(pickup));
+        var (paidTitle, paidBody) = NotificationTexts.PaymentCredited(pickup);
+        notifications.ToCustomer(pickup.CustomerId, NotificationService.CustomerTypes.PaymentCredited, paidTitle, paidBody,
+            "pickup", pickup.Id);
 
         await db.SaveChangesAsync(ct);
     }
@@ -300,9 +304,7 @@ public sealed class PickupWorkflow(AppDbContext db, RateBook rates, Notification
             job.HubDeliveryId = delivery.Id;
             job.DeliveredAt = now;
             Move(job, PickupStatus.DeliveredToHub, collector.FullName);
-            var (title, body) = NotificationTexts.HubArrival(job, hub.Name);
-            notifications.ToCustomer(job.CustomerId, NotificationService.CustomerTypes.HubArrival, title, body,
-                "pickup", job.Id);
+            notifications.PickupStatusToCustomer(job, "deliveredToHub", NotificationTexts.HubArrival(job, hub.Name));
         }
 
         await db.SaveChangesAsync(ct);
@@ -356,6 +358,24 @@ public sealed class PickupWorkflow(AppDbContext db, RateBook rates, Notification
             .Where(c => c.Online && c.Status == AccountStatus.Active && c.Latitude != null && c.Longitude != null)
             .Select(c => new { c.Latitude, c.Longitude, c.RadiusKm }).ToListAsync(ct);
         return online.Any(c => Geo.DistanceKm(c.Latitude!.Value, c.Longitude!.Value, latitude, longitude) <= c.RadiusKm);
+    }
+
+    /// <summary>
+    /// Does any active collector work near this point, online or not? Their last position or home suburb,
+    /// within twice their radius: bookings are for the coming days, not this minute.
+    /// </summary>
+    public async Task<bool> AnyCollectorWorksNearAsync(double latitude, double longitude, CancellationToken ct)
+    {
+        var collectors = await db.Collectors.Where(c => c.Status == AccountStatus.Active)
+            .Select(c => new { c.Latitude, c.Longitude, c.Area, c.RadiusKm }).ToListAsync(ct);
+        return collectors.Any(c =>
+        {
+            var home = Areas.Find(c.Area);
+            var points = new List<(double, double)>();
+            if (c.Latitude is { } lat && c.Longitude is { } lng) points.Add((lat, lng));
+            if (home is not null) points.Add((home.Latitude, home.Longitude));
+            return points.Any(p => Geo.DistanceKm(p.Item1, p.Item2, latitude, longitude) <= c.RadiusKm * 2);
+        });
     }
 
     private static string CamelCaseEnum(PickupStatus status) => CamelCaseEnumConverter<PickupStatus>.ToText(status);

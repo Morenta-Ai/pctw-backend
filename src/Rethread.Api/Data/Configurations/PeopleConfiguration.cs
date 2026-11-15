@@ -31,6 +31,12 @@ public sealed class AddressConfiguration : IEntityTypeConfiguration<Address>
     {
         b.Property(x => x.Id).HasMaxLength(40);
         b.Property(x => x.Line).HasMaxLength(200);
+        b.Property(x => x.CustomLabel).HasMaxLength(40);
+        b.Property(x => x.UnitNo).HasMaxLength(40);
+        b.Property(x => x.City).HasMaxLength(80);
+        b.Property(x => x.Landmark).HasMaxLength(120);
+        b.Property(x => x.Notes).HasMaxLength(300);
+        b.Ignore(x => x.FullLine);
         b.Property(x => x.Area).HasMaxLength(80);
         b.HasIndex(x => x.CustomerId).IsUnique().HasFilter("is_default").HasDatabaseName("ix_addresses_one_default");
     }

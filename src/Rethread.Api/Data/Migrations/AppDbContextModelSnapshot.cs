@@ -71,9 +71,20 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnType("character varying(80)")
                         .HasColumnName("area");
 
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("city");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<string>("CustomLabel")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("custom_label");
 
                     b.Property<string>("CustomerId")
                         .IsRequired()
@@ -90,6 +101,11 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnType("character varying(32)")
                         .HasColumnName("label");
 
+                    b.Property<string>("Landmark")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("landmark");
+
                     b.Property<double>("Latitude")
                         .HasColumnType("double precision")
                         .HasColumnName("latitude");
@@ -103,6 +119,16 @@ namespace Rethread.Api.Data.Migrations
                     b.Property<double>("Longitude")
                         .HasColumnType("double precision")
                         .HasColumnName("longitude");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("notes");
+
+                    b.Property<string>("UnitNo")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("unit_no");
 
                     b.HasKey("Id")
                         .HasName("pk_addresses");
@@ -382,9 +408,17 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnType("character varying(40)")
                         .HasColumnName("id");
 
+                    b.Property<string>("AvatarFileId")
+                        .HasColumnType("text")
+                        .HasColumnName("avatar_file_id");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
 
                     b.Property<string>("Email")
                         .HasMaxLength(254)
@@ -515,6 +549,10 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnType("character varying(40)")
                         .HasColumnName("customer_id");
 
+                    b.Property<DateOnly?>("DateOfBirth")
+                        .HasColumnType("date")
+                        .HasColumnName("date_of_birth");
+
                     b.Property<string>("Gender")
                         .IsRequired()
                         .HasMaxLength(32)
@@ -573,10 +611,20 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnType("numeric(6,2)")
                         .HasColumnName("estimated_kg");
 
+                    b.Property<string>("Icon")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("icon");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
+
+                    b.Property<string>("SizeBasis")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("size_basis");
 
                     b.Property<int>("SortOrder")
                         .HasColumnType("integer")
@@ -988,6 +1036,11 @@ namespace Rethread.Api.Data.Migrations
                     b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("expires_at");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("purpose");
 
                     b.Property<DateTime>("ResendAfter")
                         .HasColumnType("timestamp with time zone")

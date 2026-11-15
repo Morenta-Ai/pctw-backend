@@ -5,6 +5,8 @@ public sealed class OtpChallenge
 {
     public required string Id { get; set; }
     public Audience Audience { get; set; }
+    /// <summary><c>signIn</c>, or <c>contactChange</c> for a code sent to a new mobile or email.</summary>
+    public string Purpose { get; set; } = "signIn";
     /// <summary><c>mobile</c> or <c>email</c>.</summary>
     public required string Channel { get; set; }
     public required string Destination { get; set; }

@@ -27,6 +27,10 @@ public sealed class GarmentType
     public required string Id { get; set; }
     /// <summary>What the collector and portal show, such as <c>T-shirt</c>.</summary>
     public required string Name { get; set; }
+    /// <summary>A key the user app maps to its own icon set.</summary>
+    public string Icon { get; set; } = "other";
+    /// <summary>The measurement it's sized by: <c>chest</c>, <c>waist</c>, <c>height</c> or <c>none</c>.</summary>
+    public string SizeBasis { get; set; } = "none";
     public decimal EstimatedKg { get; set; }
     public int SortOrder { get; set; }
 }

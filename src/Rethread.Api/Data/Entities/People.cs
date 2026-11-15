@@ -11,6 +11,9 @@ public sealed class Customer
     public Language Language { get; set; } = Language.En;
     public AccountStatus Status { get; set; } = AccountStatus.Active;
     public string? StatusReason { get; set; }
+    public string? AvatarFileId { get; set; }
+    /// <summary>Set when the customer deleted their account; the personal details are gone by then.</summary>
+    public DateTime? DeletedAt { get; set; }
     public DateTime CreatedAt { get; set; }
 
     public List<Address> Addresses { get; set; } = [];
@@ -25,13 +28,24 @@ public sealed class Address
     public required string Id { get; set; }
     public required string CustomerId { get; set; }
     public AddressLabel Label { get; set; }
+    /// <summary>The customer's own name for an <c>other</c> address, such as "Grandma's".</summary>
+    public string? CustomLabel { get; set; }
+    /// <summary>Street and number.</summary>
     public required string Line { get; set; }
+    public string? UnitNo { get; set; }
+    public string City { get; set; } = "";
+    public string? Landmark { get; set; }
+    public string? Notes { get; set; }
     /// <summary>The suburb, for the portal's tables and the collector's job card.</summary>
     public required string Area { get; set; }
     public double Latitude { get; set; }
     public double Longitude { get; set; }
     public bool IsDefault { get; set; }
     public DateTime CreatedAt { get; set; }
+
+    /// <summary>One line for the portal and the collector: <c>Flat 2, 42/3 Galle Road, Colombo 03</c>.</summary>
+    public string FullLine => string.Join(", ",
+        new[] { UnitNo, Line, City }.Where(part => !string.IsNullOrWhiteSpace(part)));
 }
 
 public sealed class FamilyMember
@@ -42,6 +56,7 @@ public sealed class FamilyMember
     public FamilyRelation Relation { get; set; }
     public Gender Gender { get; set; }
     public AgeGroup AgeGroup { get; set; }
+    public DateOnly? DateOfBirth { get; set; }
     public decimal? HeightCm { get; set; }
     public decimal? ChestCm { get; set; }
     public decimal? WaistCm { get; set; }

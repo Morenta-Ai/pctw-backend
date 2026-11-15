@@ -18,6 +18,8 @@ public sealed class Notification : ICursorRow
     public required string Body { get; set; }
     public string? TargetType { get; set; }
     public string? TargetId { get; set; }
+    /// <summary>For the user app's <c>pickupStatus</c> notifications: which status was reached.</summary>
+    public string? PickupStatus { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? ReadAt { get; set; }
 }

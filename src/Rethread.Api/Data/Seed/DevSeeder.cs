@@ -427,6 +427,16 @@ public sealed class DevSeeder(
             DeliveredAt = At(PickupStatus.DeliveredToHub),
             Items = items,
             Events = events,
+            PieceCount = d.Method == PickupMethod.Bulk ? (int)Math.Round(d.EstimatedKg / PickupWorkflow.KgPerPiece) : null,
+            DeclaredBagCount = d.Method == PickupMethod.Bulk ? d.BagCount : null,
+            // The customer's three choices: the day it's on, then the next two days in the same slot.
+            PreferredDates = Enumerable.Range(1, 3).Select(priority => new PickupPreferredDate
+            {
+                PickupId = d.Id,
+                Priority = priority,
+                Date = d.Date.AddDays(priority - 1),
+                Slot = d.StartHour < 12 ? Slot.Morning : d.StartHour < 16 ? Slot.Afternoon : Slot.Evening,
+            }).ToList(),
         };
     }
 
@@ -776,9 +786,10 @@ public sealed class DevSeeder(
             });
 
         void Person(Audience audience, string recipient, string type, (string Title, string Body) text,
-            string? targetType, string? targetId, DateTime at) =>
+            string? targetType, string? targetId, DateTime at, string? pickupStatus = null) =>
             list.Add(new Notification
             {
+                PickupStatus = pickupStatus,
                 Id = $"ntf_{type}_{targetId ?? recipient}_{list.Count + 1}",
                 Audience = audience,
                 RecipientId = recipient,
@@ -806,18 +817,18 @@ public sealed class DevSeeder(
                 switch (e.Status)
                 {
                     case PickupStatus.EnRoute when collector is not null:
-                        Person(Audience.Customer, p.CustomerId, NotificationService.CustomerTypes.CollectorEnRoute,
-                            NotificationTexts.CollectorEnRoute(p, collector.FullName), "pickup", p.Id, e.OccurredAt);
+                        Person(Audience.Customer, p.CustomerId, NotificationService.CustomerTypes.PickupStatus,
+                            NotificationTexts.CollectorEnRoute(p, collector.FullName, null), "pickup", p.Id, e.OccurredAt, "enRoute");
                         break;
                     case PickupStatus.Collected:
-                        Person(Audience.Customer, p.CustomerId, NotificationService.CustomerTypes.WeightUpdated,
-                            NotificationTexts.WeightUpdated(p), "pickup", p.Id, e.OccurredAt);
+                        Person(Audience.Customer, p.CustomerId, NotificationService.CustomerTypes.PickupStatus,
+                            NotificationTexts.PickupCollected(p), "pickup", p.Id, e.OccurredAt, "collected");
                         Person(Audience.Customer, p.CustomerId, NotificationService.CustomerTypes.PaymentCredited,
-                            NotificationTexts.PaymentCredited(p), "wallet", null, e.OccurredAt);
+                            NotificationTexts.PaymentCredited(p), "pickup", p.Id, e.OccurredAt);
                         break;
                     case PickupStatus.DeliveredToHub:
-                        Person(Audience.Customer, p.CustomerId, NotificationService.CustomerTypes.HubArrival,
-                            NotificationTexts.HubArrival(p, hubs.Single(h => h.Id == p.HubId).Name), "pickup", p.Id, e.OccurredAt);
+                        Person(Audience.Customer, p.CustomerId, NotificationService.CustomerTypes.PickupStatus,
+                            NotificationTexts.HubArrival(p, hubs.Single(h => h.Id == p.HubId).Name), "pickup", p.Id, e.OccurredAt, "deliveredToHub");
                         break;
                 }
             }

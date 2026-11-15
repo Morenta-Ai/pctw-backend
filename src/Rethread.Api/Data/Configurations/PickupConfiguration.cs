@@ -21,6 +21,28 @@ public sealed class PickupConfiguration : IEntityTypeConfiguration<Pickup>
         b.HasOne(x => x.Hub).WithMany().HasForeignKey(x => x.HubId).OnDelete(DeleteBehavior.Restrict);
         b.HasMany(x => x.Items).WithOne().HasForeignKey(x => x.PickupId).OnDelete(DeleteBehavior.Cascade);
         b.HasMany(x => x.Events).WithOne().HasForeignKey(x => x.PickupId).OnDelete(DeleteBehavior.Cascade);
+        b.HasMany(x => x.PreferredDates).WithOne().HasForeignKey(x => x.PickupId).OnDelete(DeleteBehavior.Cascade);
+        b.Property(x => x.CustomerCancelReason).HasMaxLength(20);
+    }
+}
+
+public sealed class PickupPreferredDateConfiguration : IEntityTypeConfiguration<PickupPreferredDate>
+{
+    public void Configure(EntityTypeBuilder<PickupPreferredDate> b)
+    {
+        b.HasKey(x => new { x.PickupId, x.Priority });
+        b.HasIndex(x => new { x.Date, x.Slot });
+    }
+}
+
+public sealed class IdempotencyRecordConfiguration : IEntityTypeConfiguration<IdempotencyRecord>
+{
+    public void Configure(EntityTypeBuilder<IdempotencyRecord> b)
+    {
+        b.ToTable("idempotency_records");
+        b.HasKey(x => new { x.CustomerId, x.Scope, x.Key });
+        b.Property(x => x.Key).HasMaxLength(100);
+        b.Property(x => x.RequestHash).HasMaxLength(64);
     }
 }
 

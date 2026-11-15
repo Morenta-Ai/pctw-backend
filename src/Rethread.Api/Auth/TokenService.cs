@@ -92,9 +92,14 @@ public sealed class TokenService(AppDbContext db, IOptions<JwtOptions> options, 
             .ExecuteUpdateAsync(s => s.SetProperty(t => t.RevokedAt, time.UtcNow()), ct);
     }
 
-    public async Task RevokeAllAsync(Audience audience, string subjectId, CancellationToken ct) =>
+    /// <summary>Ends every session; for a customer it also drops their push devices.</summary>
+    public async Task RevokeAllAsync(Audience audience, string subjectId, CancellationToken ct)
+    {
         await db.RefreshTokens.Where(t => t.Audience == audience && t.SubjectId == subjectId && t.RevokedAt == null)
             .ExecuteUpdateAsync(s => s.SetProperty(t => t.RevokedAt, time.UtcNow()), ct);
+        if (audience == Audience.Customer)
+            await db.Devices.Where(d => d.CustomerId == subjectId).ExecuteDeleteAsync(ct);
+    }
 
     private static ApiException SessionExpired() =>
         ApiException.Unauthorized(AuthErrors.SessionExpired, "Your session has ended. Sign in again.");

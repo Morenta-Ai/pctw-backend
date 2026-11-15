@@ -28,15 +28,19 @@ using Rethread.Api.Features.Collector.Load;
 using Rethread.Api.Features.Collector.Notifications;
 using Rethread.Api.Features.Collector.Profile;
 using Rethread.Api.Features.Customer.Addresses;
+using Rethread.Api.Features.Customer.AppConfig;
 using Rethread.Api.Features.Customer.Auth;
 using Rethread.Api.Features.Customer.Catalog;
+using Rethread.Api.Features.Customer.Devices;
 using Rethread.Api.Features.Customer.Family;
+using Rethread.Api.Features.Customer.Home;
 using Rethread.Api.Features.Customer.Impact;
 using Rethread.Api.Features.Customer.Notifications;
 using Rethread.Api.Features.Customer.Orders;
 using Rethread.Api.Features.Customer.Pickups;
 using Rethread.Api.Features.Customer.Profile;
 using Rethread.Api.Features.Customer.Shop;
+using Rethread.Api.Features.Customer.Support;
 using Rethread.Api.Features.Customer.Wallet;
 using Scalar.AspNetCore;
 
@@ -99,6 +103,10 @@ public static class RethreadPipeline
         customer.MapShop();
         customer.MapCustomerOrders();
         customer.MapImpact();
+        customer.MapDevices();
+        customer.MapSupport();
+        customer.MapAppConfig();
+        customer.MapHome();
 
         var collector = api.MapGroup("/collector").WithTags("Collector app")
             .RequireAuthorization(Policies.Collector)

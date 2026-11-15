@@ -50,6 +50,7 @@ public static class RethreadServices
         services.AddScoped<ImpactCalculator>();
         services.AddScoped<PublicUrls>();
         services.AddScoped<PickupSlots>();
+        services.AddSingleton<IPaymentGateway, DevelopmentPaymentGateway>();
         services.AddScoped<OfferSimulator>();
         services.AddScoped<Maintenance>();
         services.AddHostedService<MaintenanceService>();

@@ -119,7 +119,7 @@ public static class CustomerAdminEndpoints
         var recent = await db.Pickups.AsNoTracking().Where(p => p.CustomerId == id)
             .OrderByDescending(p => p.CreatedAt).Take(10).ToListAsync(ct);
         return new CustomerDetail(c.Id, c.FullName, c.Mobile, c.Email, AreaOf(c), c.Status, c.CreatedAt, s.PickupCount,
-            s.CollectedKg, s.BalanceCents, c.Addresses.SingleOrDefault(a => a.IsDefault)?.Line,
+            s.CollectedKg, s.BalanceCents, c.Addresses.SingleOrDefault(a => a.IsDefault)?.FullLine,
             await db.FamilyMembers.CountAsync(m => m.CustomerId == id, ct), s.EarnedCents,
             recent.Select(p => new CustomerDetail.RecentPickup(p.Id, p.Status, p.ScheduledDate, p.EstimatedKg,
                 p.ActualWeightKg, p.CustomerPayoutCents)).ToList());

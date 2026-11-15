@@ -29,6 +29,7 @@ using Rethread.Api.Features.Collector.Notifications;
 using Rethread.Api.Features.Collector.Profile;
 using Rethread.Api.Features.Customer.Addresses;
 using Rethread.Api.Features.Customer.Auth;
+using Rethread.Api.Features.Customer.Catalog;
 using Rethread.Api.Features.Customer.Family;
 using Rethread.Api.Features.Customer.Impact;
 using Rethread.Api.Features.Customer.Notifications;
@@ -90,6 +91,7 @@ public static class RethreadPipeline
         customer.MapCustomerProfile();
         customer.MapAddresses();
         customer.MapFamily();
+        customer.MapCatalog();
         customer.MapBankDetails();
         customer.MapCustomerNotifications();
         customer.MapCustomerPickups();

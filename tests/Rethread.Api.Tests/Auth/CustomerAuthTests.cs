@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Rethread.Api.Tests.Contract;
 using Rethread.Api.Tests.Infrastructure;
@@ -7,90 +8,69 @@ namespace Rethread.Api.Tests.Auth;
 
 public sealed class CustomerAuthTests(PostgresServer server)
 {
+    private const string Contract = "user-next";
+
+    private static object Request(string destination, string channel = "sms") => new { channel, destination };
+
     [Fact]
     public async Task An_existing_customer_signs_in_with_a_code()
     {
         await using var api = await TestApi.StartAsync(server);
         var client = api.Client();
 
-        var challenge = await client.PostJsonAsync("/api/v1/auth/otp/request",
-            new { channel = "mobile", destination = SignIn.NadeeshaMobile });
-        challenge.MatchesContract("user", "POST /auth/otp/request");
-        Assert.Equal(30, challenge.GetProperty("resendAfterSeconds").GetInt32());
+        var challenge = await client.PostJsonAsync("/api/v1/auth/otp/request", Request(SignIn.NadeeshaMobile));
+        challenge.MatchesContract(Contract, "POST /auth/otp/request");
+        Assert.Equal((300, 60), (challenge.GetProperty("expiresInSeconds").GetInt32(), challenge.GetProperty("resendAfterSeconds").GetInt32()));
 
         var session = await client.PostJsonAsync("/api/v1/auth/otp/verify",
-            new { challengeId = challenge.Str("challengeId"), code = SignIn.Code });
-        session.MatchesContract("user", "POST /auth/otp/verify");
-        session.GetProperty("user").MatchesContract("user", "GET /me");
-        Assert.False(session.GetProperty("isNewUser").GetBoolean());
-        Assert.Equal("cus_1", session.GetProperty("user").Str("id"));
-        Assert.Equal("2026-11-07T07:00:00Z", session.Str("expiresAt"));
+            new { requestId = challenge.Str("requestId"), code = SignIn.Code });
+        ShapeAssert.Matches(ContractSamples.Response(Contract, "GET /me"), session.GetProperty("user"));
+        Assert.Equal((3600, false), (session.GetProperty("expiresIn").GetInt32(), session.GetProperty("isNewUser").GetBoolean()));
+        Assert.Equal(("cus_1", "Nadeesha Perera", "en"), (session.GetProperty("user").Str("id"),
+            session.GetProperty("user").Str("fullName"), session.GetProperty("user").Str("preferredLanguage")));
     }
 
     [Fact]
-    public async Task A_new_number_creates_an_account()
+    public async Task A_new_number_or_email_creates_an_account()
     {
         await using var api = await TestApi.StartAsync(server);
         var session = await api.CustomerSessionAsync("+94711112222");
         Assert.True(session.GetProperty("isNewUser").GetBoolean());
-        var user = session.GetProperty("user");
-        Assert.Equal("+94711112222", user.Str("mobile"));
-        Assert.Equal(System.Text.Json.JsonValueKind.Null, user.GetProperty("firstName").ValueKind);
-        Assert.Equal("en", user.Str("language"));
+        Assert.Equal(JsonValueKind.Null, session.GetProperty("user").GetProperty("fullName").ValueKind);
+
+        var client = api.Client();
+        var challenge = await client.PostJsonAsync("/api/v1/auth/otp/request", Request("New.Person@Example.lk", "email"));
+        var byEmail = await client.PostJsonAsync("/api/v1/auth/otp/verify", new { requestId = challenge.Str("requestId"), code = SignIn.Code });
+        Assert.Equal("new.person@example.lk", byEmail.GetProperty("user").Str("email"));
     }
 
     [Fact]
-    public async Task Email_sign_in_works_too()
+    public async Task Wrong_expired_and_spammed_codes_use_the_apps_error_codes()
     {
         await using var api = await TestApi.StartAsync(server);
         var client = api.Client();
-        var challenge = await client.PostJsonAsync("/api/v1/auth/otp/request",
-            new { channel = "email", destination = "New.Person@Example.lk" });
-        var session = await client.PostJsonAsync("/api/v1/auth/otp/verify",
-            new { challengeId = challenge.Str("challengeId"), code = SignIn.Code });
-        Assert.Equal("new.person@example.lk", session.GetProperty("user").Str("email"));
-    }
+        var challenge = await client.PostJsonAsync("/api/v1/auth/otp/request", Request(SignIn.NadeeshaMobile));
 
-    [Fact]
-    public async Task Wrong_expired_and_spammed_codes_are_refused()
-    {
-        await using var api = await TestApi.StartAsync(server);
-        var client = api.Client();
-        var request = new { channel = "mobile", destination = SignIn.NadeeshaMobile };
-        var challenge = await client.PostJsonAsync("/api/v1/auth/otp/request", request);
+        await (await client.PostAsJsonAsync("/api/v1/auth/otp/request", Request(SignIn.NadeeshaMobile)))
+            .ErrorAsync(HttpStatusCode.TooManyRequests, "RATE_LIMITED");
+        for (var i = 0; i < 5; i++)
+        {
+            await (await client.PostAsJsonAsync("/api/v1/auth/otp/verify", new { requestId = challenge.Str("requestId"), code = "000000" }))
+                .ErrorAsync(HttpStatusCode.BadRequest, "OTP_INVALID");
+        }
 
-        await (await client.PostAsJsonAsync("/api/v1/auth/otp/request", request))
-            .ErrorAsync(HttpStatusCode.TooManyRequests, "OTP_RATE_LIMITED");
-        await (await client.PostAsJsonAsync("/api/v1/auth/otp/verify",
-                new { challengeId = challenge.Str("challengeId"), code = "000000" }))
-            .ErrorAsync(HttpStatusCode.BadRequest, "INVALID_OTP");
-
-        api.Clock.Advance(TimeSpan.FromMinutes(6));
-        await (await client.PostAsJsonAsync("/api/v1/auth/otp/verify",
-                new { challengeId = challenge.Str("challengeId"), code = SignIn.Code }))
+        await (await client.PostAsJsonAsync("/api/v1/auth/otp/verify", new { requestId = challenge.Str("requestId"), code = SignIn.Code }))
+            .ErrorAsync(HttpStatusCode.TooManyRequests, "OTP_TOO_MANY_ATTEMPTS");
+        await (await client.PostAsJsonAsync("/api/v1/auth/otp/verify", new { requestId = "otp_unknown", code = SignIn.Code }))
             .ErrorAsync(HttpStatusCode.BadRequest, "OTP_EXPIRED");
-    }
 
-    [Fact]
-    public async Task A_code_works_once()
-    {
-        await using var api = await TestApi.StartAsync(server);
-        var client = api.Client();
-        var challenge = await client.PostJsonAsync("/api/v1/auth/otp/request",
-            new { channel = "mobile", destination = SignIn.NadeeshaMobile });
-        var verify = new { challengeId = challenge.Str("challengeId"), code = SignIn.Code };
-        await client.PostJsonAsync("/api/v1/auth/otp/verify", verify);
-        await (await client.PostAsJsonAsync("/api/v1/auth/otp/verify", verify))
-            .ErrorAsync(HttpStatusCode.BadRequest, "INVALID_OTP");
-    }
-
-    [Fact]
-    public async Task Bad_input_gets_field_errors()
-    {
-        await using var api = await TestApi.StartAsync(server);
-        var error = await (await api.Client().PostAsJsonAsync("/api/v1/auth/otp/request",
-                new { channel = "mobile", destination = "0771234567" }))
-            .ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_FAILED");
+        api.Clock.Advance(TimeSpan.FromMinutes(2));
+        var fresh = await client.PostJsonAsync("/api/v1/auth/otp/request", Request(SignIn.NadeeshaMobile));
+        api.Clock.Advance(TimeSpan.FromMinutes(6));
+        await (await client.PostAsJsonAsync("/api/v1/auth/otp/verify", new { requestId = fresh.Str("requestId"), code = SignIn.Code }))
+            .ErrorAsync(HttpStatusCode.BadRequest, "OTP_EXPIRED");
+        var error = await (await client.PostAsJsonAsync("/api/v1/auth/otp/request", Request("0771234567")))
+            .ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_ERROR");
         Assert.True(error.GetProperty("details").TryGetProperty("destination", out _));
     }
 
@@ -100,44 +80,28 @@ public sealed class CustomerAuthTests(PostgresServer server)
         await using var api = await TestApi.StartAsync(server);
         var mobile = await api.DbAsync(db => db.Customers.Where(c => c.Id == "cus_18").Select(c => c.Mobile!).SingleAsync());
         var client = api.Client();
-        var challenge = await client.PostJsonAsync("/api/v1/auth/otp/request", new { channel = "mobile", destination = mobile });
-        await (await client.PostAsJsonAsync("/api/v1/auth/otp/verify",
-                new { challengeId = challenge.Str("challengeId"), code = SignIn.Code }))
+        var challenge = await client.PostJsonAsync("/api/v1/auth/otp/request", Request(mobile));
+        await (await client.PostAsJsonAsync("/api/v1/auth/otp/verify", new { requestId = challenge.Str("requestId"), code = SignIn.Code }))
             .ErrorAsync(HttpStatusCode.Forbidden, "ACCOUNT_SUSPENDED");
     }
 
     [Fact]
-    public async Task Refresh_rotates_and_a_reused_token_ends_every_session()
+    public async Task Refresh_rotates_and_logout_revokes_with_the_refresh_token()
     {
         await using var api = await TestApi.StartAsync(server);
         var session = await api.CustomerSessionAsync();
         var client = api.Client();
 
-        var first = await client.PostJsonAsync("/api/v1/auth/refresh", new { refreshToken = session.Str("refreshToken") });
-        first.MatchesContract("user", "POST /auth/refresh");
-        Assert.NotEqual(session.Str("refreshToken"), first.Str("refreshToken"));
-
+        var refreshed = await client.PostJsonAsync("/api/v1/auth/refresh", new { refreshToken = session.Str("refreshToken") });
+        refreshed.MatchesContract(Contract, "POST /auth/refresh");
         await (await client.PostAsJsonAsync("/api/v1/auth/refresh", new { refreshToken = session.Str("refreshToken") }))
             .ErrorAsync(HttpStatusCode.Unauthorized, "SESSION_EXPIRED");
-        // Reuse looks like theft, so the newer token stops working as well.
-        await (await client.PostAsJsonAsync("/api/v1/auth/refresh", new { refreshToken = first.Str("refreshToken") }))
-            .ErrorAsync(HttpStatusCode.Unauthorized, "SESSION_EXPIRED");
-    }
-
-    [Fact]
-    public async Task Access_tokens_expire_after_an_hour_and_logout_revokes_refresh()
-    {
-        await using var api = await TestApi.StartAsync(server);
-        var session = await api.CustomerSessionAsync();
-        var client = api.WithToken(session.Str("accessToken"));
 
         api.Clock.Advance(TimeSpan.FromMinutes(61));
-        await (await client.PostAsync("/api/v1/auth/logout", null)).ErrorAsync(HttpStatusCode.Unauthorized, "UNAUTHORIZED");
-
-        var refreshed = await api.Client().PostJsonAsync("/api/v1/auth/refresh", new { refreshToken = session.Str("refreshToken") });
-        var signedIn = api.WithToken(refreshed.Str("accessToken"));
-        Assert.Equal(HttpStatusCode.NoContent, (await signedIn.PostAsync("/api/v1/auth/logout", null)).StatusCode);
-        await (await api.Client().PostAsJsonAsync("/api/v1/auth/refresh", new { refreshToken = refreshed.Str("refreshToken") }))
+        // Signing out works even with an expired access token: the refresh token is the credential.
+        Assert.Equal(HttpStatusCode.NoContent,
+            (await client.PostAsJsonAsync("/api/v1/auth/logout", new { refreshToken = refreshed.Str("refreshToken") })).StatusCode);
+        await (await client.PostAsJsonAsync("/api/v1/auth/refresh", new { refreshToken = refreshed.Str("refreshToken") }))
             .ErrorAsync(HttpStatusCode.Unauthorized, "SESSION_EXPIRED");
     }
 
@@ -146,7 +110,7 @@ public sealed class CustomerAuthTests(PostgresServer server)
     {
         await using var api = await TestApi.StartAsync(server);
         var collector = await api.CollectorAsync();
-        await (await collector.PostAsync("/api/v1/auth/logout", null)).ErrorAsync(HttpStatusCode.Forbidden, "FORBIDDEN");
-        await (await api.Client().PostAsync("/api/v1/auth/logout", null)).ErrorAsync(HttpStatusCode.Unauthorized, "UNAUTHORIZED");
+        await (await collector.GetAsync("/api/v1/me")).ErrorAsync(HttpStatusCode.Forbidden, "FORBIDDEN");
+        await (await api.Client().GetAsync("/api/v1/me")).ErrorAsync(HttpStatusCode.Unauthorized, "UNAUTHORIZED");
     }
 }

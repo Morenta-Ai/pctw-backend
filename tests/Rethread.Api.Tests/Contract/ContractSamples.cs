@@ -19,9 +19,12 @@ public static partial class ContractSamples
     {
         var samples = Section(contract, endpoint);
         var isGet = endpoint.StartsWith("GET ", StringComparison.Ordinal);
+        var unlabelled = samples.Where(s => s.Label == "").ToList();
         var match = samples.FirstOrDefault(s => s.Label.Length > 0 && char.IsDigit(s.Label[0]))
             ?? samples.FirstOrDefault(s => s.Label == "response")
-            ?? (isGet ? samples.FirstOrDefault(s => s.Label == "") : null);
+            ?? (isGet ? unlabelled.FirstOrDefault() : null)
+            // "The request body, then the response body", unlabelled (the user contract's style).
+            ?? (unlabelled.Count >= 2 ? unlabelled[1] : null);
         return match?.Json ?? throw new InvalidOperationException(
             $"No response sample for {endpoint} in {contract}.md.");
     }

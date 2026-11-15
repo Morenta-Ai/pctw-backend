@@ -114,7 +114,7 @@ public sealed class SeedTests(PostgresServer server)
                 mobile = c.Mobile,
                 email = c.Email,
                 area = c.Addresses[0].Area,
-                address = c.Addresses[0].Line,
+                address = c.Addresses[0].FullLine,
                 latitude = c.Addresses[0].Latitude,
                 longitude = c.Addresses[0].Longitude,
                 joinedAt = T(c.CreatedAt),

@@ -20,9 +20,16 @@ public sealed class FullFlowTests(PostgresServer server)
         var lahiru = await api.CollectorAsync("COL-0515", lahiruMobile);
 
         // 1. A new customer signs up, adds their home and books a pickup in the app.
-        await customer.PatchAsJsonAsync("/api/v1/me", new { firstName = "Tharushi", lastName = "Silva" });
-        var home = await customer.PostJsonAsync("/api/v1/addresses",
-            new { label = "home", line = "14 Station Road, Dehiwala", latitude = 6.8521, longitude = 79.8661, isDefault = true }, HttpStatusCode.Created);
+        await customer.PutAsJsonAsync("/api/v1/me", new { fullName = "Tharushi Silva", preferredLanguage = "en" });
+        var home = await customer.PostJsonAsync("/api/v1/addresses", new
+        {
+            label = "home",
+            addressLine = "14 Station Road",
+            city = "Dehiwala",
+            lat = 6.8521,
+            lng = 79.8661,
+            isDefault = true,
+        }, HttpStatusCode.Created);
         var pickup = await customer.PostJsonAsync("/api/v1/pickups", new
         {
             method = "bulk",
@@ -108,8 +115,8 @@ public sealed class FullFlowTests(PostgresServer server)
         });
         await using var production = api.Factory.WithWebHostBuilder(b => b.UseEnvironment("Production"));
         var client = production.CreateClient();
-        var challenge = await client.PostJsonAsync("/api/v1/auth/otp/request", new { channel = "mobile", destination = SignIn.NadeeshaMobile });
-        await (await client.PostAsJsonAsync("/api/v1/auth/otp/verify", new { challengeId = challenge.Str("challengeId"), code = SignIn.Code }))
-            .ErrorAsync(HttpStatusCode.BadRequest, "INVALID_OTP");
+        var challenge = await client.PostJsonAsync("/api/v1/auth/otp/request", new { channel = "sms", destination = SignIn.NadeeshaMobile });
+        await (await client.PostAsJsonAsync("/api/v1/auth/otp/verify", new { requestId = challenge.Str("requestId"), code = SignIn.Code }))
+            .ErrorAsync(HttpStatusCode.BadRequest, "OTP_INVALID");
     }
 }

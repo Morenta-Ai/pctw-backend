@@ -112,7 +112,7 @@ public sealed class PickupTests(PostgresServer server)
         var unknown = Booking();
         unknown["method"] = "itemised";
         unknown["items"] = new JsonArray(JsonNode.Parse("""{ "garmentType": "spacesuit", "memberId": null, "size": null, "condition": "good", "quantity": 1 }"""));
-        var error = await (await client.PostAsJsonAsync("/api/v1/pickups", unknown)).ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_FAILED");
+        var error = await (await client.PostAsJsonAsync("/api/v1/pickups", unknown)).ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_ERROR");
         Assert.True(error.GetProperty("details").TryGetProperty("items[0].garmentType", out _));
     }
 
@@ -122,7 +122,7 @@ public sealed class PickupTests(PostgresServer server)
         await using var api = await TestApi.StartAsync(server);
         var client = await api.CustomerAsync();
         var kandy = await client.PostJsonAsync("/api/v1/addresses",
-            new { label = "other", line = "5 Temple Road, Kandy", latitude = 7.29, longitude = 80.63, isDefault = false }, HttpStatusCode.Created);
+            new { label = "other", addressLine = "5 Temple Road", city = "Kandy", lat = 7.29, lng = 80.63, isDefault = false }, HttpStatusCode.Created);
 
         await (await client.PostAsJsonAsync("/api/v1/pickups", Booking(kandy.Str("id"))))
             .ErrorAsync(HttpStatusCode.Conflict, "NO_COLLECTORS_AVAILABLE");
@@ -145,7 +145,7 @@ public sealed class PickupTests(PostgresServer server)
 
         async Task Field(JsonNode body, string field)
         {
-            var error = await (await client.PostAsJsonAsync("/api/v1/pickups", body)).ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_FAILED");
+            var error = await (await client.PostAsJsonAsync("/api/v1/pickups", body)).ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_ERROR");
             Assert.True(error.GetProperty("details").TryGetProperty(field, out _), $"no error for {field}: {error}");
         }
 
@@ -170,11 +170,11 @@ public sealed class PickupTests(PostgresServer server)
         Assert.Equal("cancelled", cancelled.Str("status"));
         Assert.Equal("cancelled", cancelled.GetProperty("timeline").EnumerateArray().Last().Str("status"));
         await (await client.PostAsync($"/api/v1/pickups/{pickup.Str("id")}/cancel", null))
-            .ErrorAsync(HttpStatusCode.Conflict, "PICKUP_NOT_CANCELLABLE");
+            .ErrorAsync(HttpStatusCode.Conflict, "CANNOT_CANCEL");
 
         var cancelledList = await client.GetJsonAsync("/api/v1/pickups?group=cancelled");
         Assert.Contains(cancelledList.GetProperty("items").EnumerateArray(), p => p.Str("id") == pickup.Str("id"));
-        await (await client.GetAsync("/api/v1/pickups?group=lost")).ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_FAILED");
+        await (await client.GetAsync("/api/v1/pickups?group=lost")).ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_ERROR");
     }
 
     [Fact]
@@ -189,7 +189,7 @@ public sealed class PickupTests(PostgresServer server)
 
         var collectedOwner = await api.DbAsync(db => db.Customers.Where(c => c.Id == "cus_10").Select(c => c.Mobile!).SingleAsync());
         await (await (await api.CustomerAsync(collectedOwner)).PostAsync("/api/v1/pickups/RT-24790/cancel", null))
-            .ErrorAsync(HttpStatusCode.Conflict, "PICKUP_NOT_CANCELLABLE");
+            .ErrorAsync(HttpStatusCode.Conflict, "CANNOT_CANCEL");
     }
 
     [Fact]
@@ -197,8 +197,8 @@ public sealed class PickupTests(PostgresServer server)
     {
         await using var api = await TestApi.StartAsync(server);
         var client = await api.CustomerAsync();
-        await (await client.GetAsync("/api/v1/pickups/RT-24822")).ErrorAsync(HttpStatusCode.NotFound, "PICKUP_NOT_FOUND");
-        await (await client.PostAsync("/api/v1/pickups/RT-24822/cancel", null)).ErrorAsync(HttpStatusCode.NotFound, "PICKUP_NOT_FOUND");
+        await (await client.GetAsync("/api/v1/pickups/RT-24822")).ErrorAsync(HttpStatusCode.NotFound, "NOT_FOUND");
+        await (await client.PostAsync("/api/v1/pickups/RT-24822/cancel", null)).ErrorAsync(HttpStatusCode.NotFound, "NOT_FOUND");
     }
 
     [Fact]

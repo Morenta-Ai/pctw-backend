@@ -483,6 +483,7 @@ $RECYCLE.BIN/
 
 # Local
 .env
+.env.*
 storage/
 *.local.json
 .DS_Store

@@ -135,6 +135,32 @@ Before going live:
 - Choose a card payment gateway and implement `IPaymentGateway`: until then Production confirms no card
   payment, so shop orders can't be paid. Development accepts the user app's mock gateway.
 
+### Vercel
+
+The test deployment is https://pctw-backend.vercel.app. Vercel builds `Dockerfile.vercel` as a container
+function, so the project's framework preset must be Container. Set these in the project's environment
+variables:
+
+| Variable | Value |
+| --- | --- |
+| `PORT` | `8080`: Vercel sends traffic to this port, and the image's non-root user can't listen on 80 |
+| `ASPNETCORE_ENVIRONMENT` | `Staging`: sign-in codes are `Otp__FixedCode` and the apps' mock card payments are accepted, because there's no SMS provider or gateway yet. `Production` once there is |
+| `Otp__FixedCode` | `123456` (Staging only; Production ignores it) |
+| `ConnectionStrings__Default` | Neon's pooled connection string |
+| `Jwt__SigningKey` | `openssl rand -base64 48` |
+| `Storage__PublicBaseUrl` | `https://pctw-backend.vercel.app` |
+| `Portal__BaseUrl` | `https://pctw-admin.vercel.app` |
+
+Things that work differently on Vercel:
+
+- Instances stop after 5 idle minutes, so the background maintenance only runs while there's traffic.
+  The rules that matter (offer expiry, waiting alerts) also run on the reads that depend on them.
+- Uploads go to `/tmp` and are lost when an instance stops. Real catalogue photos need object storage
+  (Vercel Blob) behind `IFileStore`.
+- Request bodies are capped at 4.5 MB.
+- Vercel doesn't run migrations. Run `migrate` with Neon's direct connection string before deploying a
+  change that adds one.
+
 ## Status
 
 | Step | What | State |

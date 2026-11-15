@@ -36,6 +36,10 @@ to when the seed ran, so today's queue looks like today. Re-seed to move it to n
 dotnet run --project src/Rethread.Api -- seed --reset
 ```
 
+Every client's e2e or contract checks have been run against this API: the portal's Playwright suite
+passes against it (`E2E_API_BASE_URL`), and the apps' contracts are checked sample by sample in
+`dotnet test`.
+
 | Who | Sign in with |
 | --- | --- |
 | Admin | `admin@rethread.lk` / `rethread-admin` |
@@ -143,3 +147,8 @@ Before going live:
 | 11 | Admin operations | Done |
 | 12 | Rates and impact | Done |
 | 13 | Deploy readiness | Done |
+| 14 | User app's current contract: auth, profile, addresses, family, catalog | Done |
+| 15 | User app: pickups with preferred dates, confirmation and tracking | Done |
+| 16 | User app: impact summary, history, factors and milestones | Done |
+| 17 | User app: shop, quote, card checkout and orders | Done |
+| 18 | User app: inbox, devices, support, app config and home | Done |

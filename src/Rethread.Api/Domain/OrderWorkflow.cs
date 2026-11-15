@@ -79,7 +79,7 @@ public sealed class OrderWorkflow(
             Id = id,
             CustomerId = placement.Customer.Id,
             FulfilmentType = placement.FulfilmentType,
-            Destination = placement.Vendor?.Address ?? placement.Address!.Line,
+            Destination = placement.Vendor?.Address ?? placement.Address!.FullLine,
             AddressId = placement.Address?.Id,
             VendorId = placement.Vendor?.Id,
             PaymentMethod = placement.PaymentMethod,

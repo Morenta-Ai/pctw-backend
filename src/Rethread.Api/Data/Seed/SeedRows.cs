@@ -38,9 +38,9 @@ internal static class SeedRows
     public static readonly (string Name, FamilyRelation Relation, Gender Gender, AgeGroup Age)[] FamilyTemplates =
     [
         ("Spouse", FamilyRelation.Spouse, Gender.Male, AgeGroup.Adult),
-        ("Son", FamilyRelation.Son, Gender.Male, AgeGroup.Child),
+        ("Son", FamilyRelation.Son, Gender.Male, AgeGroup.Kid),
         ("Daughter", FamilyRelation.Daughter, Gender.Female, AgeGroup.Teen),
-        ("Mother", FamilyRelation.Mother, Gender.Female, AgeGroup.Senior),
+        ("Mother", FamilyRelation.Mother, Gender.Female, AgeGroup.Adult),
     ];
 
     public static Staff[] Staff() =>
@@ -85,14 +85,14 @@ internal static class SeedRows
 
     public static GarmentType[] GarmentTypes() =>
     [
-        new() { Id = "tShirt", Name = "T-shirt", EstimatedKg = 0.2m, SortOrder = 1 },
-        new() { Id = "shirt", Name = "Shirt", EstimatedKg = 0.25m, SortOrder = 2 },
-        new() { Id = "trousers", Name = "Trousers", EstimatedKg = 0.5m, SortOrder = 3 },
-        new() { Id = "saree", Name = "Saree", EstimatedKg = 0.6m, SortOrder = 4 },
-        new() { Id = "dress", Name = "Dress", EstimatedKg = 0.4m, SortOrder = 5 },
-        new() { Id = "kidsWear", Name = "Kids wear", EstimatedKg = 0.15m, SortOrder = 6 },
-        new() { Id = "bedsheet", Name = "Bedsheet", EstimatedKg = 0.9m, SortOrder = 7 },
-        new() { Id = "other", Name = "Other", EstimatedKg = 0.3m, SortOrder = 8 },
+        new() { Id = "tShirt", Name = "T-shirt", Icon = "tShirt", SizeBasis = "chest", EstimatedKg = 0.2m, SortOrder = 1 },
+        new() { Id = "shirt", Name = "Shirt", Icon = "shirt", SizeBasis = "chest", EstimatedKg = 0.25m, SortOrder = 2 },
+        new() { Id = "trousers", Name = "Trousers", Icon = "trousers", SizeBasis = "waist", EstimatedKg = 0.5m, SortOrder = 3 },
+        new() { Id = "saree", Name = "Saree", Icon = "saree", SizeBasis = "none", EstimatedKg = 0.6m, SortOrder = 4 },
+        new() { Id = "dress", Name = "Dress", Icon = "dress", SizeBasis = "chest", EstimatedKg = 0.4m, SortOrder = 5 },
+        new() { Id = "kidsWear", Name = "Kids wear", Icon = "kidsWear", SizeBasis = "height", EstimatedKg = 0.15m, SortOrder = 6 },
+        new() { Id = "bedsheet", Name = "Bedsheet", Icon = "bedsheet", SizeBasis = "none", EstimatedKg = 0.9m, SortOrder = 7 },
+        new() { Id = "other", Name = "Other", Icon = "other", SizeBasis = "none", EstimatedKg = 0.3m, SortOrder = 8 },
     ];
 
     public static VoucherBrand[] VoucherBrands() =>

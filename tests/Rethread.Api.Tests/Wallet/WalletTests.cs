@@ -95,9 +95,9 @@ public sealed class WalletTests(PostgresServer server)
         Assert.Matches(@"^LF-[A-Z0-9]{4}-\d{4}$", voucher.Str("voucherCode"));
 
         await (await client.PostAsJsonAsync("/api/v1/wallet/redemptions", new { type = "voucher", amountCents = 75000, voucherBrandId = "vb_lanka_fresh" }))
-            .ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_FAILED");
+            .ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_ERROR");
         await (await client.PostAsJsonAsync("/api/v1/wallet/redemptions", new { type = "voucher", amountCents = 50000, voucherBrandId = "vb_nope" }))
-            .ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_FAILED");
+            .ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_ERROR");
     }
 
     [Fact]
@@ -116,7 +116,7 @@ public sealed class WalletTests(PostgresServer server)
         Assert.True(await api.DbAsync(db => db.Notifications.AnyAsync(n => n.RecipientId == "cus_1" && n.Type == "donationThanks")));
 
         await (await client.PostAsJsonAsync("/api/v1/wallet/redemptions", new { type = "donation", amountCents = 50000, projectId = "dp_flood_relief" }))
-            .ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_FAILED");
+            .ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_ERROR");
         await (await client.PostAsJsonAsync("/api/v1/wallet/redemptions", new { type = "donation", amountCents = 1000, projectId = "dp_monaragala" }))
             .ErrorAsync(HttpStatusCode.UnprocessableEntity, "BELOW_MINIMUM_AMOUNT");
     }

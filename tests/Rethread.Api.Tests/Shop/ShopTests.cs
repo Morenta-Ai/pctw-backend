@@ -24,6 +24,20 @@ public sealed class ShopTests(PostgresServer server)
         return await api.CustomerAsync(mobile);
     }
 
+    private static object Address(string line, string city, double lat, double lng) => new
+    {
+        label = "home",
+        customLabel = (string?)null,
+        addressLine = line,
+        unitNo = (string?)null,
+        city,
+        landmark = (string?)null,
+        notes = (string?)null,
+        lat,
+        lng,
+        isDefault = true,
+    };
+
     private static async Task<string> DefaultAddressAsync(HttpClient client) =>
         (await client.GetJsonAsync("/api/v1/addresses")).GetProperty("items")[0].Str("id");
 
@@ -55,8 +69,8 @@ public sealed class ShopTests(PostgresServer server)
         var prices = cheapest.GetProperty("items").EnumerateArray().Select(p => p.GetProperty("priceCents").GetInt64()).ToList();
         Assert.Equal(prices.Order(), prices);
 
-        await (await client.GetAsync("/api/v1/products/prd_9")).ErrorAsync(HttpStatusCode.NotFound, "PRODUCT_NOT_FOUND");
-        await (await client.GetAsync("/api/v1/products?sort=random")).ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_FAILED");
+        await (await client.GetAsync("/api/v1/products/prd_9")).ErrorAsync(HttpStatusCode.NotFound, "NOT_FOUND");
+        await (await client.GetAsync("/api/v1/products?sort=random")).ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_ERROR");
 
         var options = await client.GetJsonAsync("/api/v1/fulfilment-options");
         options.MatchesContract("user", "GET /fulfilment-options");
@@ -84,7 +98,7 @@ public sealed class ShopTests(PostgresServer server)
 
         Assert.Equal("ORD-5135", (await client.GetJsonAsync("/api/v1/orders")).GetProperty("items")[0].Str("id"));
         (await client.GetJsonAsync("/api/v1/orders/ORD-5135")).MatchesContract("user", "GET /orders/{id}");
-        await (await (await api.CustomerAsync()).GetAsync("/api/v1/orders/ORD-5135")).ErrorAsync(HttpStatusCode.NotFound, "ORDER_NOT_FOUND");
+        await (await (await api.CustomerAsync()).GetAsync("/api/v1/orders/ORD-5135")).ErrorAsync(HttpStatusCode.NotFound, "NOT_FOUND");
     }
 
     [Fact]
@@ -100,14 +114,14 @@ public sealed class ShopTests(PostgresServer server)
         Assert.Equal(4, await api.DbAsync(db => db.Products.Where(p => p.Id == "prd_6").Select(p => p.Stock).SingleAsync()));
 
         var poor = await api.CustomerAsync("+94700000009");
-        var home = await poor.PostJsonAsync("/api/v1/addresses", new { label = "home", line = "1 Galle Road, Dehiwala", latitude = 6.85, longitude = 79.86, isDefault = true }, HttpStatusCode.Created);
+        var home = await poor.PostJsonAsync("/api/v1/addresses", Address("1 Galle Road", "Dehiwala", 6.85, 79.86), HttpStatusCode.Created);
         await (await poor.PostAsJsonAsync("/api/v1/orders", Order("prd_1", "M", 1, home.Str("id")))).ErrorAsync(HttpStatusCode.Conflict, "INSUFFICIENT_BALANCE");
         Assert.Equal(6, await api.DbAsync(db => db.Products.Where(p => p.Id == "prd_1").Select(p => p.Stock).SingleAsync()));
 
         var card = await poor.PostJsonAsync("/api/v1/orders", Order("prd_1", "M", 1, home.Str("id"), "card"), HttpStatusCode.Created);
         Assert.Equal(PaymentStatus.Unpaid, await api.DbAsync(db => db.Orders.Where(o => o.Id == card.Str("id")).Select(o => o.PaymentStatus).SingleAsync()));
 
-        await (await poor.PostAsJsonAsync("/api/v1/orders", Order("prd_1", "M", 1, address))).ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_FAILED");
+        await (await poor.PostAsJsonAsync("/api/v1/orders", Order("prd_1", "M", 1, address))).ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_ERROR");
         await (await poor.PostAsJsonAsync("/api/v1/orders", new
         {
             items = new[] { new { productId = "prd_1", size = "M", quantity = 1 } },
@@ -115,7 +129,7 @@ public sealed class ShopTests(PostgresServer server)
             addressId = (string?)null,
             vendorId = "vnd_nope",
             paymentMethod = "card",
-        })).ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_FAILED");
+        })).ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_ERROR");
     }
 
     [Fact]

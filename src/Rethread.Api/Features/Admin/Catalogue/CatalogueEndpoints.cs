@@ -179,13 +179,14 @@ public static class CatalogueEndpoints
         ?? throw ApiException.NotFound(NotFoundCode, "Product not found.");
 }
 
-/// <summary>Catalogue photos are public: the shop shows them to anyone. Collection photos are not served.</summary>
+/// <summary>Catalogue photos and avatars are public (by unguessable ID). Collection photos are never served.</summary>
 public static class FileEndpoints
 {
     public static void MapFiles(this WebApplication app) =>
         app.MapGet("/files/{id}", async Task<IResult> (string id, AppDbContext db, IFileStore files, CancellationToken ct) =>
         {
-            var file = await db.Files.AsNoTracking().SingleOrDefaultAsync(f => f.Id == id && f.Id.StartsWith("img_"), ct);
+            var file = await db.Files.AsNoTracking()
+                .SingleOrDefaultAsync(f => f.Id == id && (f.Id.StartsWith("img_") || f.Id.StartsWith("avt_")), ct);
             if (file is null) return Results.NotFound();
             return Results.Stream(files.OpenRead(file), file.ContentType,
                 lastModified: new DateTimeOffset(file.CreatedAt, TimeSpan.Zero));

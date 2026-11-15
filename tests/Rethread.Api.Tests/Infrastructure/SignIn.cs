@@ -21,9 +21,9 @@ public static class SignIn
     {
         var client = api.Client();
         var challenge = await client.PostJsonAsync("/api/v1/auth/otp/request",
-            new { channel = "mobile", destination = mobile });
+            new { channel = "sms", destination = mobile });
         return await client.PostJsonAsync("/api/v1/auth/otp/verify",
-            new { challengeId = challenge.Str("challengeId"), code = Code });
+            new { requestId = challenge.Str("requestId"), code = Code });
     }
 
     public static async Task<HttpClient> CollectorAsync(this TestApi api, string code = RuwanCode,

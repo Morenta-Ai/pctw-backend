@@ -25,6 +25,7 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
                 context.Request.Path);
         }
 
+        (status, body) = ErrorDialect.Translate(context, status, body);
         context.Response.StatusCode = status;
         await context.Response.WriteAsJsonAsync(body, ct);
         return true;

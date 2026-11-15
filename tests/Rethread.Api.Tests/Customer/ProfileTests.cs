@@ -1,5 +1,8 @@
 using System.Net;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
+using Rethread.Api.Data.Entities;
 using Rethread.Api.Tests.Contract;
 using Rethread.Api.Tests.Infrastructure;
 
@@ -7,25 +10,96 @@ namespace Rethread.Api.Tests.Customer;
 
 public sealed class ProfileTests(PostgresServer server)
 {
+    private const string Contract = "user-next";
+    private static readonly byte[] Jpeg = [0xFF, 0xD8, 0xFF, 0xE0, 0, 0x10, (byte)'J', (byte)'F', (byte)'I', (byte)'F', 0, 1];
+
+    private static JsonNode AddressSample() => JsonNode.Parse(ContractSamples.Request(Contract, "POST /addresses").GetRawText())!;
+
     [Fact]
-    public async Task Customers_read_and_update_their_profile()
+    public async Task Completing_the_profile_sets_the_name_and_creates_the_own_family_profile()
     {
         await using var api = await TestApi.StartAsync(server);
         var client = await api.CustomerAsync("+94700000001");
 
         var me = await client.GetJsonAsync("/api/v1/me");
-        me.MatchesContract("user", "GET /me");
-        Assert.False(me.GetProperty("hasBankDetails").GetBoolean());
+        me.MatchesContract(Contract, "GET /me");
+        Assert.Equal(JsonValueKind.Null, me.GetProperty("fullName").ValueKind);
 
-        var updated = await (await client.PatchAsJsonAsync("/api/v1/me",
-            new { firstName = " Nimali ", lastName = "Perera", language = "si" })).JsonAsync();
-        updated.MatchesContract("user", "GET /me");
-        Assert.Equal(("Nimali", "Perera", "si"), (updated.Str("firstName"), updated.Str("lastName"), updated.Str("language")));
+        var saved = await (await client.PutAsJsonAsync("/api/v1/me",
+            ContractSamples.Request(Contract, "PUT /me"))).JsonAsync();
+        saved.MatchesContract(Contract, "GET /me");
+        Assert.Equal(("Nimali Perera", "nimali.perera@gmail.com", "si"), (saved.Str("fullName"), saved.Str("email"), saved.Str("preferredLanguage")));
 
-        await (await client.PatchAsJsonAsync("/api/v1/me", new { language = "fr" }))
-            .ErrorAsync(HttpStatusCode.BadRequest, "BAD_REQUEST");
-        await (await client.PatchAsJsonAsync("/api/v1/me", new { firstName = "" }))
-            .ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_FAILED");
+        var family = await client.GetJsonAsync("/api/v1/family-members");
+        Assert.Equal(("self", "Nimali Perera"), (family.GetProperty("items")[0].Str("relation"), family.GetProperty("items")[0].Str("name")));
+        Assert.Single(family.GetProperty("items").EnumerateArray());
+
+        // Contacts change only through the verified flow once set.
+        await (await client.PutAsJsonAsync("/api/v1/me", new { fullName = "Nimali", email = "other@example.lk", preferredLanguage = "en" }))
+            .ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_ERROR");
+        await (await client.PutAsJsonAsync("/api/v1/me", new { fullName = "", preferredLanguage = "en" }))
+            .ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_ERROR");
+        var other = await api.CustomerAsync("+94700000002");
+        await (await other.PutAsJsonAsync("/api/v1/me", new { fullName = "Someone", email = "nimali.perera@gmail.com", preferredLanguage = "en" }))
+            .ErrorAsync(HttpStatusCode.Conflict, "CONTACT_IN_USE");
+    }
+
+    [Fact]
+    public async Task Contacts_change_with_a_code_sent_to_the_new_one()
+    {
+        await using var api = await TestApi.StartAsync(server);
+        var client = await api.CustomerAsync();
+        var request = await client.PostJsonAsync("/api/v1/me/contact-change/request", new { channel = "sms", newDestination = "+94771239876" });
+        request.MatchesContract(Contract, "POST /me/contact-change/request");
+        Assert.StartsWith("cc_", request.Str("requestId"), StringComparison.Ordinal);
+
+        // A contact-change code can't sign anyone in.
+        await (await api.Client().PostAsJsonAsync("/api/v1/auth/otp/verify", new { requestId = request.Str("requestId"), code = SignIn.Code }))
+            .ErrorAsync(HttpStatusCode.BadRequest, "OTP_EXPIRED");
+        var me = await client.PostJsonAsync("/api/v1/me/contact-change/verify", new { requestId = request.Str("requestId"), code = SignIn.Code });
+        Assert.Equal("+94771239876", me.Str("mobile"));
+
+        await (await client.PostAsJsonAsync("/api/v1/me/contact-change/request", new { channel = "sms", newDestination = "+94764824761" }))
+            .ErrorAsync(HttpStatusCode.Conflict, "CONTACT_IN_USE");
+    }
+
+    [Fact]
+    public async Task Avatars_upload_and_are_served()
+    {
+        await using var api = await TestApi.StartAsync(server);
+        var client = await api.CustomerAsync();
+        var me = await (await client.PostAsync("/api/v1/me/avatar", new MultipartFormDataContent { { new ByteArrayContent(Jpeg), "file", "me.jpg" } })).JsonAsync();
+        var url = me.Str("avatarUrl");
+        Assert.Equal(HttpStatusCode.OK, (await api.Client().GetAsync(new Uri(url).AbsolutePath)).StatusCode);
+        Assert.Equal(JsonValueKind.Null, (await (await client.DeleteAsync("/api/v1/me/avatar")).JsonAsync()).GetProperty("avatarUrl").ValueKind);
+    }
+
+    [Fact]
+    public async Task Deleting_the_account_needs_a_code_and_nothing_outstanding()
+    {
+        await using var api = await TestApi.StartAsync(server);
+        var nadeesha = await api.CustomerAsync();
+        api.Clock.Advance(TimeSpan.FromSeconds(61)); // Past the resend wait from signing in.
+        async Task<string> CodeFor(string mobile) =>
+            (await api.Client().PostJsonAsync("/api/v1/auth/otp/request", new { channel = "sms", destination = mobile })).Str("requestId");
+
+        var error = await (await nadeesha.SendAsync(new HttpRequestMessage(HttpMethod.Delete, "/api/v1/me")
+        {
+            Content = JsonContent.Create(new { reason = "privacy", otpRequestId = await CodeFor(SignIn.NadeeshaMobile), otpCode = SignIn.Code }),
+        })).ErrorAsync(HttpStatusCode.Conflict, "ACTIVE_PICKUPS");
+        Assert.True(error.GetProperty("details").GetProperty("count").GetInt32() > 0);
+
+        var fresh = await api.CustomerAsync("+94700000003");
+        await fresh.PutAsJsonAsync("/api/v1/me", new { fullName = "Short Stay", preferredLanguage = "en" });
+        api.Clock.Advance(TimeSpan.FromMinutes(2));
+        var requestId = await CodeFor("+94700000003");
+        Assert.Equal(HttpStatusCode.NoContent, (await fresh.SendAsync(new HttpRequestMessage(HttpMethod.Delete, "/api/v1/me")
+        {
+            Content = JsonContent.Create(new { reason = "movingAway", otpRequestId = requestId, otpCode = SignIn.Code }),
+        })).StatusCode);
+        var gone = await api.DbAsync(db => db.Customers.SingleAsync(c => c.FirstName == "Deleted" && c.DeletedAt != null));
+        Assert.Null(gone.Mobile);
+        await (await fresh.GetAsync("/api/v1/me")).ErrorAsync(HttpStatusCode.Forbidden, "ACCOUNT_SUSPENDED");
     }
 
     [Fact]
@@ -35,88 +109,79 @@ public sealed class ProfileTests(PostgresServer server)
         var client = await api.CustomerAsync();
 
         var list = await client.GetJsonAsync("/api/v1/addresses");
-        list.MatchesContract("user", "GET /addresses");
+        list.MatchesContract(Contract, "GET /addresses");
         var home = list.GetProperty("items")[0];
-        Assert.True(home.GetProperty("isDefault").GetBoolean());
+        Assert.Equal("Dehiwala", home.Str("city"));
 
-        var work = await client.PostJsonAsync("/api/v1/addresses",
-            new { label = "work", line = "21 Duplication Rd, Colombo 03", latitude = 6.91, longitude = 79.85, isDefault = true },
-            HttpStatusCode.Created);
-        ShapeAssert.Matches(ContractSamples.Response("user", "GET /addresses").GetProperty("items")[0], work);
-        Assert.Equal("Kollupitiya", await api.DbAsync(db => db.Addresses.Where(a => a.Id == work.Str("id")).Select(a => a.Area).SingleAsync()));
+        var body = AddressSample();
+        var grandma = await (await client.PostAsJsonAsync("/api/v1/addresses", body)).JsonAsync(HttpStatusCode.Created);
+        ShapeAssert.Matches(ContractSamples.Response(Contract, "GET /addresses").GetProperty("items")[0], grandma);
+        Assert.Equal(("Grandma's", false), (grandma.Str("customLabel"), grandma.GetProperty("isDefault").GetBoolean()));
 
-        list = await client.GetJsonAsync("/api/v1/addresses");
-        Assert.Equal(1, list.GetProperty("items").EnumerateArray().Count(a => a.GetProperty("isDefault").GetBoolean()));
-        Assert.Equal(work.Str("id"), list.GetProperty("items")[0].Str("id"));
+        var made = await client.PostJsonAsync($"/api/v1/addresses/{grandma.Str("id")}/default", null);
+        Assert.True(made.GetProperty("isDefault").GetBoolean());
+        body["isDefault"] = false;
+        body["notes"] = "Blue door";
+        var replaced = await (await client.PutAsJsonAsync($"/api/v1/addresses/{grandma.Str("id")}", body)).JsonAsync();
+        Assert.Equal(("Blue door", true), (replaced.Str("notes"), replaced.GetProperty("isDefault").GetBoolean()));
 
-        await (await client.PatchAsJsonAsync($"/api/v1/addresses/{work.Str("id")}", new { isDefault = false }))
-            .ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_FAILED");
-        var renamed = await (await client.PatchAsJsonAsync($"/api/v1/addresses/{work.Str("id")}", new { label = "other" })).JsonAsync();
-        Assert.Equal("other", renamed.Str("label"));
+        Assert.Equal(HttpStatusCode.NoContent, (await client.DeleteAsync($"/api/v1/addresses/{grandma.Str("id")}")).StatusCode);
+        Assert.True((await client.GetJsonAsync("/api/v1/addresses")).GetProperty("items")[0].GetProperty("isDefault").GetBoolean());
+        await (await client.DeleteAsync($"/api/v1/addresses/{grandma.Str("id")}")).ErrorAsync(HttpStatusCode.NotFound, "NOT_FOUND");
+        // RT-24817 is on its way to the home address.
+        await (await client.DeleteAsync($"/api/v1/addresses/{home.Str("id")}")).ErrorAsync(HttpStatusCode.Conflict, "ADDRESS_IN_USE");
 
-        Assert.Equal(HttpStatusCode.NoContent, (await client.DeleteAsync($"/api/v1/addresses/{work.Str("id")}")).StatusCode);
-        list = await client.GetJsonAsync("/api/v1/addresses");
-        Assert.True(list.GetProperty("items")[0].GetProperty("isDefault").GetBoolean());
-
-        await (await client.DeleteAsync($"/api/v1/addresses/{work.Str("id")}")).ErrorAsync(HttpStatusCode.NotFound, "ADDRESS_NOT_FOUND");
-        // Someone else's address is invisible.
-        var other = await api.CustomerAsync("+94764824761");
-        await (await other.DeleteAsync($"/api/v1/addresses/{home.Str("id")}")).ErrorAsync(HttpStatusCode.NotFound, "ADDRESS_NOT_FOUND");
+        body["lat"] = 51.5;
+        await (await client.PostAsJsonAsync("/api/v1/addresses", body)).ErrorAsync(HttpStatusCode.UnprocessableEntity, "OUTSIDE_SERVICE_AREA");
+        body["lat"] = 6.03;
+        body["city"] = "";
+        var error = await (await client.PostAsJsonAsync("/api/v1/addresses", body)).ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_ERROR");
+        Assert.True(error.GetProperty("details").TryGetProperty("city", out _));
     }
 
     [Fact]
-    public async Task The_first_address_becomes_the_default()
+    public async Task Family_members_follow_the_self_rules()
     {
         await using var api = await TestApi.StartAsync(server);
-        var client = await api.CustomerAsync("+94700000002");
-        var first = await client.PostJsonAsync("/api/v1/addresses",
-            new { label = "home", line = "5 Temple Road, Kandy", latitude = 7.29, longitude = 80.63, isDefault = false },
-            HttpStatusCode.Created);
-        Assert.True(first.GetProperty("isDefault").GetBoolean());
-        Assert.Equal("Kandy", await api.DbAsync(db => db.Addresses.Where(a => a.Id == first.Str("id")).Select(a => a.Area).SingleAsync()));
-        await (await client.PostAsJsonAsync("/api/v1/addresses",
-                new { label = "home", line = "", latitude = 51.5, longitude = 0.1, isDefault = false }))
-            .ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_FAILED");
-    }
-
-    [Fact]
-    public async Task Family_members_get_sizes_from_their_measurements()
-    {
-        await using var api = await TestApi.StartAsync(server);
-        var client = await api.CustomerAsync("+94700000003");
-        var sample = ContractSamples.Response("user", "GET /family-members").GetProperty("items")[0];
-
-        var created = await client.PostJsonAsync("/api/v1/family-members", new
-        {
-            name = "Nimali Perera",
-            relation = "self",
-            gender = "female",
-            ageGroup = "adult",
-            heightCm = 160,
-            chestCm = 86,
-            waistCm = 71,
-            hipCm = 94,
-            shoeSize = "38",
-            topSize = "XXL",
-        }, HttpStatusCode.Created);
-        ShapeAssert.Matches(sample, created);
-        Assert.Equal(("M", "28"), (created.Str("topSize"), created.Str("bottomSize")));
-
-        var child = await client.PostJsonAsync("/api/v1/family-members",
-            new { name = "Sahan", relation = "son", gender = "male", ageGroup = "child", heightCm = 115 }, HttpStatusCode.Created);
-        Assert.Equal(("6-7Y", "6-7Y"), (child.Str("topSize"), child.Str("bottomSize")));
-
-        var grown = await (await client.PatchAsJsonAsync($"/api/v1/family-members/{child.Str("id")}", new { heightCm = 128 })).JsonAsync();
-        Assert.Equal("8-9Y", grown.Str("topSize"));
-
+        var client = await api.CustomerAsync();
         var list = await client.GetJsonAsync("/api/v1/family-members");
-        list.MatchesContract("user", "GET /family-members");
-        Assert.Equal("self", list.GetProperty("items")[0].Str("relation"));
+        list.MatchesContract(Contract, "GET /family-members");
+        var self = list.GetProperty("items")[0];
+        Assert.Equal("self", self.Str("relation"));
 
-        Assert.Equal(HttpStatusCode.NoContent, (await client.DeleteAsync($"/api/v1/family-members/{child.Str("id")}")).StatusCode);
-        var error = await (await client.PostAsJsonAsync("/api/v1/family-members", new { name = "No relation" }))
-            .ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_FAILED");
-        Assert.True(error.GetProperty("details").TryGetProperty("relation", out _));
+        var mother = await (await client.PostAsJsonAsync("/api/v1/family-members",
+            ContractSamples.Request(Contract, "POST /family-members"))).JsonAsync(HttpStatusCode.Created);
+        ShapeAssert.Matches(ContractSamples.Response(Contract, "GET /family-members").GetProperty("items")[0], mother);
+
+        var body = JsonNode.Parse(ContractSamples.Request(Contract, "POST /family-members").GetRawText())!;
+        body["heightCm"] = 999;
+        var error = await (await client.PostAsJsonAsync("/api/v1/family-members", body)).ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_ERROR");
+        Assert.DoesNotContain("999", error.GetProperty("details").Str("heightCm"), StringComparison.Ordinal);
+        body["heightCm"] = 150;
+        body["relation"] = "self";
+        await (await client.PostAsJsonAsync("/api/v1/family-members", body)).ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_ERROR");
+        await (await client.PutAsJsonAsync($"/api/v1/family-members/{mother.Str("id")}", body)).ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_ERROR");
+        body["relation"] = "mother";
+        body["shoeSize"] = "38.5";
+        Assert.Equal("38.5", (await (await client.PutAsJsonAsync($"/api/v1/family-members/{mother.Str("id")}", body)).JsonAsync()).Str("shoeSize"));
+
+        await (await client.DeleteAsync($"/api/v1/family-members/{self.Str("id")}")).ErrorAsync(HttpStatusCode.Forbidden, "CANNOT_DELETE_SELF");
+        Assert.Equal(HttpStatusCode.NoContent, (await client.DeleteAsync($"/api/v1/family-members/{mother.Str("id")}")).StatusCode);
+        await (await client.DeleteAsync($"/api/v1/family-members/{mother.Str("id")}")).ErrorAsync(HttpStatusCode.NotFound, "NOT_FOUND");
+    }
+
+    [Fact]
+    public async Task The_catalog_lists_garment_types_and_size_charts()
+    {
+        await using var api = await TestApi.StartAsync(server);
+        var client = await api.CustomerAsync();
+        var types = await client.GetJsonAsync("/api/v1/catalog/garment-types");
+        types.MatchesContract(Contract, "GET /catalog/garment-types");
+        Assert.Equal(("shirt", "chest"), (types.GetProperty("items")[1].Str("id"), types.GetProperty("items")[1].Str("sizeBasis")));
+        var charts = await client.GetJsonAsync("/api/v1/catalog/size-charts");
+        charts.MatchesContract(Contract, "GET /catalog/size-charts");
+        var adultChest = charts.GetProperty("items").EnumerateArray().Single(c => c.Str("sizeBasis") == "chest" && c.Str("ageGroup") == "adult");
+        Assert.Equal("M", adultChest.GetProperty("ranges").EnumerateArray().Single(r => r.GetProperty("minCm").GetInt32() == 88).Str("size"));
     }
 
     [Fact]
@@ -124,46 +189,22 @@ public sealed class ProfileTests(PostgresServer server)
     {
         await using var api = await TestApi.StartAsync(server);
         var client = await api.CustomerAsync("+94700000004");
-        await (await client.GetAsync("/api/v1/wallet/bank-details")).ErrorAsync(HttpStatusCode.NotFound, "BANK_DETAILS_NOT_FOUND");
-
+        await (await client.GetAsync("/api/v1/wallet/bank-details")).ErrorAsync(HttpStatusCode.NotFound, "NOT_FOUND");
         var saved = await (await client.PutAsJsonAsync("/api/v1/wallet/bank-details",
-            ContractSamples.Request("user", "PUT /wallet/bank-details"))).JsonAsync();
-        saved.MatchesContract("user", "GET /wallet/bank-details");
-        Assert.Equal("•••• 4821", saved.Str("accountNumberMasked"));
-
+            ContractSamples.Request(Contract, "PUT /wallet/bank-details"))).JsonAsync();
+        saved.MatchesContract(Contract, "GET /wallet/bank-details");
         var stored = await api.DbAsync(db => db.BankDetails
             .SingleAsync(b => db.Customers.Any(c => c.Id == b.CustomerId && c.Mobile == "+94700000004")));
         Assert.DoesNotContain("8001234821", stored.AccountNumberProtected, StringComparison.Ordinal);
         Assert.True((await client.GetJsonAsync("/api/v1/me")).GetProperty("hasBankDetails").GetBoolean());
-
-        await (await client.PutAsJsonAsync("/api/v1/wallet/bank-details",
-                new { bankName = "HNB", branch = "Dehiwala", accountName = "Nimali", accountNumber = "12-34" }))
-            .ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_FAILED");
-
         Assert.Equal(HttpStatusCode.NoContent, (await client.DeleteAsync("/api/v1/wallet/bank-details")).StatusCode);
-        await (await client.GetAsync("/api/v1/wallet/bank-details")).ErrorAsync(HttpStatusCode.NotFound, "BANK_DETAILS_NOT_FOUND");
     }
 
     [Fact]
-    public async Task Customers_read_and_clear_their_notifications()
+    public async Task Seeded_family_age_groups_use_the_apps_set()
     {
         await using var api = await TestApi.StartAsync(server);
-        var client = await api.CustomerAsync();
-
-        var page = await client.GetJsonAsync("/api/v1/notifications");
-        page.MatchesContract("user", "GET /notifications");
-        var first = page.GetProperty("items")[0];
-        Assert.Equal("collectorEnRoute", first.Str("type"));
-        Assert.Equal("RT-24817", first.Str("targetId"));
-        var unread = page.GetProperty("unreadCount").GetInt32();
-        Assert.True(unread > 0);
-
-        Assert.Equal(HttpStatusCode.NoContent, (await client.PostAsync($"/api/v1/notifications/{first.Str("id")}/read", null)).StatusCode);
-        Assert.Equal(unread - 1, (await client.GetJsonAsync("/api/v1/notifications")).GetProperty("unreadCount").GetInt32());
-
-        Assert.Equal(HttpStatusCode.NoContent, (await client.PostAsync("/api/v1/notifications/read-all", null)).StatusCode);
-        Assert.Equal(0, (await client.GetJsonAsync("/api/v1/notifications")).GetProperty("unreadCount").GetInt32());
-
-        await (await client.PostAsync("/api/v1/notifications/ntf_nope/read", null)).ErrorAsync(HttpStatusCode.NotFound, "NOTIFICATION_NOT_FOUND");
+        var groups = await api.DbAsync(db => db.FamilyMembers.Select(m => m.AgeGroup).Distinct().ToListAsync());
+        Assert.All(groups, g => Assert.Contains(g, new[] { AgeGroup.Adult, AgeGroup.Teen, AgeGroup.Kid }));
     }
 }

@@ -147,7 +147,7 @@ public sealed class DevSeeder(
             var area = Areas.All[i % Areas.All.Count];
             var daysAgo = _random.Int(20, 400);
             var email = _random.Chance(0.6) ? $"{first.ToLowerInvariant()}.{last.ToLowerInvariant()}@example.lk" : null;
-            var line = $"{_random.Int(2, 180)}/{_random.Int(1, 9)} {_random.Pick(SeedRows.CustomerStreets)}, {area.Name}";
+            var line = $"{_random.Int(2, 180)}/{_random.Int(1, 9)} {_random.Pick(SeedRows.CustomerStreets)}";
             var latitude = area.Latitude + (_random.Next() - 0.5) * 0.015;
             var longitude = area.Longitude + (_random.Next() - 0.5) * 0.015;
             var id = $"cus_{i + 1}";
@@ -168,7 +168,7 @@ public sealed class DevSeeder(
                     new Address
                     {
                         Id = $"adr_{i + 1}", CustomerId = id, Label = AddressLabel.Home, Line = line,
-                        Area = area.Name, Latitude = latitude, Longitude = longitude, IsDefault = true,
+                        City = area.Name, Area = area.Name, Latitude = latitude, Longitude = longitude, IsDefault = true,
                         CreatedAt = joined,
                     },
                 ],
@@ -195,7 +195,7 @@ public sealed class DevSeeder(
                     ? (FamilyRelation.Self, female ? Gender.Female : Gender.Male, AgeGroup.Adult)
                     : (SeedRows.FamilyTemplates[k - 1].Relation, SeedRows.FamilyTemplates[k - 1].Gender,
                         SeedRows.FamilyTemplates[k - 1].Age);
-                var child = age is AgeGroup.Child or AgeGroup.Teen;
+                var child = age is AgeGroup.Kid or AgeGroup.Teen;
                 yield return new FamilyMember
                 {
                     Id = $"fam_{customer.Id[4..]}_{k + 1}",
@@ -411,7 +411,7 @@ public sealed class DevSeeder(
             WindowStart = Colombo.At(d.Date, d.StartHour),
             WindowEnd = Colombo.At(d.Date, d.StartHour + 1),
             AddressId = address.Id,
-            AddressLine = address.Line,
+            AddressLine = address.FullLine,
             Area = address.Area,
             Latitude = address.Latitude,
             Longitude = address.Longitude,
@@ -546,7 +546,7 @@ public sealed class DevSeeder(
                 Id = id,
                 CustomerId = customer.Id,
                 FulfilmentType = type,
-                Destination = vendor?.Address ?? customer.Addresses[0].Line,
+                Destination = vendor?.Address ?? customer.Addresses[0].FullLine,
                 AddressId = vendor is null ? customer.Addresses[0].Id : null,
                 VendorId = vendor?.Id,
                 PaymentMethod = payment,

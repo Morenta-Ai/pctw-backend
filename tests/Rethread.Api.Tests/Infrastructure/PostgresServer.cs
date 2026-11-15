@@ -77,6 +77,7 @@ public sealed class PostgresServer : IAsyncLifetime
         try
         {
             if (_templateReady) return;
+            await ExecuteAsync($"DROP DATABASE IF EXISTS \"{_template}\" WITH (FORCE)");
             await ExecuteAsync($"CREATE DATABASE \"{_template}\"");
             var connection = ConnectionFor(_template, pooling: false);
             // Migrate before the API starts, so nothing at start-up queries tables that don't exist yet.

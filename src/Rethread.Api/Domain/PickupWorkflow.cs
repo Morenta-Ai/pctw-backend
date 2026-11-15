@@ -93,7 +93,7 @@ public sealed class PickupWorkflow(AppDbContext db, RateBook rates, Notification
             WindowStart = Colombo.At(booking.ScheduledDate, start),
             WindowEnd = Colombo.At(booking.ScheduledDate, end),
             AddressId = address.Id,
-            AddressLine = address.Line,
+            AddressLine = address.FullLine,
             Area = address.Area,
             Latitude = address.Latitude,
             Longitude = address.Longitude,

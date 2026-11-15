@@ -8,6 +8,7 @@ public sealed class ContractDocumentTests
     [InlineData("user")]
     [InlineData("collector")]
     [InlineData("admin")]
+    [InlineData("user-next")]
     public void Every_sample_in_the_contract_is_valid_json(string contract)
     {
         var samples = ContractSamples.All(contract).ToList();
@@ -23,6 +24,9 @@ public sealed class ContractDocumentTests
         // App style: "// 200" inside the block after "// request".
         Assert.Equal("otp_8f2c",
             ContractSamples.Response("user", "POST /auth/otp/request").GetProperty("challengeId").GetString());
+        // The new user contract: the request block, then the response block, both unlabelled.
+        Assert.Equal("otp_8f2c",
+            ContractSamples.Response("user-next", "POST /auth/otp/request").GetProperty("requestId").GetString());
         // A plain GET block.
         Assert.Equal("col_457", ContractSamples.Response("collector", "GET /me").GetProperty("id").GetString());
         // A heading with a query string.

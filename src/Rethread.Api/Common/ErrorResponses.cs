@@ -21,6 +21,7 @@ public static class ErrorResponses
                 >= 400 and < 500 => new ErrorBody(ErrorCodes.BadRequest, "Bad request."),
                 _ => new ErrorBody(ErrorCodes.InternalError, "Something went wrong on our side."),
             };
-            await response.WriteAsJsonAsync(body);
+            var (_, translated) = ErrorDialect.Translate(context.HttpContext, response.StatusCode, body);
+            await response.WriteAsJsonAsync(translated);
         });
 }

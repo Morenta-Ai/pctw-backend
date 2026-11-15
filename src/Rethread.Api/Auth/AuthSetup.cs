@@ -44,8 +44,9 @@ public static class AuthSetup
             o.OnRejected = async (context, ct) =>
             {
                 context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
-                await context.HttpContext.Response.WriteAsJsonAsync(
-                    new ErrorBody(ErrorCodes.TooManyRequests, "Too many requests. Try again in a minute."), ct);
+                var (_, body) = ErrorDialect.Translate(context.HttpContext, StatusCodes.Status429TooManyRequests,
+                    new ErrorBody(ErrorCodes.TooManyRequests, "Too many requests. Try again in a minute."));
+                await context.HttpContext.Response.WriteAsJsonAsync(body, ct);
             };
         });
 

@@ -16,7 +16,7 @@ public enum FamilyRelation { Self, Spouse, Son, Daughter, Mother, Father, Siblin
 
 public enum Gender { Female, Male, Other }
 
-public enum AgeGroup { Toddler, Child, Teen, Adult, Senior }
+public enum AgeGroup { Adult, Teen, Kid }
 
 /// <summary>The portal's set. The user and collector apps see translated values; see ARCHITECTURE.md.</summary>
 public enum PickupStatus { Pending, Assigned, EnRoute, Arrived, Collected, DeliveredToHub, Cancelled }

@@ -10,7 +10,7 @@ namespace Rethread.Api.Tests.Customer;
 
 public sealed class ProfileTests(PostgresServer server)
 {
-    private const string Contract = "user-next";
+    private const string Contract = "user";
     private static readonly byte[] Jpeg = [0xFF, 0xD8, 0xFF, 0xE0, 0, 0x10, (byte)'J', (byte)'F', (byte)'I', (byte)'F', 0, 1];
 
     private static JsonNode AddressSample() => JsonNode.Parse(ContractSamples.Request(Contract, "POST /addresses").GetRawText())!;

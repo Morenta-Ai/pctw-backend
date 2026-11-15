@@ -7,7 +7,7 @@ namespace Rethread.Api.Tests.Customer;
 
 public sealed class ImpactTests(PostgresServer server)
 {
-    private const string Contract = "user-next";
+    private const string Contract = "user";
 
     private static async Task<(HttpClient Client, decimal TotalKg, int Count)> BusiestAsync(TestApi api)
     {

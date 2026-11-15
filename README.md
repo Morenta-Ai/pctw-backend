@@ -76,6 +76,9 @@ export TEST_DATABASE_URL="Host=localhost;Port=5432;Username=rethread;Password=re
 | `Maintenance:StaleCollectorMinutes` | 30 (0, off, in Development) | Take collectors offline when their app stops reporting |
 | `Storage:Root` | `storage/` beside the app | Where uploaded photos are kept (local disk for now) |
 | `Storage:PublicBaseUrl` | the request's host | Base of catalogue photo URLs, such as `https://api.rethread.lk` |
+| `Pickups:SlotCapacity` | 40 | Pickup requests per slot before it shows as unavailable |
+| `ServiceArea:MinLatitude` … `MaxLongitude` | Sri Lanka | Where customers can save an address |
+| `App:*` | see `AppConfigEndpoints` | What `GET /app/config` tells the user app: support contacts, legal and store links, `WalletEnabled`, `PushEnabled`, `MinSupportedVersion`, `LatestVersion` |
 | `Portal:BaseUrl` | `http://localhost:3000` | Where staff invite links point (`/set-password?token=…`) |
 | `Simulation:AutoAnswerOffers` | `false` | Development only: answer call-centre offers like the portal's mock collectors, to demo the portal without a phone |
 
@@ -120,7 +123,8 @@ Before going live:
 - Move uploads to object storage (S3, R2 or Azure Blob) behind `IFileStore` if there's more than one
   instance.
 - Protect the Data Protection keys (they encrypt bank account numbers) with a certificate or a key vault.
-- Choose a card payment gateway: card orders are recorded unpaid.
+- Choose a card payment gateway and implement `IPaymentGateway`: until then Production confirms no card
+  payment, so shop orders can't be paid. Development accepts the user app's mock gateway.
 
 ## Status
 

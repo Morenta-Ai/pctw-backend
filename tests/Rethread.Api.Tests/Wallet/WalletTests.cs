@@ -113,7 +113,7 @@ public sealed class WalletTests(PostgresServer server)
         await client.PostJsonAsync("/api/v1/wallet/redemptions", gift, HttpStatusCode.Created);
         var after = await Project();
         Assert.Equal((start.RaisedCents + 100000, start.DonorCount + 1), (after.RaisedCents, after.DonorCount));
-        Assert.True(await api.DbAsync(db => db.Notifications.AnyAsync(n => n.RecipientId == "cus_1" && n.Type == "donationThanks")));
+        Assert.True(await api.DbAsync(db => db.Notifications.AnyAsync(n => n.RecipientId == "cus_1" && n.Type == "system")));
 
         await (await client.PostAsJsonAsync("/api/v1/wallet/redemptions", new { type = "donation", amountCents = 50000, projectId = "dp_flood_relief" }))
             .ErrorAsync(HttpStatusCode.UnprocessableEntity, "VALIDATION_ERROR");
@@ -144,7 +144,7 @@ public sealed class WalletTests(PostgresServer server)
         var rejected = await staff.PostJsonAsync("/api/v1/admin/redemptions/red_2/reject", new { reason = "Account name doesn't match the customer." });
         Assert.Equal("rejected", rejected.Str("status"));
         Assert.Equal(before + 75000, (await customer.GetJsonAsync("/api/v1/wallet")).GetProperty("balanceCents").GetInt64());
-        Assert.True(await api.DbAsync(db => db.Notifications.AnyAsync(n => n.RecipientId == customerId && n.Type == "transferUpdate")));
+        Assert.True(await api.DbAsync(db => db.Notifications.AnyAsync(n => n.RecipientId == customerId && n.Type == "system")));
 
         await (await staff.PostAsJsonAsync("/api/v1/admin/redemptions/red_6/pay", new { reference = "x" }))
             .ErrorAsync(HttpStatusCode.Conflict, "REDEMPTION_CLOSED");

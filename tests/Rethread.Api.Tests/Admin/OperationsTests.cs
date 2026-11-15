@@ -53,7 +53,7 @@ public sealed partial class OperationsTests(PostgresServer server)
         Assert.Equal(("cancelled", "Customer called to cancel: travelling this week."), (cancelled.Str("status"), cancelled.Str("cancelReason")));
         Assert.Equal("Kasun Jayawardena", cancelled.GetProperty("timeline").EnumerateArray().Last().Str("actor"));
         Assert.True(await api.DbAsync(db => db.Notifications.AnyAsync(n => n.RecipientId == "col_457" && n.Type == "jobCancelled")));
-        Assert.True(await api.DbAsync(db => db.Notifications.AnyAsync(n => n.RecipientId == "cus_1" && n.Type == "pickupCancelled")));
+        Assert.True(await api.DbAsync(db => db.Notifications.AnyAsync(n => n.RecipientId == "cus_1" && n.Type == "pickupStatus" && n.PickupStatus == "cancelled")));
         await (await staff.PostAsJsonAsync("/api/v1/admin/pickups/RT-24790/cancel", new { reason = "Too late now" }))
             .ErrorAsync(HttpStatusCode.Conflict, "PICKUP_NOT_CANCELLABLE");
         await (await staff.GetAsync("/api/v1/admin/pickups/RT-1")).ErrorAsync(HttpStatusCode.NotFound, "PICKUP_NOT_FOUND");

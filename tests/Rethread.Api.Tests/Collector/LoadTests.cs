@@ -41,7 +41,7 @@ public sealed class LoadTests(PostgresServer server)
         {
             var delivered = await db.Pickups.Where(p => p.HubDeliveryId == "HUB-PLG-071126-0457").ToListAsync();
             Assert.All(delivered, p => Assert.Equal((PickupStatus.DeliveredToHub, "hub_plg"), (p.Status, p.HubId)));
-            Assert.Equal(2, await db.Notifications.CountAsync(n => n.Type == "hubArrival" && n.CreatedAt == TestClock.Start.UtcDateTime));
+            Assert.Equal(2, await db.Notifications.CountAsync(n => n.Type == "pickupStatus" && n.PickupStatus == "deliveredToHub" && n.CreatedAt == TestClock.Start.UtcDateTime));
         });
 
         var load = await client.GetJsonAsync("/api/v1/collector/load");

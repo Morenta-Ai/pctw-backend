@@ -109,7 +109,7 @@ runs as a non-root user. Production needs:
 
 | Variable | Example |
 | --- | --- |
-| `ConnectionStrings__Default` | `Host=ep-…-pooler.ap-southeast-1.aws.neon.tech;Database=rethread;Username=…;Password=…;SSL Mode=Require` |
+| `ConnectionStrings__Default` | `Host=ep-…-pooler.….aws.neon.tech;Database=neondb;Username=…;Password=…;SSL Mode=VerifyFull;Channel Binding=Require` |
 | `Jwt__SigningKey` | 32+ random characters, from the platform's secret store |
 | `Storage__PublicBaseUrl` | `https://api.rethread.lk` (catalogue photo links) |
 | `Storage__Root` | A mounted volume for uploads (`/data/storage` in the image) |
@@ -120,6 +120,11 @@ Run migrations as a deploy step, not on start: `dotnet Rethread.Api.dll migrate`
 `docker run … rethread-api migrate`). Use Neon's direct (non-pooled) connection string for that, and the
 pooled one for the API. The seed and the development switches (`Otp:FixedCode`,
 `Simulation:AutoAnswerOffers`) never run in Production.
+
+Neon gives a `postgresql://…` URL; Npgsql needs it as the keyword string above. The direct host is the
+pooled one without `-pooler`. To load the demo data into an empty Neon database, run `seed` (never
+`seed --reset`, which drops the whole database) with `ASPNETCORE_ENVIRONMENT=Development` and the direct
+connection string. Keep the strings in a gitignored `.env`, never in `appsettings*.json`.
 
 Before going live:
 

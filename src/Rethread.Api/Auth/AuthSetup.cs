@@ -24,7 +24,15 @@ public static class AuthSetup
         services.AddScoped<OtpService>();
         services.AddSingleton<LoginThrottle>();
         services.AddSingleton<DevOutbox>();
-        services.AddSingleton<ISmsSender, LoggingSmsSender>();
+        services.AddOptions<NotifyLkOptions>().Bind(config.GetSection(NotifyLkOptions.Section));
+        if (config.GetSection(NotifyLkOptions.Section).Get<NotifyLkOptions>()?.IsConfigured == true)
+        {
+            services.AddHttpClient<ISmsSender, NotifyLkSmsSender>(c => c.Timeout = TimeSpan.FromSeconds(15));
+        }
+        else
+        {
+            services.AddSingleton<ISmsSender, LoggingSmsSender>();
+        }
         services.AddSingleton<IEmailSender, LoggingEmailSender>();
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();

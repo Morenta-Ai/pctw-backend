@@ -1,6 +1,9 @@
 namespace Rethread.Api.Auth;
 
-/// <summary>Sends text messages. Only a logging implementation exists until an SMS provider is chosen.</summary>
+/// <summary>
+/// Sends text messages: <see cref="NotifyLkSmsSender"/> once <c>Sms:NotifyLk:ApiKey</c> is set, otherwise
+/// <see cref="LoggingSmsSender"/>. Throws <see cref="SmsNotSentException"/> when the message wasn't sent.
+/// </summary>
 public interface ISmsSender
 {
     Task SendAsync(string mobile, string text, CancellationToken ct);

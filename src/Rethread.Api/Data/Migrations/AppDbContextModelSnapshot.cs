@@ -1957,11 +1957,6 @@ namespace Rethread.Api.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("Path")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("path");
-
                     b.Property<long>("SizeBytes")
                         .HasColumnType("bigint")
                         .HasColumnName("size_bytes");
@@ -1975,6 +1970,23 @@ namespace Rethread.Api.Data.Migrations
                         .HasName("pk_files");
 
                     b.ToTable("files", (string)null);
+                });
+
+            modelBuilder.Entity("Rethread.Api.Data.Entities.StoredFileContent", b =>
+                {
+                    b.Property<string>("FileId")
+                        .HasColumnType("text")
+                        .HasColumnName("file_id");
+
+                    b.Property<byte[]>("Bytes")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("bytes");
+
+                    b.HasKey("FileId")
+                        .HasName("pk_file_contents");
+
+                    b.ToTable("file_contents", (string)null);
                 });
 
             modelBuilder.Entity("Rethread.Api.Data.Entities.SupportTicket", b =>
@@ -2381,6 +2393,16 @@ namespace Rethread.Api.Data.Migrations
                         .HasConstraintName("fk_staff_notification_reads_staff_staff_id");
                 });
 
+            modelBuilder.Entity("Rethread.Api.Data.Entities.StoredFileContent", b =>
+                {
+                    b.HasOne("Rethread.Api.Data.Entities.StoredFile", null)
+                        .WithOne("Content")
+                        .HasForeignKey("Rethread.Api.Data.Entities.StoredFileContent", "FileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_file_contents_files_file_id");
+                });
+
             modelBuilder.Entity("Rethread.Api.Data.Entities.Customer", b =>
                 {
                     b.Navigation("Addresses");
@@ -2404,6 +2426,11 @@ namespace Rethread.Api.Data.Migrations
                     b.Navigation("Items");
 
                     b.Navigation("PreferredDates");
+                });
+
+            modelBuilder.Entity("Rethread.Api.Data.Entities.StoredFile", b =>
+                {
+                    b.Navigation("Content");
                 });
 #pragma warning restore 612, 618
         }

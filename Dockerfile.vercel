@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Vercel builds this file instead of ./Dockerfile (it selects the Container preset). The differences:
-# Vercel sends traffic to $PORT (set PORT=8080 in the project), the filesystem is read-only apart
-# from /tmp, and requests arrive through Vercel's proxy.
+# Vercel sends traffic to $PORT (set PORT=8080 in the project) and requests arrive through Vercel's
+# proxy. Uploads are kept in the database, so the read-only filesystem doesn't matter.
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
@@ -14,9 +14,7 @@ RUN dotnet publish src/Rethread.Api/Rethread.Api.csproj --configuration Release 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 COPY --from=build /app .
-# Uploads in /tmp don't survive a scale-down: fine for testing, not for real catalogue photos.
 ENV ASPNETCORE_ENVIRONMENT=Production \
-    Storage__Root=/tmp/storage \
     Hosting__TrustForwardedHeaders=true \
     DOTNET_EnableDiagnostics=0
 USER $APP_UID

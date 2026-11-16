@@ -41,5 +41,19 @@ public sealed class ImpactMultiplierConfiguration : IEntityTypeConfiguration<Imp
 
 public sealed class StoredFileConfiguration : IEntityTypeConfiguration<StoredFile>
 {
-    public void Configure(EntityTypeBuilder<StoredFile> b) => b.ToTable("files");
+    public void Configure(EntityTypeBuilder<StoredFile> b)
+    {
+        b.ToTable("files");
+        b.HasOne(f => f.Content).WithOne().HasForeignKey<StoredFileContent>(c => c.FileId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+public sealed class StoredFileContentConfiguration : IEntityTypeConfiguration<StoredFileContent>
+{
+    public void Configure(EntityTypeBuilder<StoredFileContent> b)
+    {
+        b.ToTable("file_contents");
+        b.HasKey(c => c.FileId);
+    }
 }

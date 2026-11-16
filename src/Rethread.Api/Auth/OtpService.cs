@@ -63,8 +63,25 @@ public sealed class OtpService(
         await db.SaveChangesAsync(ct);
 
         var text = $"{code} is your ReThread code. It expires in {_otp.LifetimeMinutes} minutes.";
-        if (channel == "email") await email.SendAsync(destination, "Your ReThread code", text, ct);
-        else await sms.SendAsync(destination, text, ct);
+        if (channel == "email")
+        {
+            await email.SendAsync(destination, "Your ReThread code", text, ct);
+        }
+        else
+        {
+            try
+            {
+                await sms.SendAsync(destination, text, ct);
+            }
+            catch (SmsNotSentException)
+            {
+                // Forget the unsent code so the retry isn't held back by the resend wait.
+                db.OtpChallenges.Remove(challenge);
+                await db.SaveChangesAsync(CancellationToken.None);
+                throw new ApiException(StatusCodes.Status503ServiceUnavailable, ErrorCodes.InternalError,
+                    "We couldn't send your code. Try again in a minute.");
+            }
+        }
 
         return new Challenge(challenge.Id, challenge.ExpiresAt, _otp.LifetimeMinutes * 60, resend);
     }

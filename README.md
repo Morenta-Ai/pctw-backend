@@ -76,6 +76,8 @@ export TEST_DATABASE_URL="Host=localhost;Port=5432;Username=rethread;Password=re
 | `Jwt:SigningKey` | a dev key in Development | HS256 key for access tokens, at least 32 characters. Required |
 | `Jwt:AppAccessTokenMinutes`, `Jwt:StaffAccessTokenMinutes` | 60, 15 | Access token lifetimes |
 | `Otp:FixedCode` | `123456` in Development | Every sign-in code is this value. Ignored in Production |
+| `Sms:NotifyLk:UserId`, `Sms:NotifyLk:ApiKey` | empty | notify.lk account (Settings → API Keys). Texts go to the log until the key is set |
+| `Sms:NotifyLk:SenderId` | `NotifyDEMO` | Approved sender ID (Settings → Sender IDs). `NotifyDEMO` is for testing only: notify.lk may suspend accounts that send sign-in codes from it |
 | `Maintenance:Enabled`, `Maintenance:IntervalSeconds` | `true`, 5 | The background job that expires offers and raises waiting-pickup alerts |
 | `Maintenance:StaleCollectorMinutes` | 30 (0, off, in Development and Staging, where the demo collectors never report) | Take collectors offline when their app stops reporting |
 | `Storage:PublicBaseUrl` | the request's host | Base of catalogue photo URLs, such as `https://api.rethread.lk` |
@@ -95,8 +97,10 @@ export TEST_DATABASE_URL="Host=localhost;Port=5432;Username=rethread;Password=re
 
 Access tokens are JWTs; refresh tokens are random, stored hashed and rotated on every use. A refresh token
 used twice ends every session of that account. Suspension and staff roles are checked against the database
-on every request, not taken from the token. Until an SMS provider is chosen, codes and invite links are
-written to the log.
+on every request, not taken from the token. Sign-in codes go by SMS through notify.lk once
+`Sms:NotifyLk:ApiKey` is set, and to the log otherwise. If notify.lk refuses a message, the request fails
+with 503 and the code is dropped, so the app can ask again at once. Invite links and email codes are
+written to the log until an email sender is chosen.
 
 Set secrets with `dotnet user-secrets` locally and environment variables elsewhere
 (`ConnectionStrings__Default`, for example).
@@ -127,7 +131,8 @@ is gone and everyone signs in again. Keep the strings in a gitignored `.env`, ne
 
 Before going live:
 
-- Choose an SMS provider and an email sender: codes and invite links only go to the log today.
+- Set the notify.lk settings with an approved sender ID and enough credit, and choose an email sender:
+  email codes and invite links only go to the log today.
 - Uploads are kept in Postgres (`file_contents`), which suits photos of a few MB. Move them to object
   storage (S3, R2, Azure Blob or Vercel Blob) behind `IFileStore` if they grow.
 - Protect the Data Protection keys (they encrypt bank account numbers) with a certificate or a key vault.
@@ -143,8 +148,9 @@ variables:
 | Variable | Value |
 | --- | --- |
 | `PORT` | `8080`: Vercel sends traffic to this port, and the image's non-root user can't listen on 80 |
-| `ASPNETCORE_ENVIRONMENT` | `Staging`: sign-in codes are `Otp__FixedCode` and the apps' mock card payments are accepted, because there's no SMS provider or gateway yet. `Production` once there is |
+| `ASPNETCORE_ENVIRONMENT` | `Staging`: sign-in codes are `Otp__FixedCode` and the apps' mock card payments are accepted, for the demo. `Production` once notify.lk has an approved sender ID and there's a payment gateway |
 | `Otp__FixedCode` | `123456` (Staging only; Production ignores it) |
+| `Sms__NotifyLk__UserId`, `Sms__NotifyLk__ApiKey`, `Sms__NotifyLk__SenderId` | Optional. Set them to send real texts; on Staging the text still says `123456` but uses credit |
 | `ConnectionStrings__Default` | Neon's pooled connection string |
 | `Jwt__SigningKey` | `openssl rand -base64 48` |
 | `Storage__PublicBaseUrl` | `https://pctw-backend.vercel.app` |

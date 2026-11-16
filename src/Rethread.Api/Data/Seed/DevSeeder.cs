@@ -30,6 +30,19 @@ public sealed class DevSeeder(
     private DateTime _dayStart;
     private SeedRandom _random = new(24_841);
 
+    /// <summary>
+    /// Starts the demo again, dated today: drops the <c>public</c> schema (every table, sequence and the
+    /// migration history), migrates and seeds. It keeps the database itself, which on Neon is the project's
+    /// only one. The Data Protection keys go too, so run it in a fresh process, as the <c>seed</c> command does.
+    /// </summary>
+    public async Task ResetAsync(CancellationToken ct = default)
+    {
+        await db.Database.ExecuteSqlRawAsync("DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;", ct);
+        db.ChangeTracker.Clear();
+        await db.Database.MigrateAsync(ct);
+        await SeedAsync(ct);
+    }
+
     /// <summary>Seeds an empty database. Returns false, doing nothing, if it already has data.</summary>
     public async Task<bool> SeedAsync(CancellationToken ct = default)
     {

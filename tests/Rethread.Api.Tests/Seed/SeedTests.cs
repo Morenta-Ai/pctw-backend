@@ -1,11 +1,14 @@
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Rethread.Api.Common;
 using Rethread.Api.Data;
 using Rethread.Api.Data.Entities;
+using Rethread.Api.Data.Seed;
 using Rethread.Api.Domain;
 using Rethread.Api.Tests.Contract;
 using Rethread.Api.Tests.Infrastructure;
@@ -32,6 +35,42 @@ public sealed class SeedTests(PostgresServer server)
             .Select(p => p!.DeepClone()).ToArray());
 
         JsonDiff.AssertSame(expected, actual);
+    }
+
+    [Fact]
+    public async Task Reset_starts_the_demo_again_and_keeps_the_database()
+    {
+        await using var api = await TestApi.StartAsync(server);
+        // What a day of demos does: collectors go quiet, pickups move on.
+        await api.DbAsync(async db =>
+        {
+            await db.Collectors.ExecuteUpdateAsync(s => s.SetProperty(c => c.Online, false));
+            await db.Pickups.Where(p => p.Id == "RT-24841")
+                .ExecuteUpdateAsync(s => s.SetProperty(p => p.Status, PickupStatus.Cancelled));
+        });
+
+        await using (var scope = api.Factory.Services.CreateAsyncScope())
+            await scope.ServiceProvider.GetRequiredService<DevSeeder>().ResetAsync();
+
+        await api.DbAsync(async db =>
+        {
+            Assert.Equal(["col_312", "col_388", "col_421", "col_457", "col_466", "col_480", "col_515"],
+                await db.Collectors.Where(c => c.Online).OrderBy(c => c.Id).Select(c => c.Id).ToListAsync());
+            Assert.True(await db.Pickups.AnyAsync(p => p.Id == "RT-24841" && p.Status == PickupStatus.Pending));
+            Assert.Empty(await db.Database.GetPendingMigrationsAsync());
+        });
+        var staff = await api.Client().PostJsonAsync("/api/v1/admin/auth/login",
+            new { email = "admin@rethread.lk", password = "rethread-admin" });
+        Assert.Equal("admin", staff.GetProperty("staff").Str("role"));
+    }
+
+    [Fact]
+    public void The_hosted_demo_keeps_its_collectors_online()
+    {
+        using var staging = new TestApiFactory("Host=unused", TestClock.Start)
+            .WithWebHostBuilder(b => b.UseEnvironment("Staging"));
+        var config = staging.Services.GetRequiredService<IConfiguration>();
+        Assert.Equal(0, config.GetValue<int>("Maintenance:StaleCollectorMinutes"));
     }
 
     [Fact]

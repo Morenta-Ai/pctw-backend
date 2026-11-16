@@ -171,8 +171,8 @@ public static class RethreadPipeline
     }
 
     /// <summary>
-    /// <c>dotnet run -- seed [--reset]</c>: migrates and seeds the database, then exits. <c>--reset</c> drops
-    /// the database first. Refuses to run in Production.
+    /// <c>dotnet run -- seed [--reset]</c>: migrates and seeds the database, then exits. <c>--reset</c> clears
+    /// it first (<see cref="DevSeeder.ResetAsync"/>). Refuses to run in Production.
     /// </summary>
     public static async Task<int> RunSeedCommandAsync(this WebApplication app, string[] args)
     {
@@ -183,15 +183,16 @@ public static class RethreadPipeline
         }
 
         await using var scope = app.Services.CreateAsyncScope();
-        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var seeder = scope.ServiceProvider.GetRequiredService<DevSeeder>();
         if (args.Contains("--reset"))
         {
-            await db.Database.EnsureDeletedAsync();
-            Console.WriteLine("Dropped the database.");
+            await seeder.ResetAsync();
+            Console.WriteLine("Cleared and seeded the database.");
+            return 0;
         }
 
-        await db.Database.MigrateAsync();
-        var seeded = await scope.ServiceProvider.GetRequiredService<DevSeeder>().SeedAsync();
+        await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
+        var seeded = await seeder.SeedAsync();
         Console.WriteLine(seeded
             ? "Seeded the database."
             : "The database already has data. Run `seed --reset` to start again.");

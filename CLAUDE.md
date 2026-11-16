@@ -37,7 +37,7 @@ dotnet format          # before committing; CI runs --verify-no-changes
 dotnet build
 dotnet test            # TEST_DATABASE_URL, or Docker for Testcontainers
 dotnet ef migrations add <Name> --project src/Rethread.Api --output-dir Data/Migrations
-dotnet run --project src/Rethread.Api -- seed --reset   # fresh dev data, dated today
+dotnet run --project src/Rethread.Api -- seed --reset   # fresh dev data, dated today (clears the schema)
 dotnet run --project src/Rethread.Api -- migrate        # what production runs on deploy
 ```
 

@@ -1,6 +1,5 @@
 **/bin/
 **/obj/
-**/storage/
 .git/
 .github/
 tests/

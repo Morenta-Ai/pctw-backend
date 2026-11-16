@@ -21,7 +21,6 @@ public sealed class TestApiFactory(string connectionString, DateTimeOffset now,
         builder.UseSetting("Maintenance:Enabled", "false");
         builder.UseSetting("Jwt:SigningKey", "test-signing-key-that-is-long-enough-for-hs256-0123456789");
         builder.UseSetting("Otp:FixedCode", "123456");
-        builder.UseSetting("Storage:Root", Path.Combine(Path.GetTempPath(), "rethread-tests", Guid.NewGuid().ToString("N")));
         foreach (var (key, value) in settings ?? new Dictionary<string, string>()) builder.UseSetting(key, value);
         builder.ConfigureTestServices(services =>
         {

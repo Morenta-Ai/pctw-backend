@@ -12,8 +12,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 COPY --from=build /app .
 ENV ASPNETCORE_URLS=http://+:8080 \
-    ASPNETCORE_ENVIRONMENT=Production \
-    Storage__Root=/data/storage
+    ASPNETCORE_ENVIRONMENT=Production
 EXPOSE 8080
 # The image's built-in non-root user.
 USER $APP_UID

@@ -1,56 +1,50 @@
+using Microsoft.EntityFrameworkCore;
 using Rethread.Api.Common;
+using Rethread.Api.Data;
 using Rethread.Api.Data.Entities;
 
 namespace Rethread.Api.Domain;
 
-/// <summary>Where uploaded files live. Local disk for now; cloud storage can slot in behind this.</summary>
+/// <summary>Where uploaded files live. Cloud storage can slot in behind this.</summary>
 public interface IFileStore
 {
-    /// <summary>Saves the bytes and returns the record to add to the context.</summary>
+    /// <summary>Reads the bytes into a record (with its content) for the caller to add to the context.</summary>
     Task<StoredFile> SaveAsync(string prefix, Stream content, string contentType, string uploadedBy,
         CancellationToken ct);
 
-    Stream OpenRead(StoredFile file);
+    /// <summary>The file's bytes, or null if they're missing.</summary>
+    Task<Stream?> OpenReadAsync(StoredFile file, CancellationToken ct);
 }
 
-public sealed class LocalFileStore(IConfiguration config, IHostEnvironment environment, TimeProvider time)
-    : IFileStore
+/// <summary>
+/// Keeps uploads in Postgres. Every instance sees every file, which hosts with a throwaway disk (Vercel)
+/// need, and uploads are small (photos up to 5 MB).
+/// </summary>
+public sealed class DatabaseFileStore(AppDbContext db, TimeProvider time) : IFileStore
 {
-    private string Root => Path.GetFullPath(config["Storage:Root"] is { Length: > 0 } root
-        ? root
-        : Path.Combine(environment.ContentRootPath, "storage"));
-
     public async Task<StoredFile> SaveAsync(string prefix, Stream content, string contentType, string uploadedBy,
         CancellationToken ct)
     {
-        Directory.CreateDirectory(Root);
+        using var buffer = new MemoryStream();
+        await content.CopyToAsync(buffer, ct);
         var id = Ids.New(prefix);
-        var name = id + Extension(contentType);
-        await using (var file = File.Create(Path.Combine(Root, name)))
-        {
-            await content.CopyToAsync(file, ct);
-        }
-
         return new StoredFile
         {
             Id = id,
             ContentType = contentType,
-            SizeBytes = new FileInfo(Path.Combine(Root, name)).Length,
-            Path = name,
+            SizeBytes = buffer.Length,
             UploadedBy = uploadedBy,
             CreatedAt = time.UtcNow(),
+            Content = new StoredFileContent { FileId = id, Bytes = buffer.ToArray() },
         };
     }
 
-    public Stream OpenRead(StoredFile file) => File.OpenRead(Path.Combine(Root, file.Path));
-
-    private static string Extension(string contentType) => contentType switch
+    public async Task<Stream?> OpenReadAsync(StoredFile file, CancellationToken ct)
     {
-        "image/jpeg" => ".jpg",
-        "image/png" => ".png",
-        "image/webp" => ".webp",
-        _ => "",
-    };
+        var bytes = await db.Set<StoredFileContent>().AsNoTracking()
+            .Where(c => c.FileId == file.Id).Select(c => c.Bytes).SingleOrDefaultAsync(ct);
+        return bytes is null ? null : new MemoryStream(bytes, writable: false);
+    }
 }
 
 /// <summary>Checks an upload's real type from its first bytes, not the name or header the client sent.</summary>

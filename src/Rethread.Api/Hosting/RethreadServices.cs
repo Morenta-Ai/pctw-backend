@@ -54,7 +54,7 @@ public static class RethreadServices
         services.AddScoped<OfferSimulator>();
         services.AddScoped<Maintenance>();
         services.AddHostedService<MaintenanceService>();
-        services.AddSingleton<IFileStore, LocalFileStore>();
+        services.AddScoped<IFileStore, DatabaseFileStore>();
         services.AddScoped<DevSeeder>();
         services.AddScoped<RecipientNotifications>();
 

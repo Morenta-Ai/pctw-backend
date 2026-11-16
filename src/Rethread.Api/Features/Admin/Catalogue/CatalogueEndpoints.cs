@@ -187,8 +187,9 @@ public static class FileEndpoints
         {
             var file = await db.Files.AsNoTracking()
                 .SingleOrDefaultAsync(f => f.Id == id && (f.Id.StartsWith("img_") || f.Id.StartsWith("avt_")), ct);
-            if (file is null) return Results.NotFound();
-            return Results.Stream(files.OpenRead(file), file.ContentType,
+            var content = file is null ? null : await files.OpenReadAsync(file, ct);
+            if (content is null) return Results.NotFound();
+            return Results.Stream(content, file!.ContentType,
                 lastModified: new DateTimeOffset(file.CreatedAt, TimeSpan.Zero));
         }).ExcludeFromDescription().AllowAnonymous();
 }

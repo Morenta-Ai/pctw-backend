@@ -75,13 +75,21 @@ public sealed class ImpactMultiplier
     public required string UpdatedBy { get; set; }
 }
 
-/// <summary>An uploaded file: catalogue photos and collection photos.</summary>
+/// <summary>An uploaded file: catalogue photos, avatars, collection photos and support screenshots.</summary>
 public sealed class StoredFile
 {
     public required string Id { get; set; }
     public required string ContentType { get; set; }
     public long SizeBytes { get; set; }
-    public required string Path { get; set; }
     public required string UploadedBy { get; set; }
     public DateTime CreatedAt { get; set; }
+
+    /// <summary>The bytes, in their own table so listing files never loads them.</summary>
+    public StoredFileContent? Content { get; set; }
+}
+
+public sealed class StoredFileContent
+{
+    public required string FileId { get; set; }
+    public required byte[] Bytes { get; set; }
 }

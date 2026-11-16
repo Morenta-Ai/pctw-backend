@@ -78,7 +78,6 @@ export TEST_DATABASE_URL="Host=localhost;Port=5432;Username=rethread;Password=re
 | `Otp:FixedCode` | `123456` in Development | Every sign-in code is this value. Ignored in Production |
 | `Maintenance:Enabled`, `Maintenance:IntervalSeconds` | `true`, 5 | The background job that expires offers and raises waiting-pickup alerts |
 | `Maintenance:StaleCollectorMinutes` | 30 (0, off, in Development and Staging, where the demo collectors never report) | Take collectors offline when their app stops reporting |
-| `Storage:Root` | `storage/` beside the app | Where uploaded photos are kept (local disk for now) |
 | `Storage:PublicBaseUrl` | the request's host | Base of catalogue photo URLs, such as `https://api.rethread.lk` |
 | `Pickups:SlotCapacity` | 40 | Pickup requests per slot before it shows as unavailable |
 | `ServiceArea:MinLatitude` … `MaxLongitude` | Sri Lanka | Where customers can save an address |
@@ -112,7 +111,6 @@ runs as a non-root user. Production needs:
 | `ConnectionStrings__Default` | `Host=ep-…-pooler.….aws.neon.tech;Database=neondb;Username=…;Password=…;SSL Mode=VerifyFull;Channel Binding=Require` |
 | `Jwt__SigningKey` | 32+ random characters, from the platform's secret store |
 | `Storage__PublicBaseUrl` | `https://api.rethread.lk` (catalogue photo links) |
-| `Storage__Root` | A mounted volume for uploads (`/data/storage` in the image) |
 | `Portal__BaseUrl` | `https://portal.rethread.lk` (staff invite links) |
 | `Hosting__TrustForwardedHeaders` | `true` behind a load balancer or platform proxy |
 
@@ -130,8 +128,8 @@ is gone and everyone signs in again. Keep the strings in a gitignored `.env`, ne
 Before going live:
 
 - Choose an SMS provider and an email sender: codes and invite links only go to the log today.
-- Move uploads to object storage (S3, R2 or Azure Blob) behind `IFileStore` if there's more than one
-  instance.
+- Uploads are kept in Postgres (`file_contents`), which suits photos of a few MB. Move them to object
+  storage (S3, R2, Azure Blob or Vercel Blob) behind `IFileStore` if they grow.
 - Protect the Data Protection keys (they encrypt bank account numbers) with a certificate or a key vault.
 - Choose a card payment gateway and implement `IPaymentGateway`: until then Production confirms no card
   payment, so shop orders can't be paid. Development accepts the user app's mock gateway.
@@ -156,9 +154,7 @@ Things that work differently on Vercel:
 
 - Instances stop after 5 idle minutes, so the background maintenance only runs while there's traffic.
   The rules that matter (offer expiry, waiting alerts) also run on the reads that depend on them.
-- Uploads go to `/tmp` and are lost when an instance stops. Real catalogue photos need object storage
-  (Vercel Blob) behind `IFileStore`.
-- Request bodies are capped at 4.5 MB.
+- Request bodies are capped at 4.5 MB. The portal shrinks product photos before uploading them.
 - Vercel doesn't run migrations. Run `migrate` with Neon's direct connection string before deploying a
   change that adds one.
 

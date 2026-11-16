@@ -320,6 +320,11 @@ public sealed class ShopTests(PostgresServer server)
         Assert.Equal("image/png", served.Content.Headers.ContentType!.MediaType);
         Assert.Equal(Png, await served.Content.ReadAsByteArrayAsync());
 
+        // Another instance on the same database serves it too, as on Vercel, where instances come and go.
+        await using var otherInstance = api.Factory.WithWebHostBuilder(_ => { });
+        var elsewhere = await otherInstance.CreateClient().GetAsync(new Uri(upload.Str("url")).AbsolutePath);
+        Assert.Equal(Png, await elsewhere.Content.ReadAsByteArrayAsync());
+
         await (await admin.PostAsync("/api/v1/admin/uploads", File("not an image"u8.ToArray())))
             .ErrorAsync(HttpStatusCode.UnsupportedMediaType, "UNSUPPORTED_FILE_TYPE");
         var big = new byte[5 * 1024 * 1024 + 1];

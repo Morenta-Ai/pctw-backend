@@ -77,7 +77,7 @@ export TEST_DATABASE_URL="Host=localhost;Port=5432;Username=rethread;Password=re
 | `Jwt:AppAccessTokenMinutes`, `Jwt:StaffAccessTokenMinutes` | 60, 15 | Access token lifetimes |
 | `Otp:FixedCode` | `123456` in Development | Every sign-in code is this value. Ignored in Production |
 | `Maintenance:Enabled`, `Maintenance:IntervalSeconds` | `true`, 5 | The background job that expires offers and raises waiting-pickup alerts |
-| `Maintenance:StaleCollectorMinutes` | 30 (0, off, in Development) | Take collectors offline when their app stops reporting |
+| `Maintenance:StaleCollectorMinutes` | 30 (0, off, in Development and Staging, where the demo collectors never report) | Take collectors offline when their app stops reporting |
 | `Storage:Root` | `storage/` beside the app | Where uploaded photos are kept (local disk for now) |
 | `Storage:PublicBaseUrl` | the request's host | Base of catalogue photo URLs, such as `https://api.rethread.lk` |
 | `Pickups:SlotCapacity` | 40 | Pickup requests per slot before it shows as unavailable |
@@ -122,9 +122,10 @@ pooled one for the API. The seed and the development switches (`Otp:FixedCode`,
 `Simulation:AutoAnswerOffers`) never run in Production.
 
 Neon gives a `postgresql://…` URL; Npgsql needs it as the keyword string above. The direct host is the
-pooled one without `-pooler`. To load the demo data into an empty Neon database, run `seed` (never
-`seed --reset`, which drops the whole database) with `ASPNETCORE_ENVIRONMENT=Development` and the direct
-connection string. Keep the strings in a gitignored `.env`, never in `appsettings*.json`.
+pooled one without `-pooler`. To load the demo data into Neon, or start the hosted demo again dated
+today (before a presentation, say), run `seed --reset` with `ASPNETCORE_ENVIRONMENT=Development` and the
+direct connection string. It clears the `public` schema, keeping the database, so everything entered since
+is gone and everyone signs in again. Keep the strings in a gitignored `.env`, never in `appsettings*.json`.
 
 Before going live:
 
